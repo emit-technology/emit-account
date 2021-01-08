@@ -22,6 +22,8 @@ export interface TxPrams {
     data: string
     gas: string
     gasPrice: string
+    feeCy?:string
+    feeValue?:string
 }
 
 

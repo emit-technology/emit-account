@@ -59,6 +59,12 @@ class SeroApi extends Api {
                     Currency: utils.cyToHex("SERO"),
                     Value: new BigNumber(gasPrice, 16).multipliedBy(new BigNumber(gas, 16)).toString(10)
                 }
+                if(txPrams.feeCy){
+                    fee.Currency = utils.cyToHex(txPrams.feeCy);
+                    if(txPrams.feeValue){
+                        fee.Value = txPrams.feeValue;
+                    }
+                }
                 const asset = {
                     Tkn: tkn,
                 }
