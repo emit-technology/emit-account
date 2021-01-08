@@ -106,7 +106,7 @@ class SeroThread {
                     await this.pickOuts(txInfo, outsMap, addressOuts, addressAndTxMap);
 
                     const txReceipt: TransactionReceipt = await seroRPC.getTransactionReceipt(txInfo.txHash);
-                    txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(txInfo.gasPrice)).toString(10)
+                    // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(txInfo.gasPrice)).toString(10)
                     txInfo.gasUsed = txReceipt.gasUsed;
                     txInfos.push(txInfo)
                     const logs: Array<Log> = txReceipt.logs;

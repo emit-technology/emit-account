@@ -16,7 +16,9 @@ class EthApi extends Api {
 
     commitTx = async (data: any, t: any): Promise<any> => {
         const hash = await ethRpc.sendRawTransaction(data);
-        await this.insertTxInfo(hash, t,"ETH")
+        t.feeCy = "ETH";
+        t.feeValue = new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
+        await this.insertTxInfo(hash, t)
         return Promise.resolve(hash);
     }
 

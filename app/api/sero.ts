@@ -34,7 +34,7 @@ class SeroApi extends Api {
 
     commitTx = async (signTx: any,t:any): Promise<any> => {
         const resp = await seroRPC.post('sero_commitTx', [signTx])
-        await this.insertTxInfo(signTx.Hash,t,"SERO");
+        await this.insertTxInfo(signTx.Hash,t);
         return Promise.resolve(resp);
     }
 
@@ -61,10 +61,11 @@ class SeroApi extends Api {
                 }
                 if(txPrams.feeCy){
                     fee.Currency = utils.cyToHex(txPrams.feeCy);
-                    if(txPrams.feeValue){
-                        fee.Value = txPrams.feeValue;
-                    }
                 }
+                if(txPrams.feeValue){
+                    fee.Value = txPrams.feeValue;
+                }
+
                 const asset = {
                     Tkn: tkn,
                 }

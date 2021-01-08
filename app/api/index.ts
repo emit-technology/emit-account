@@ -45,7 +45,7 @@ export abstract class Api {
         return await this.db.getAppVersion(tag,versionNum)
     }
 
-    insertTxInfo = async (hash: string, t: any,feeCy:string) => {
+    insertTxInfo = async (hash: string, t: any) => {
         const client: any = await myPool.acquire();
         const session = client.startSession();
         let err: any = null;
@@ -57,8 +57,8 @@ export abstract class Api {
                 gas: t.gas,
                 gasUsed: t.gasUsed,
                 gasPrice: t.gasPrice,
-                fee: new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10),     //gas * gasPrice
-                feeCy: feeCy,
+                fee: t.feeValue,     //gas * gasPrice
+                feeCy: t.feeCy,
                 txHash: hash,
                 num: 0,
                 outs: [],
