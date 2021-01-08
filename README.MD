@@ -1,5 +1,28 @@
 ## command line
+
+### Getting Started
+
+#### Install
+```shell script
+npm i or yarn
 ```
+
+#### Install mongodb with `run-rs`
+
+Zero-config MongoDB runner. Starts a replica set with no non-Node dependencies, not even MongoDB.
+
+https://www.npmjs.com/package/run-rs
+
+```shell script
+npm i run-rs - g
+
+run-rs -v 4.0.12 --shell --keep
+
+```
+
+#### Create dbs,connections,indexes
+
+```shell script
 
 use sero;
 
@@ -142,3 +165,13 @@ for(var i=0;i<tables.length;i++){
 
 
 ```
+
+#### Start App
+
+```shell script
+npm run start
+```
+or
+````shell script
+sh startup.sh
+````

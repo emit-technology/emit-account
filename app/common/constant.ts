@@ -2,7 +2,7 @@ export const SERO_RPC_HOST = "http://172.31.34.20:8545";
 export const ETH_HOST = "http://172.31.43.228:8545";
 
 export const API_ETHERSCAN = "https://api.etherscan.io/api?";
-const API_KEY = "YOUR API KEY";
+const API_KEY = "CRZ8FDVUJ4X2ACZ299CK6GJU6YQN8BB8RD";
 export const GAS_TRACKER = "module=gastracker&action=gasoracle&apikey="+API_KEY;
 export const GAS_ESTIMATE = "module=gastracker&action=gasestimate&apikey="+API_KEY+"&gasprice=";
 
