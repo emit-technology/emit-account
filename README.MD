@@ -1,5 +1,3 @@
-## command line
-
 ### Getting Started
 
 #### Install
