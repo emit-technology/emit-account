@@ -1,0 +1,71 @@
+import RPC from "./index";
+import * as constant from "../common/constant";
+import BigNumber from "bignumber.js";
+import {Block, Log, TransactionReceipt} from "../types/eth";
+import * as utils from "../common/utils";
+import Ierc20 from "../api/tokens/ierc20";
+import {EVENT_ABI_CONFIG} from "../event";
+
+const Web3 = require('web3');
+const web3 = new Web3(constant.ETH_HOST);
+
+class EthRpc extends RPC {
+
+    constructor() {
+        super(constant.ETH_HOST)
+    }
+
+    blockNumber = async (): Promise<number> => {
+        const rest: any = await this.post("eth_blockNumber", [])
+        return new BigNumber(rest).toNumber();
+    }
+
+    getBlockByNum = async (num: number): Promise<Block> => {
+        const block: any = await this.post("eth_getBlockByNumber", [utils.toHex(num), true])
+        return block
+    }
+
+    getBalance = async (address: string): Promise<BigNumber> => {
+        const rest: any = await this.post("eth_getBalance", [address, "latest"])
+        return new BigNumber(rest);
+    }
+
+    getTokenBalance = async (address: string, ierc20: Ierc20): Promise<BigNumber> => {
+        return await ierc20.balanceOf(address);
+    }
+
+    getTransactionReceipt = async (txHash: string): Promise<TransactionReceipt> => {
+        const rest: any = await this.post("eth_getTransactionReceipt", [txHash]);
+        return Promise.resolve(rest)
+    }
+
+    sendRawTransaction = async (data: any): Promise<string> => {
+        const hash: any = await this.post("eth_sendRawTransaction", [data]);
+        return Promise.resolve(hash)
+    }
+
+    getLogs = async (from: number, to: number): Promise<Array<Log>> => {
+        const keys = Object.keys(constant.TOKEN_ADDRESS);
+        const addresses: Array<any> = [];
+        const topics: Array<any> = [];
+        for (let key of keys) {
+            addresses.push(constant.TOKEN_ADDRESS[key]);
+        }
+        addresses.push(constant.CROSS_ADDRESS.ETH)
+        for (let conf of EVENT_ABI_CONFIG) {
+            topics.push(web3.eth.abi.encodeEventSignature(conf.abi))
+        }
+        const params = [{
+            fromBlock: utils.toHex(from),
+            toBlock: utils.toHex(to),
+            address: addresses,
+            topics: [topics]
+        }]
+        const data: any = await this.post("eth_getLogs",params);
+        return Promise.resolve(data)
+    }
+}
+
+const ethRpc = new EthRpc();
+
+export default ethRpc
