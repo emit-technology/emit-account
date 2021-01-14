@@ -4,6 +4,7 @@ const MongodbClient = require('mongodb').MongoClient;
 
 const factory = {
     create: function () {
+        //USE Server optional to support remote url
         return MongodbClient.connect(constant.mongo.host, {useUnifiedTopology: true,useNewUrlParser:true});
     },
 
