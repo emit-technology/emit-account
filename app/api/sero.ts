@@ -1,5 +1,6 @@
 import {Api} from "./index";
 import BigNumber from "bignumber.js";
+// @ts-ignore
 import BN from "bn.js";
 import {OutInfo, TxPrams} from "../types/sero";
 import {genTxParam} from "jsuperzk/src/tx/tx";
@@ -34,13 +35,14 @@ class SeroApi extends Api {
 
     commitTx = async (signTx: any,t:any): Promise<any> => {
         const resp = await seroRPC.post('sero_commitTx', [signTx])
-        await this.insertTxInfo(signTx.Hash,t);
+        // await this.insertTxInfo(signTx.Hash,t);
         return Promise.resolve(resp);
     }
 
     genParams = async (txPrams: TxPrams): Promise<any> => {
         const preTxParam = await this.genPreParams(txPrams);
         let rest: any = await genTxParam(preTxParam, new TxGenerator(), new TxState());
+        // rest.Gas=txPrams.gas?txPrams.gas:"25000";
         return Promise.resolve(rest);
     }
 

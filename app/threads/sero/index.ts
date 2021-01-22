@@ -1,18 +1,43 @@
-import * as db from "../db";
-import seroRPC from "../rpc/sero";
-import {OutInfo} from "../types/sero";
-import {AddressTx, BalanceRecord, EventStruct, TxInfo, TxType} from "../types/";
-import * as constant from "../common/constant";
+/**
+ * Copyright 2020 EMIT Foundation.
+ This file is part of E.M.I.T. .
+
+ E.M.I.T. is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ E.M.I.T. is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
+ */
+import * as db from "../../db";
+import seroRPC from "../../rpc/sero";
+import {OutInfo} from "../../types/sero";
+import {AddressTx, BalanceRecord, EventStruct, TxInfo, TxType} from "../../types/";
+import * as constant from "../../common/constant";
 import BigNumber from "bignumber.js";
-import event from "../event";
-import {Log, TransactionReceipt} from "../types/eth";
-import * as utils from "../common/utils";
+import event from "../../event";
+import {Log, TransactionReceipt} from "../../types/eth";
+import * as utils from "../../common/utils";
+import ethRpc from "../../rpc/eth";
 
-const myPool = require('../db/mongodb');
+const myPool = require('../../db/mongodb');
 
-class SeroThread {
+class Index {
 
-    async syncBlock(startNum:number,maxNum:number) {
+    syncPendingTransactions = async () => {
+        const txInfos = await seroRPC.getFilterChangesPending();
+        for(let tx of txInfos){
+            await db.sero.insertTxInfo(tx.hash,tx);
+        }
+    }
+
+    async run(startNum:number, maxNum:number,repairBlockNumber?:number) {
         const client: any = await myPool.acquire();
         const session = client.startSession();
         let limit = 1;
@@ -42,12 +67,20 @@ class SeroThread {
             console.info(`fetch from : ${dbNum+1}, limit: ${limit}`);
             const timestampMap: Map<number, number> = new Map<number, number>();
 
-            const rest:Array<any> = await seroRPC.getBlocksInfo(dbNum+1, limit);
+            let start = dbNum+1;
+            let endLimit = limit;
+            if(repairBlockNumber){
+                start = repairBlockNumber;
+                endLimit = 1;
+            }
+
+            const rest:Array<any> = await seroRPC.getBlocksInfo(start, endLimit);
             const outs: Array<OutInfo> = rest[0];
             const nils:Array<string> = rest[1];
 
             if (!(outs && outs.length > 0)) {
-                const updateNum = limit + dbNum + 1 > chainNum ? chainNum : limit + dbNum + 1;
+                const updateNum = start + endLimit > chainNum ? chainNum : start + endLimit;
+                console.log("outs is nil, update latest block num: ",updateNum)
                 const timestamp: number = await seroRPC.getBlockTimestamp(updateNum)
                 await db.sero.upsertLatestBlock(updateNum, timestamp, session, client);
                 return
@@ -110,7 +143,6 @@ class SeroThread {
                     txInfo.gasUsed = txReceipt.gasUsed;
                     txInfos.push(txInfo)
                     const logs: Array<Log> = txReceipt.logs;
-                    console.log(logs)
                     if (logs && logs.length > 0) {
                         for (let log of logs) {
                             if (!utils.isCrossAddress(log.address)) {
@@ -141,9 +173,7 @@ class SeroThread {
             this.convertToBRS(addressOuts, balanceRecords, TxType.OUT, timestampMap);
 
 
-            if (outs.length == 0 || addressTxs.length == 0 || txInfos.length == 0 || balanceRecords.length == 0) {
-                throw new Error(`Invalid Data ,outs = [${outs.length}] , address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]`)
-            }
+            console.log("balanceRecords",balanceRecords)
 
             const txRecords:Map<string,BalanceRecord> = new Map<string, BalanceRecord>();
             for(let record of balanceRecords){
@@ -166,6 +196,12 @@ class SeroThread {
                 groupBalanceRecords.push(gNext.value[1]);
                 gNext = gEntries.next();
             }
+
+            if (outs.length == 0 || addressTxs.length == 0 || txInfos.length == 0 || groupBalanceRecords.length == 0) {
+                throw new Error(`Invalid Data ,outs = [${outs.length}] , address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]`)
+            }
+
+            console.log(`SERO Address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]`)
 
             //==== insert mongo
             const transactionResults = await session.withTransaction(async () => {
@@ -193,12 +229,12 @@ class SeroThread {
             }, constant.mongo.sero.transactionOptions);
 
             if (transactionResults) {
-                console.log("The reservation was successfully created.");
+                console.log("The sero reservation was successfully created.");
             } else {
-                console.log("The transaction was intentionally aborted.");
+                console.log("The sero transaction was intentionally aborted.");
             }
         } catch (e) {
-            console.error("The transaction was aborted due to an unexpected error: ", e);
+            console.error("The sero transaction was aborted due to an unexpected error: ", e);
         } finally {
             await session.endSession();
             myPool.release(client);
@@ -287,4 +323,4 @@ class SeroThread {
     }
 }
 
-export default SeroThread
+export default Index

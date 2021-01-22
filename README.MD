@@ -62,7 +62,7 @@ for(var i=0;i<tables.length;i++){
     {index:{txHash:1},unique:false},
     {index:{timestamp:-1},unique:false},
     {index:{type:1},unique:false},
-    {index:{num:1},unique:false}
+    {index:{num:1},unique:false},
     {index:{address:1},unique:false},
 ].forEach((v)=>{
    db.balanceRecords.createIndex(v.index,{unique:v.unique});

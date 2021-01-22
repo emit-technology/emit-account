@@ -1,9 +1,5 @@
 import {TxPrams} from "../types/sero";
-import {TxInfo, TxsView, Asset, Balance, EventStruct, Version, TxType} from "../types/index";
-import BigNumber from "bignumber.js";
-import * as db from "../db";
-import * as constant from "../common/constant";
-const myPool = require('../db/mongodb');
+import {TxInfo, TxsView, EventStruct} from "../types/index";
 
 export abstract class Api {
 
@@ -31,7 +27,13 @@ export abstract class Api {
         return Promise.resolve(retn);
     }
 
+    countPendingTx = async (address:string,currency:string)=>{
+        const rest:any = await this.db.countPendingTx(address,currency);
+        return Promise.resolve(rest);
+    }
+
     getBalanceRecords = async (address: string,currency: string, hash:string,pageSize: number, pageNo: number): Promise<TxsView> => {
+        console.log("default")
         const retn: TxsView = await this.db.queryBalanceRecords(address,currency,hash, pageSize, pageNo)
         return Promise.resolve(retn);
     }
@@ -45,70 +47,7 @@ export abstract class Api {
         return await this.db.getAppVersion(tag,versionNum)
     }
 
-    insertTxInfo = async (hash: string, t: any) => {
-        const client: any = await myPool.acquire();
-        const session = client.startSession();
-        let err: any = null;
-        try {
-            const timestamp: number = Math.ceil(Date.now() / 1000);
-            const info: TxInfo = {
-                fromAddress: t.from,
-                toAddress: [t.to],
-                gas: t.gas,
-                gasUsed: t.gasUsed,
-                gasPrice: t.gasPrice,
-                fee: t.feeValue,     //gas * gasPrice
-                feeCy: t.feeCy,
-                txHash: hash,
-                num: 0,
-                outs: [],
-                ins: [],
-                transactionIndex: "0x0",
-                contract: null,
-                timestamp: timestamp
-            };
-            const records:Array<any> = [];
-            [t.value,t.amount].forEach(value => {
-                if(value && new BigNumber(value).toNumber()>0){
-                    records.push({
-                        address: t.from,
-                        currency: t.cy,
-                        amount: new BigNumber(value).multipliedBy(-1).toString(10),
-                        type: TxType.OUT,
-                        txHash: info.txHash,
-                        num: 0,
-                        timestamp: timestamp
-                    })
-                    records.push({
-                        address: t.to,
-                        currency: t.cy,
-                        amount: new BigNumber(value).toString(10),
-                        type: TxType.IN,
-                        txHash: info.txHash,
-                        num: 0,
-                        timestamp: timestamp
-                    })
-                }
-            })
-            const transactionResults = await session.withTransaction(async () => {
-                await this.db.insertTxInfos([info], session, client)
-                await this.db.insertBalanceRecord(records, session, client)
-            }, constant.mongo.eth.transactionOptions)
-
-            if (transactionResults) {
-                console.log("The reservation was successfully created.");
-            } else {
-                console.log("The transaction was intentionally aborted.");
-            }
-        } catch (e) {
-            err = e;
-            console.error("The transaction was aborted due to an unexpected error: ", e);
-        } finally {
-            await session.endSession();
-            myPool.release(client);
-        }
-        if (err) {
-            return Promise.reject(err);
-        }
+    protected insertTxInfo = async (hash: string, t: any) => {
+        this.db.insertTxInfo(hash,t);
     }
 }

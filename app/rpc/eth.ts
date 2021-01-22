@@ -5,11 +5,15 @@ import {Block, Log, TransactionReceipt} from "../types/eth";
 import * as utils from "../common/utils";
 import Ierc20 from "../api/tokens/ierc20";
 import {EVENT_ABI_CONFIG} from "../event";
+import {Asset, Transaction, TxInfo} from "../types";
+import {ChainType} from "../../../emit-wallet/src/types";
 
 const Web3 = require('web3');
 const web3 = new Web3(constant.ETH_HOST);
 
 class EthRpc extends RPC {
+
+    protected pendingFilterId: any = "";
 
     constructor() {
         super(constant.ETH_HOST)
@@ -61,8 +65,51 @@ class EthRpc extends RPC {
             address: addresses,
             topics: [topics]
         }]
-        const data: any = await this.post("eth_getLogs",params);
+        const data: any = await this.post("eth_getLogs", params);
         return Promise.resolve(data)
+    }
+
+    getFilterChangesPending = async (): Promise<Array<Transaction>> => {
+        if (!this.pendingFilterId) {
+            this.pendingFilterId = await this.post("eth_newPendingTransactionFilter", []);
+        }
+        console.log("pendingFilterId", this.pendingFilterId)
+        const data: any = await this.filterChanges();
+        console.log("filterChanges data: ", data)
+        const txArray: Array<Transaction> = [];
+        if (data && data.length > 0) {
+            for (let hash of data) {
+                const tx: any = await this.post("eth_getTransactionByHash", [hash]);
+                txArray.push({
+                    hash: tx.hash,
+                    from: tx.from,
+                    to: tx.to,
+                    cy: "ETH",
+                    value: tx.value,
+                    data: tx.input,
+                    gas: tx.gas,
+                    gasPrice: tx.gasPrice,
+                    chain: ChainType.ETH,
+                    nonce: tx.nonce,
+                    amount: "0x0",
+                    feeCy: "ETH",
+                    feeValue: "0x" + new BigNumber(tx.gas).multipliedBy(new BigNumber(tx.gasPrice)).toString(16)
+                })
+            }
+        }
+        return txArray
+    }
+
+
+    protected filterChanges = async (): Promise<Array<string>> => {
+        return new Promise((resolve, reject) => {
+            this.post("eth_getFilterChanges", [this.pendingFilterId]).then((rest: any) => {
+                resolve(rest)
+            }).catch(e => {
+                this.pendingFilterId = "";
+                reject(e)
+            })
+        })
     }
 }
 

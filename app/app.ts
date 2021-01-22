@@ -22,6 +22,7 @@ import {Api} from "./api";
 import EthApi from "./api/eth";
 import SeroApi from "./api/sero";
 import gasTracker from "./api/gasTracker";
+import TronApi from "./api/tron";
 
 const bodyParser = require('body-parser');
 const app: express.Application = express();
@@ -74,16 +75,15 @@ app.post('/', function (req, res) {
         sendError(r, res, "invalid request!");
         return;
     }
-    let api: Api;
+    let api: Api = new EthApi();;
     const prefix = r.method.split("_")[0];
     const method = r.method.split("_")[1];
     if (prefix === "sero") {
         api = new SeroApi();
     } else if (prefix === "eth") {
         api = new EthApi();
-    } else {
-        sendError(r, res, `Api prefix=[${prefix}] not defined!`);
-        return
+    } else if (prefix === "tron") {
+        api = new TronApi();
     }
 
     switch (method) {
@@ -143,6 +143,13 @@ app.post('/', function (req, res) {
             break;
         case "getAppVersion":
             api.getAppVersion(r.params[0],r.params[1]).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
+            break;
+        case "countPendingTx":
+            api.countPendingTx(r.params[0],r.params[1]).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
                 sendError(r, res, typeof e == "string" ? e : e.message);

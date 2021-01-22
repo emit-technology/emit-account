@@ -1,18 +1,36 @@
-import * as db from "../db";
-import ethRpc from "../rpc/eth";
-import {AddressTx, Balance, BalanceRecord, EventStruct, TxInfo, TxType} from "../types";
-import * as constant from "../common/constant";
-import * as utils from '../common/utils'
-import {ApprovalEvent, Block, Log, Transaction, TransactionReceipt, TransferEvent} from "../types/eth";
+/**
+ * Copyright 2020 EMIT Foundation.
+ This file is part of E.M.I.T. .
+
+ E.M.I.T. is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ E.M.I.T. is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import * as db from "../../db";
+import ethRpc from "../../rpc/eth";
+import {AddressTx, Balance, BalanceRecord, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
+import * as constant from "../../common/constant";
+import * as utils from '../../common/utils'
+import {ApprovalEvent, Block, Log, Transaction, TransactionReceipt, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
-import Ierc20 from "../api/tokens/ierc20";
-import event from "../event";
+import Ierc20 from "../../api/tokens/ierc20";
+import event from "../../event";
 
 const Web3 = require('web3');
 
-const myPool = require('../db/mongodb');
+const myPool = require('../../db/mongodb');
 
-class EthThread {
+class Index {
 
     ethWeb3: any;
 
@@ -20,7 +38,14 @@ class EthThread {
         this.ethWeb3 = new Web3(constant.ETH_HOST);
     }
 
-    syncBlock = async (startNum:number,maxNum:number) => {
+    syncPendingTransactions = async () => {
+        const txInfos = await ethRpc.getFilterChangesPending();
+        for(let tx of txInfos){
+            await db.eth.insertTxInfo(tx.hash,tx);
+        }
+    }
+
+    syncTransactions = async (startNum:number, maxNum:number) => {
         const client: any = await myPool.acquire();
         const session = client.startSession();
         let limit = 1;
@@ -288,6 +313,48 @@ class EthThread {
             await this.setBalanceMap(e.owner, balanceMap, key, ierc20);
             await this.setBalanceMap(e.spender, balanceMap, key, ierc20);
         }
+        //WETH Deposit
+        else if (key=="WETH") {
+            const logRet:any = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
+            console.log("logRet>> ",logRet)
+            if(logRet.eventName == EVENT_TYPE.WETH_DEPOSIT){
+                balanceRecords.push({
+                    address: logRet.event.dst.toLowerCase(),
+                    currency: key,
+                    amount: new BigNumber(logRet.event.wad).toString(10),
+                    type: TxType.IN,
+                    txHash: txInfo.txHash,
+                    num: txInfo.num,
+                    timestamp: txInfo.timestamp
+                })
+            }else if(logRet.eventName == EVENT_TYPE.WETH_WITHDRAW){
+                // balanceRecords.splice()
+                for(let i=0;i<balanceRecords.length;i++){
+                    const record = balanceRecords[i];
+                    if(record.address == logRet.event.src.toLowerCase()){
+                        balanceRecords.splice(i,1,{
+                            address: logRet.event.src.toLowerCase(),
+                            currency: "ETH",
+                            amount: new BigNumber(logRet.event.wad).toString(10),
+                            type: TxType.IN,
+                            txHash: txInfo.txHash,
+                            num: txInfo.num,
+                            timestamp: txInfo.timestamp
+                        })
+                        break
+                    }
+                }
+                balanceRecords.push({
+                    address: logRet.event.src.toLowerCase(),
+                    currency: key,
+                    amount: new BigNumber(logRet.event.wad).multipliedBy(-1).toString(10),
+                    type: TxType.OUT,
+                    txHash: txInfo.txHash,
+                    num: txInfo.num,
+                    timestamp: txInfo.timestamp
+                })
+            }
+        }
     }
 
     private async setBalanceMap(address: string, balanceMap: Map<string, Balance>, cy: string, ierc20?: Ierc20) {
@@ -312,4 +379,4 @@ class EthThread {
 }
 
 
-export default EthThread
+export default Index

@@ -1,25 +1,13 @@
-import {EVENT_TYPE, EventStruct, EventType} from "../types";
-import * as constant from "../common/constant";
-import {
-    ApprovalEvent,
-    DepositEvent,
-    ProposalEvent,
-    TransferEvent,
-    WETH_Deposit_Event,
-    WETH_Withdrawal_Event
-} from "../types/eth";
-
-const Web3 = require('web3');
-const web3 = new Web3(constant.ETH_HOST);
-
-interface configType {
-    type: EVENT_TYPE,
-    abi: any
-}
-
-export const EVENT_ABI_CONFIG: Array<configType> = [
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EVENT_ABI_CONFIG = void 0;
+var types_1 = require("../types");
+var constant = require("../common/constant");
+var Web3 = require('web3');
+var web3 = new Web3(constant.ETH_HOST);
+exports.EVENT_ABI_CONFIG = [
     {
-        type: EVENT_TYPE.ERC20_Transfer,
+        type: types_1.EVENT_TYPE.ERC20_Transfer,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -44,7 +32,7 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
         }
     },
     {
-        type: EVENT_TYPE.ERC20_Approve,
+        type: types_1.EVENT_TYPE.ERC20_Approve,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -69,7 +57,7 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
         }
     },
     {
-        type: EVENT_TYPE.CROSS_DEPOSIT,
+        type: types_1.EVENT_TYPE.CROSS_DEPOSIT,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -97,7 +85,7 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
         }
     },
     {
-        type: EVENT_TYPE.CROSS_PROPOSAL,
+        type: types_1.EVENT_TYPE.CROSS_PROPOSAL,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -137,7 +125,7 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
         }
     },
     {
-        type: EVENT_TYPE.WETH_DEPOSIT,
+        type: types_1.EVENT_TYPE.WETH_DEPOSIT,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -159,7 +147,7 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
         }
     },
     {
-        type: EVENT_TYPE.WETH_WITHDRAW,
+        type: types_1.EVENT_TYPE.WETH_WITHDRAW,
         abi: {
             "anonymous": false,
             "inputs": [
@@ -180,86 +168,83 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
             "type": "event"
         }
     }
-]
-
-class Event {
-
-    constructor() {
+];
+var Event = /** @class */ (function () {
+    function Event() {
     }
-
-    decodeLog(num: number, txHash: string, contractAddress: string, topics: Array<string>, data: string): EventStruct | undefined {
-        const topic = topics[0]
-        let eventTypeEnum = EVENT_TYPE._;
-        let input: any = {};
-        for (let conf of EVENT_ABI_CONFIG) {
+    Event.prototype.decodeLog = function (num, txHash, contractAddress, topics, data) {
+        var topic = topics[0];
+        var eventTypeEnum = types_1.EVENT_TYPE._;
+        var input = {};
+        for (var _i = 0, EVENT_ABI_CONFIG_1 = exports.EVENT_ABI_CONFIG; _i < EVENT_ABI_CONFIG_1.length; _i++) {
+            var conf = EVENT_ABI_CONFIG_1[_i];
             if (topic === web3.eth.abi.encodeEventSignature(conf.abi)) {
                 eventTypeEnum = conf.type;
                 input = conf.abi["inputs"];
-                break
+                break;
             }
         }
-        if (eventTypeEnum == EVENT_TYPE._) {
-            return
+        if (eventTypeEnum == types_1.EVENT_TYPE._) {
+            return;
         }
-        let ret: any = {};
+        var ret = {};
         switch (eventTypeEnum) {
-            case EVENT_TYPE.CROSS_DEPOSIT:
-                const rest: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t: DepositEvent = {
+            case types_1.EVENT_TYPE.CROSS_DEPOSIT:
+                var rest = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t = {
                     destinationChainID: rest.destinationChainID,
                     resourceID: rest.resourceID,
                     depositNonce: rest.depositNonce
-                }
+                };
                 ret = t;
                 break;
-            case EVENT_TYPE.CROSS_PROPOSAL:
-                const rest2: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t2: ProposalEvent = {
+            case types_1.EVENT_TYPE.CROSS_PROPOSAL:
+                var rest2 = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t2 = {
                     originChainID: rest2.originChainID,
                     depositNonce: rest2.depositNonce,
                     status: rest2.status,
                     resourceID: rest2.resourceID,
                     dataHash: rest2.dataHash
-                }
+                };
                 ret = t2;
                 break;
-            case EVENT_TYPE.ERC20_Approve:
-                const rest3: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t3: ApprovalEvent = {
+            case types_1.EVENT_TYPE.ERC20_Approve:
+                var rest3 = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t3 = {
                     owner: rest3.owner,
                     spender: rest3.spender,
                     value: rest3.value
-                }
+                };
                 ret = t3;
                 break;
-            case EVENT_TYPE.ERC20_Transfer:
-                const rest4: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t4: TransferEvent = {
+            case types_1.EVENT_TYPE.ERC20_Transfer:
+                var rest4 = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t4 = {
                     from: rest4.from,
                     to: rest4.to,
                     value: rest4.value
-                }
+                };
                 ret = t4;
                 break;
-            case EVENT_TYPE.WETH_DEPOSIT:
-                const rest5: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t5: WETH_Deposit_Event = {
-                    dst:rest5.dst,
-                    wad:rest5.wad
-                }
+            case types_1.EVENT_TYPE.WETH_DEPOSIT:
+                var rest5 = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t5 = {
+                    dst: rest5.dst,
+                    wad: rest5.wad
+                };
                 ret = t5;
                 break;
-            case EVENT_TYPE.WETH_WITHDRAW:
-                const rest6: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-                const t6: WETH_Withdrawal_Event = {
-                   src:rest6.src,
-                    wad:rest6.wad
-                }
+            case types_1.EVENT_TYPE.WETH_WITHDRAW:
+                var rest6 = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+                var t6 = {
+                    src: rest6.src,
+                    wad: rest6.wad
+                };
                 ret = t6;
                 break;
-
             default:
-                break
+                break;
         }
         return {
             num: num,
@@ -268,10 +253,9 @@ class Event {
             eventName: eventTypeEnum,
             topic: topic,
             event: ret
-        }
-    }
-}
-
-const event:Event = new Event();
-
-export default event
+        };
+    };
+    return Event;
+}());
+var event = new Event();
+exports.default = event;

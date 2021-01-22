@@ -1,14 +1,17 @@
 import axios from 'axios';
 import * as constant from '../common/constant'
 import {OutInfo} from '../types/sero'
-import {TxInfo} from "../types/";
+import {Asset, Transaction, TxInfo} from "../types/";
 import * as utils from '../common/utils'
 import * as db from '../db'
 import BigNumber from "bignumber.js";
 import RPC from "./index";
 import {TransactionReceipt} from "../types/eth";
+import {ChainType} from "../../../emit-wallet/src/types";
 
 class SeroRPC extends RPC {
+
+    protected pendingFilterId:any = "";
 
     constructor() {
         super(constant.SERO_RPC_HOST)
@@ -29,45 +32,77 @@ class SeroRPC extends RPC {
         if (!datas || datas.length == 0) {
             return []
         }
-        const outInfos: Array<OutInfo> = [];
+        let outInfos: Array<OutInfo> = [];
         let nils: Array<any> = [];
         for (let data of datas) {
             const outs: Array<any> = data.Outs;
             if(data.Nils && data.Nils.length>0){
                 nils = nils.concat(data.Nils);
             }
-            for (let out of outs) {
-                if (out.State.OS.Out_O) {
-                    const outInfo: OutInfo = {
-                        address: utils.addrToString(out.State.OS.Out_O.Addr),
-                        asset: {
-                            currency: utils.hexToCy(out.State.OS.Out_O.Asset.Tkn.Currency),
-                            value: out.State.OS.Out_O.Asset.Tkn.Value
-                        },
-                        txHash: out.State.TxHash,
-                        num: new BigNumber(out.State.Num).toNumber(),
-                        root: out.Root,
-                        used: false,
-                        utxo: {
-                            Root: out.Root,
-                            Asset: out.State.OS.Out_O.Asset,
-                            State: out.State
-                        }
-                    };
-                    if (utils.isV1(outInfo.address) &&
-                        ["0x0000000000000000000000000000000000000000000000000000000000000000",
-                            "0x0000000000000000000000000000000000000000000000000000000000000001",
-                            "0x0000000000000000000000000000000000000000000000000000000000000002",
-                            "0x0000000000000000000000000000000000000000000000000000000000000003"].indexOf(outInfo.txHash) == -1
-                    ) {
-                        outInfos.push(outInfo);
-                    }
-                }
-            }
+            const rest = this.convertOuts(outs);
+            outInfos = outInfos.concat(rest)
         }
         return [outInfos,nils]
     }
 
+
+    private convertOuts(outs: Array<any>):Array<OutInfo> {
+        const outInfos: Array<OutInfo> = [];
+        for (let out of outs) {
+            if (out.State.OS.Out_O) {
+                const outInfo: OutInfo = {
+                    address: utils.addrToString(out.State.OS.Out_O.Addr),
+                    asset: {
+                        currency: utils.hexToCy(out.State.OS.Out_O.Asset.Tkn.Currency),
+                        value: out.State.OS.Out_O.Asset.Tkn.Value
+                    },
+                    txHash: out.State.TxHash,
+                    num: new BigNumber(out.State.Num).toNumber(),
+                    root: out.Root,
+                    used: false,
+                    utxo: {
+                        Root: out.Root,
+                        Asset: out.State.OS.Out_O.Asset,
+                        State: out.State
+                    }
+                };
+                if (utils.isV1(outInfo.address) &&
+                    ["0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x0000000000000000000000000000000000000000000000000000000000000002",
+                        "0x0000000000000000000000000000000000000000000000000000000000000003"].indexOf(outInfo.txHash) == -1
+                ) {
+                    outInfos.push(outInfo);
+                }
+            }
+            if (out.State.OS.Out_P) {
+                const outInfo: OutInfo = {
+                    address: utils.addrToString(out.State.OS.Out_P.PKr),
+                    asset: {
+                        currency: utils.hexToCy(out.State.OS.Out_P.Asset.Tkn.Currency),
+                        value: out.State.OS.Out_P.Asset.Tkn.Value
+                    },
+                    txHash: out.State.TxHash,
+                    num: new BigNumber(out.State.Num).toNumber(),
+                    root: out.Root,
+                    used: false,
+                    utxo: {
+                        Root: out.Root,
+                        Asset: out.State.OS.Out_P.Asset,
+                        State: out.State
+                    }
+                };
+                if (["0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x0000000000000000000000000000000000000000000000000000000000000002",
+                        "0x0000000000000000000000000000000000000000000000000000000000000003"].indexOf(outInfo.txHash) == -1
+                ) {
+                    outInfos.push(outInfo);
+                }
+            }
+        }
+        return outInfos;
+    }
 
     getTxInfo = async (txHash: string, outs: Array<OutInfo>, selfOuts:Map<string,OutInfo>): Promise<TxInfo | null> => {
         const rest: any = await this.post("sero_getTransactionByHash", [txHash])
@@ -128,6 +163,163 @@ class SeroRPC extends RPC {
     blockNumber = async (): Promise<number> => {
         const rest: any = await this.post("sero_blockNumber", ["latest"])
         return new BigNumber(rest).toNumber();
+    }
+
+    getOut = async (root:string) =>{
+        const rest: any = await this.post("flight_getOut", [root])
+        return rest;
+    }
+
+    getFilterChangesPending = async ():Promise<Array<Transaction>> =>{
+        if(!this.pendingFilterId){
+            this.pendingFilterId = await this.post("sero_newPendingTransactionFilter", []);
+        }
+        console.log("pendingFilterId",this.pendingFilterId)
+        const data:any = await this.filterChanges();
+        console.log("filterChanges data: ",data)
+        const txArray:Array<Transaction> = [];
+        if(data && data.length > 0){
+            for(let hash of data){
+                const tx:any = await this.post("sero_getTransactionByHash",[hash]);
+                const Ins_P0: any = tx.stx.Tx1.Ins_P0;
+                const inOutMap:Map<string,Asset> = new Map<string, Asset>()
+                if(Ins_P0 && Ins_P0.length>0){
+                    for (let InOut of Ins_P0) {
+                        // const out:any = await this.getOut(InOut.Root)
+                        const dbOuts: Array<OutInfo> = await db.sero.findOutsByRoots([InOut.Root]);
+                        if(!dbOuts || dbOuts.length == 0){
+                            break;
+                        }
+                        const out = dbOuts[0];
+                        const cy = out.asset.currency;
+                        const tmpAsset:Asset = {
+                            currency: cy,
+                            value: new BigNumber(out.asset.value).multipliedBy(-1).toString(10)
+                        };
+                        const key = [tx.from,cy].join(":");
+                        if(inOutMap.has(key)){
+                            const asset:any = inOutMap.get(key);
+                            tmpAsset.value = new BigNumber(tmpAsset.value).plus(new BigNumber(asset.value)).toString(10)
+                            inOutMap.set(key,asset)
+                        }else{
+                            inOutMap.set(key,tmpAsset)
+                        }
+                    }
+                }
+                const outMap:Map<string,Asset> = new Map<string, Asset>()
+                const Outs_P: any = tx.stx.Tx1.Outs_P;
+                if(!Outs_P){
+                    continue;
+                }
+                let toAddr:string = "";
+                for(let out of Outs_P){
+                    const cy = utils.hexToCy(out.Asset.Tkn.Currency);
+                    const to = utils.addrToString(out.PKr);
+                    if(to != tx.from){
+                        toAddr = to;
+                    }
+                    const key = [to,cy].join(":");
+                    const tmpAsset:Asset = {
+                        currency:cy,
+                        value:out.Asset.Tkn.Value
+                    };
+                    if(outMap.has(key)){
+                        const asset:any = outMap.get(key);
+                        tmpAsset.value = new BigNumber(tmpAsset.value).plus(new BigNumber(asset.value)).toString(10)
+                        outMap.set(key,asset)
+                    }else{
+                        outMap.set(key,tmpAsset)
+                    }
+                }
+                const inEntries = inOutMap.entries();
+                let next = inEntries.next();
+                const deleteKeys:Array<string> = [];
+                while (!next.done){
+                    const key:any = next.value[0]
+                    const asset:any = next.value[1]
+                    if(outMap.has(key)){
+                        const tmp:any = outMap.get(key);
+                        tmp.value = new BigNumber(tmp.value).plus(new BigNumber(asset.value)).toString(10)
+                        outMap.set(key,tmp)
+                        deleteKeys.push(key)
+                    }
+                    next = inEntries.next();
+                }
+                for(let k of deleteKeys){
+                    inOutMap.delete(k);
+                }
+
+                if(inOutMap.size>0){
+                    const inEntries = inOutMap.entries();
+                    let next = inEntries.next();
+                    while (!next.done){
+                        outMap.set(next.value[0],next.value[1])
+                        next = inEntries.next();
+                    }
+                }
+                let currency = "SERO";
+                if(outMap.size>0){
+                    const entries = outMap.entries();
+                    let next = entries.next();
+                    while (!next.done){
+                        const key = next.value[0];
+                        // const value = next.value[1];
+                        const cy = key.split(":")[1];
+                        if(cy !== "SERO"){
+                            currency = cy;
+                            break
+                        }
+                        next = entries.next();
+                    }
+                }
+                let value = "0"
+                if(outMap.size>0){
+                    const entries = outMap.entries();
+                    let next = entries.next();
+                    while (!next.done){
+                        const key = next.value[0];
+                        const asset = next.value[1];
+                        const cy = key.split(":")[1];
+                        const addr = key.split(":")[0];
+                        if(cy == currency && addr == toAddr){
+                            value = asset.value;
+                            break;
+                        }
+                        next = entries.next();
+                    }
+                }
+
+                if (toAddr && utils.isV1(toAddr) || utils.isV1(tx.from)){
+                    txArray.push({
+                        hash:tx.hash,
+                        from: tx.from,
+                        to: toAddr,
+                        cy: currency,
+                        value:value,
+                        data: tx.input,
+                        gas: tx.gas,
+                        gasPrice: tx.gasPrice,
+                        chain: ChainType.SERO,
+                        nonce: tx.nonce,
+                        amount:"0x0",
+                        feeCy: utils.hexToCy(tx.stx.Fee.Currency),
+                        feeValue:`0x${new BigNumber(tx.stx.Fee.Value).toString(16)}`
+                    })
+                }
+            }
+        }
+        return txArray
+    }
+
+    protected filterChanges = async ():Promise<Array<string>> =>{
+        return new Promise((resolve,reject)=>{
+            this.post("sero_getFilterChanges", [this.pendingFilterId]).then((rest:any)=>{
+                resolve(rest)
+            }).catch(e=>{
+                this.pendingFilterId="";
+                reject(e)
+            })
+        })
     }
 }
 

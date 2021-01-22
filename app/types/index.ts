@@ -1,3 +1,5 @@
+import {ChainType} from "../../../emit-wallet/src/types";
+
 export interface Balance {
     address: string
     currency: string
@@ -56,6 +58,23 @@ export interface TxInfo {
     contractAddress?: string
 }
 
+export interface Transaction {
+    hash: string
+    from: string
+    to: string
+    cy: string
+    value: string
+    data?: string
+    gas: string
+    gasPrice: string
+    chain: ChainType
+    nonce: string
+    chainId?: any
+    amount:any
+    feeCy?:string
+    feeValue?:string
+}
+
 export interface LatestBlock {
     tag: string
     num: number
@@ -79,7 +98,10 @@ export enum EVENT_TYPE {
     ERC20_Approve,
 
     CROSS_DEPOSIT,
-    CROSS_PROPOSAL
+    CROSS_PROPOSAL,
+
+    WETH_DEPOSIT,
+    WETH_WITHDRAW
 }
 
 export interface EventStruct {

@@ -1,5 +1,6 @@
-import {AddressTx, Balance, BalanceRecord, EventStruct, TxInfo, TxsView, TxType} from "../types";
+import {AddressTx, Balance, BalanceRecord, EventStruct, Transaction, TxInfo, TxsView, TxType} from "../types";
 import BigNumber from "bignumber.js";
+import * as constant from "../common/constant";
 
 const myPool = require('../db/mongodb');
 
@@ -71,6 +72,73 @@ class Base {
     insertTxInfos = async (txInfos: Array<TxInfo>, session: any, client: any) => {
         const db: any = await this.txInfo(client);
         return await db.insertMany(txInfos, {session})
+    }
+
+    insertTxInfo = async (hash: string, t: Transaction) => {
+        const client: any = await myPool.acquire();
+        const session = client.startSession();
+        let err: any = null;
+        try {
+            const timestamp: number = Math.ceil(Date.now() / 1000);
+            const info: TxInfo = {
+                fromAddress: t.from,
+                toAddress: [t.to],
+                gas: t.gas ? t.gas : "21000",
+                gasUsed: t.gas ? t.gas : "21000",
+                gasPrice: t.gasPrice ? t.gasPrice : "0x3b9aca00",
+                fee: t.feeValue ? t.feeValue : "0x" + new BigNumber(t.gas ? t.gas : "21000").multipliedBy(new BigNumber(t.gasPrice ? t.gasPrice : "0x3b9aca00")).toString(16),     //gas * gasPrice
+                feeCy: t.feeCy ? t.feeCy : "",
+                txHash: hash,
+                num: 0,
+                outs: [],
+                ins: [],
+                transactionIndex: "0x0",
+                contract: null,
+                timestamp: timestamp
+            };
+            const records: Array<any> = [];
+            [t.value].forEach(value => {
+                // if (value && new BigNumber(value).toNumber() > 0) {
+                    records.push({
+                        address: t.from,
+                        currency: t.cy,
+                        amount: new BigNumber(value).multipliedBy(-1).toString(10),
+                        type: TxType.OUT,
+                        txHash: info.txHash,
+                        num: 0,
+                        timestamp: timestamp
+                    })
+                    records.push({
+                        address: t.to,
+                        currency: t.cy,
+                        amount: new BigNumber(value).toString(10),
+                        type: TxType.IN,
+                        txHash: info.txHash,
+                        num: 0,
+                        timestamp: timestamp
+                    })
+                // }
+            })
+            const transactionResults = await session.withTransaction(async () => {
+                await this.insertTxInfos([info], session, client)
+                await this.insertBalanceRecord(records, session, client)
+            }, constant.mongo.eth.transactionOptions)
+
+            if (transactionResults) {
+                console.log("The pending tx was successfully created.");
+            } else {
+                console.log("The pending tx was intentionally aborted.");
+            }
+        } catch (e) {
+            err = e;
+            console.error("The pending transaction was aborted due to an unexpected error: ", e);
+        } finally {
+            await session.endSession();
+            myPool.release(client);
+        }
+        if (err) {
+            return Promise.reject(err);
+        }
     }
 
     //balance
@@ -250,7 +318,9 @@ class Base {
                 }
             }
         ).toArray();
-        txInfo.records = records;
+        if (records) {
+            txInfo.records = records;
+        }
         this.release(client);
         return txInfo;
     }
@@ -299,6 +369,19 @@ class Base {
         this.release(client);
         return results;
     }
-}
 
+    countPendingTx = async (address:string,currency:string) => {
+        const client = await this.client();
+        const db: any = await this.balanceRecords(client);
+        const query: any = {
+            address:address,
+            num:0,
+            currency:currency
+        };
+        const count = await db.find(query).count();
+        this.release(client);
+        return count;
+    }
+
+}
 export default Base

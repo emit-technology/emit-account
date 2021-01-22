@@ -90,3 +90,13 @@ export interface ProposalEvent {
     resourceID: string
     dataHash: string
 }
+
+export interface WETH_Deposit_Event {
+    dst: string
+    wad: string
+}
+
+export interface WETH_Withdrawal_Event {
+    src: string
+    wad: string
+}

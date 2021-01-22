@@ -1,4 +1,4 @@
-import utils, {isNewVersion, hexToCy, addrToString, toHex} from 'jsuperzk/src/utils/utils'
+import utils, {isNewVersion, hexToCy, addrToString} from 'jsuperzk/src/utils/utils'
 import BigNumber from "bignumber.js";
 import * as constant from "./constant";
 
@@ -22,6 +22,13 @@ export function isErc20Address(address: string) {
     return "";
 }
 
+export function isWETHAddress(address: string) {
+    if (address.toLowerCase() === constant.TOKEN_ADDRESS.WETH.toLowerCase()) {
+        return "WETH";
+    }
+    return "";
+}
+
 export function isCrossAddress(address: string) {
     const cKeys: any = Object.keys(constant.CROSS_ADDRESS);
     for (let key of cKeys) {
@@ -32,6 +39,13 @@ export function isCrossAddress(address: string) {
         }
     }
     return "";
+}
+
+function toHex(value: string | BigNumber | number) {
+    if(!value){
+        return "0x0";
+    }
+    return `0x${new BigNumber(value).toString(16)}`
 }
 
 export {

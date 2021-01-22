@@ -18,7 +18,7 @@ class EthApi extends Api {
         const hash = await ethRpc.sendRawTransaction(data);
         t.feeCy = "ETH";
         t.feeValue = new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-        await this.insertTxInfo(hash, t)
+        // await this.insertTxInfo(hash, t)
         return Promise.resolve(hash);
     }
 
@@ -38,7 +38,7 @@ class EthApi extends Api {
         }
         //init for next query
         this.initBalance(address).catch(e=>{
-            // console.log(e,"initBalance")
+            console.log(e,"initBalance")
         })
         return Promise.resolve(assets);
     }
@@ -49,7 +49,9 @@ class EthApi extends Api {
         for(let cy of tokens){
             const addressContract:any = constant.TOKEN_ADDRESS[cy];
             const ierc20: Ierc20 = new Ierc20(addressContract);
+            // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
+
             balanceArr.push({
                 address: address.toLowerCase(),
                 currency: cy,
