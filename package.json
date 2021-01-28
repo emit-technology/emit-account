@@ -5,7 +5,7 @@
   "main": "./build/app.js",
   "scripts": {
     "tsc": "tsc",
-    "start": "ts-node-dev --respawn ./app/app.ts",
+    "dev": "ts-node-dev --respawn ./app/app.ts",
     "build": "tsc && supervisor ./build/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,6 +25,7 @@
     "bignumber.js": "^9.0.1",
     "bn.js": "^5.1.3",
     "body-parser": "^1.19.0",
+    "ts-node": "^9.1.1",
     "ts-node-dev": "^1.0.0",
     "typescript": "^4.1.2",
     "web3": "^1.3.0"
