@@ -9,3 +9,4 @@ var ProposalStatus;
     ProposalStatus[ProposalStatus["Executed"] = 3] = "Executed";
     ProposalStatus[ProposalStatus["Cancelled"] = 4] = "Cancelled";
 })(ProposalStatus = exports.ProposalStatus || (exports.ProposalStatus = {}));
+//# sourceMappingURL=eth.js.map

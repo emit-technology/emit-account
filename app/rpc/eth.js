@@ -224,3 +224,4 @@ var EthRpc = /** @class */ (function (_super) {
 }(index_1.default));
 var ethRpc = new EthRpc();
 exports.default = ethRpc;
+//# sourceMappingURL=eth.js.map

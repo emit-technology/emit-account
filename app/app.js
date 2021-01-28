@@ -91,7 +91,7 @@ app.post('/', function (req, res) {
             });
             break;
         case "getTransactions":
-            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3], r.params[4]).then(function (rest) {
+            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3], r.params[4], r.params[5]).then(function (rest) {
                 sendResult(r, res, rest);
             }).catch(function (e) {
                 sendError(r, res, typeof e == "string" ? e : e.message);
@@ -129,7 +129,8 @@ app.post('/', function (req, res) {
             sendResult(r, res, gasTracker_1.default.gasPriceLevel);
             break;
         case "getEvents":
-            api.getEvents(r.params[0], r.params[1]).then(function (rest) {
+            console.log("getEvents>>>");
+            api.getEvents(r.params[0], r.params[1], r.params[2], r.params[3]).then(function (rest) {
                 sendResult(r, res, rest);
             }).catch(function (e) {
                 sendError(r, res, typeof e == "string" ? e : e.message);
@@ -161,3 +162,4 @@ app.post('/', function (req, res) {
 app.listen(7655, function () {
     console.log('Example app listening on port 7655!');
 });
+//# sourceMappingURL=app.js.map

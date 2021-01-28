@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var ethereum_1 = require("./ethereum/");
 var sero_1 = require("./sero/");
+var event_1 = require("./tron/event");
 var gasTracker_1 = require("../api/gasTracker");
 var constant = require("../common/constant");
 var Threads = /** @class */ (function () {
@@ -13,6 +14,8 @@ var Threads = /** @class */ (function () {
             _this.startGasTracker();
             _this.startSyncPendingEth();
             _this.startSyncPendingSero();
+            _this.startTronEvent();
+            _this.startTronEventApi();
         };
         this.startGasTracker = function () {
             gasTracker_1.default.gasTrackerCache().then(function () {
@@ -81,10 +84,38 @@ var Threads = /** @class */ (function () {
                 }, _this.timeSyncBlock);
             });
         };
+        this.startTronEvent = function () {
+            _this.tronEvent.runByNum().then(function () {
+                console.info("startTronEvent, sleep 5s...");
+                setTimeout(function () {
+                    _this.startTronEvent();
+                }, _this.timeSyncBlock / 5000);
+            }).catch(function (e) {
+                console.error("startTronEvent err: ", e, " restart 5s later...");
+                setTimeout(function () {
+                    _this.startTronEvent();
+                }, _this.timeSyncBlock / 5);
+            });
+        };
+        this.startTronEventApi = function () {
+            _this.tronEvent.runByEventApi().then(function () {
+                console.info("startTronEventApi, sleep 5s...");
+                setTimeout(function () {
+                    _this.startTronEventApi();
+                }, _this.timeSyncBlock * 2);
+            }).catch(function (e) {
+                console.error("startTronEventApi err: ", e, " restart 5s later...");
+                setTimeout(function () {
+                    _this.startTronEventApi();
+                }, _this.timeSyncBlock);
+            });
+        };
         this.timeSyncBlock = 1000 * 5;
         this.syncSero = new sero_1.default();
         this.syncEth = new ethereum_1.default();
+        this.tronEvent = new event_1.default();
     }
     return Threads;
 }());
 exports.default = Threads;
+//# sourceMappingURL=index.js.map

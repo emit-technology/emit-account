@@ -259,3 +259,4 @@ var Event = /** @class */ (function () {
 }());
 var event = new Event();
 exports.default = event;
+//# sourceMappingURL=index.js.map

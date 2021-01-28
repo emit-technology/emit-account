@@ -54,3 +54,4 @@ function toHex(value) {
     return "0x" + new bignumber_js_1.default(value).toString(16);
 }
 exports.toHex = toHex;
+//# sourceMappingURL=utils.js.map

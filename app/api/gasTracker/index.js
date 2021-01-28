@@ -99,3 +99,4 @@ var GasTracker = /** @class */ (function () {
 }());
 var gasTracker = new GasTracker();
 exports.default = gasTracker;
+//# sourceMappingURL=index.js.map

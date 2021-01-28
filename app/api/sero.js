@@ -55,7 +55,6 @@ var tx_1 = require("jsuperzk/src/tx/tx");
 var utils_1 = require("jsuperzk/src/utils/utils");
 var sero_1 = require("../rpc/sero");
 var db = require("../db");
-var myPool = require('../db/mongodb');
 var SeroApi = /** @class */ (function (_super) {
     __extends(SeroApi, _super);
     function SeroApi() {
@@ -261,3 +260,4 @@ var TxState = /** @class */ (function () {
     return TxState;
 }());
 exports.default = SeroApi;
+//# sourceMappingURL=sero.js.map

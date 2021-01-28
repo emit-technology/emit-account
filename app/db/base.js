@@ -265,7 +265,25 @@ var Base = /** @class */ (function () {
                 }
             });
         }); };
-        this.queryEvents = function (txHash, depositNonce) { return __awaiter(_this, void 0, void 0, function () {
+        this.insertEventOne = function (event) { return __awaiter(_this, void 0, void 0, function () {
+            var client, db;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.client()];
+                    case 1:
+                        client = _a.sent();
+                        return [4 /*yield*/, this.events(client)];
+                    case 2:
+                        db = _a.sent();
+                        return [4 /*yield*/, db.insertOne(event)];
+                    case 3:
+                        _a.sent();
+                        this.release(client);
+                        return [2 /*return*/];
+                }
+            });
+        }); };
+        this.queryEvents = function (txHash, depositNonce, originChainID, resourceID, eventName) { return __awaiter(_this, void 0, void 0, function () {
             var client, db, query, cursor, rests;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -282,6 +300,15 @@ var Base = /** @class */ (function () {
                         if (depositNonce) {
                             query["event.depositNonce"] = depositNonce;
                         }
+                        if (originChainID) {
+                            query["event.originChainID"] = originChainID;
+                        }
+                        if (resourceID) {
+                            query["event.resourceID"] = resourceID;
+                        }
+                        if (eventName) {
+                            query.eventName = eventName;
+                        }
                         return [4 /*yield*/, db.find(query)];
                     case 3:
                         cursor = _a.sent();
@@ -290,6 +317,31 @@ var Base = /** @class */ (function () {
                         rests = _a.sent();
                         this.release(client);
                         return [2 /*return*/, rests];
+                }
+            });
+        }); };
+        this.eventExist = function (txHash) { return __awaiter(_this, void 0, void 0, function () {
+            var client, db, query, cursor, count;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.client()];
+                    case 1:
+                        client = _a.sent();
+                        return [4 /*yield*/, this.events(client)];
+                    case 2:
+                        db = _a.sent();
+                        query = {};
+                        if (txHash) {
+                            query.txHash = txHash;
+                        }
+                        return [4 /*yield*/, db.find(query)];
+                    case 3:
+                        cursor = _a.sent();
+                        return [4 /*yield*/, cursor.count()];
+                    case 4:
+                        count = _a.sent();
+                        this.release(client);
+                        return [2 /*return*/, count > 0];
                 }
             });
         }); };
@@ -650,3 +702,4 @@ var Base = /** @class */ (function () {
     return Base;
 }());
 exports.default = Base;
+//# sourceMappingURL=base.js.map

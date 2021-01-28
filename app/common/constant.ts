@@ -32,6 +32,15 @@ export const mongo = {
             readConcern: {level: 'local'},
             writeConcern: {w: 'majority'}
         }
+    },
+
+    tron: {
+        name: "tron",
+        transactionOptions: {
+            readPreference: 'primary',
+            readConcern: {level: 'local'},
+            writeConcern: {w: 'majority'}
+        }
     }
 };
 
@@ -46,19 +55,21 @@ export const TOKEN_ADDRESS: any = {
 // Key = Chain
 export const CROSS_ADDRESS = {
     ETH: "0xC7c287200D0952d4f591509463fD5203C7D88F56",
-    SERO: "GD8XEXxLSG4GxtaTbVEuRJsjoqNSyoRqFzTB367etU3eQvPNeZKaBSSFvdha1UU3dcYuDdZJhoxqTufERKYaZpgQasyWSdsMgRomJfgVMmL32p61m54sfQQe1JVF6t8bqQj"
+    SERO: "2JgvRCVfsk6cryY95ghYbVez1eR2MSwyWmJGvTpVr4yid1hGWGiruMKay5Q66MfcTDUfaGgyyaJGYmjPZQsHUcKQx7hnxqM37sba2DfomwRJqpB6mjF7pUFEfiiC2MkbWBaP",
+    TRON: "TAongUaLfhatu89hZAxgkinS57zfViBYMj"
 }
-
 
 export const THREAD_CONFIG = {
     CONFIRM_BLOCK_NUM: 0,
     START_AT: {
         SERO: 100000,
-        ETH: 0
+        ETH: 0,
+        TRON:11773100,
     },
     LIMIT: {
         SERO: 5000,
-        ETH: 100
+        ETH: 100,
+        TRON:50
     }
 }
 

@@ -199,3 +199,4 @@ var EthApi = /** @class */ (function (_super) {
     return EthApi;
 }(index_1.Api));
 exports.default = EthApi;
+//# sourceMappingURL=eth.js.map

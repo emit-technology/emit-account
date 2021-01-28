@@ -97,7 +97,7 @@ app.post('/', function (req, res) {
 
             break;
         case "getTransactions":
-            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3],r.params[4]).then(rest => {
+            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3],r.params[4],r.params[5]).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
                 sendError(r, res, typeof e == "string" ? e : e.message);
@@ -135,7 +135,8 @@ app.post('/', function (req, res) {
             sendResult(r, res, gasTracker.gasPriceLevel)
             break;
         case "getEvents":
-            api.getEvents(r.params[0],r.params[1]).then(rest => {
+            console.log("getEvents>>>")
+            api.getEvents(r.params[0],r.params[1],r.params[2],r.params[3]).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
                 sendError(r, res, typeof e == "string" ? e : e.message);

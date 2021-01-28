@@ -9,10 +9,7 @@ import {Token, Witness, ZPkg} from "jsuperzk/src/types/types";
 import utils from "jsuperzk/src/utils/utils";
 import seroRPC from "../rpc/sero";
 import * as db from '../db'
-import {Balance, BalanceRecord, TxInfo, TxType} from "../types";
-import * as constant from "../common/constant";
-
-const myPool = require('../db/mongodb');
+import {Balance} from "../types";
 
 class SeroApi extends Api {
 

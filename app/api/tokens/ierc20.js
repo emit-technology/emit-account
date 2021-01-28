@@ -257,3 +257,4 @@ var Ierc20 = /** @class */ (function () {
 }());
 exports.Ierc20 = Ierc20;
 exports.default = Ierc20;
+//# sourceMappingURL=ierc20.js.map

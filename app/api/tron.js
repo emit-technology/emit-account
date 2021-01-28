@@ -49,6 +49,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.tronGrid = exports.tronWeb = void 0;
 /**
  * Copyright 2020 EMIT Foundation.
  This file is part of E.M.I.T. .
@@ -79,11 +80,29 @@ var solidityNode = new HttpProvider(constant.TRON_API_HOST.fullNode);
 var eventServer = new HttpProvider(constant.TRON_API_HOST.fullNode);
 var privateKey = "3481E79956D4BD95F358AC96D151C976392FC4E3FC132F78A847906DE588C145";
 var tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+exports.tronWeb = tronWeb;
 var tronGrid = new TronGrid(tronWeb);
+exports.tronGrid = tronGrid;
 var TronApi = /** @class */ (function (_super) {
     __extends(TronApi, _super);
     function TronApi() {
-        var _this = _super.call(this, db.eth) || this;
+        var _this = _super.call(this, db.tron) || this;
+        _this.commitTx = function (tx, txInfo) { return __awaiter(_this, void 0, void 0, function () {
+            var receipt;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, tronWeb.trx.sendRawTransaction(tx)];
+                    case 1:
+                        receipt = _a.sent();
+                        return [2 /*return*/, Promise.resolve(receipt)];
+                }
+            });
+        }); };
+        _this.genParams = function (txPrams) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        }); };
         _this.getBalance = function (address, cy) { return __awaiter(_this, void 0, void 0, function () {
             var rest, balance, instance, balanceUSDT;
             return __generator(this, function (_a) {
@@ -92,7 +111,7 @@ var TronApi = /** @class */ (function (_super) {
                     case 1:
                         rest = _a.sent();
                         balance = {};
-                        balance["TRON"] = rest.balance;
+                        balance["TRX"] = rest.balance;
                         return [4 /*yield*/, tronWeb.contract().at(constant.TRC20_ADDRESS.USDT)];
                     case 2:
                         instance = _a.sent();
@@ -105,37 +124,23 @@ var TronApi = /** @class */ (function (_super) {
             });
         }); };
         _this.getTxInfo = function (txHash) { return __awaiter(_this, void 0, void 0, function () {
-            var t, tx;
+            var t;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, tronWeb.trx.getTransactionInfo(txHash)];
                     case 1:
                         t = _a.sent();
-                        tx = {
-                            txHash: t.transaction_id,
-                            fromAddress: t.from,
-                            toAddress: [t.to],
-                            gas: "0x0",
-                            gasUsed: "0x0",
-                            gasPrice: "0x0",
-                            feeCy: "TRX",
-                            fee: "0x0",
-                            num: 0,
-                            outs: [],
-                            ins: [],
-                            transactionIndex: "0x0",
-                            timestamp: t.block_timestamp,
-                        };
-                        return [2 /*return*/, Promise.resolve(tx)];
+                        return [2 /*return*/, Promise.resolve(t)];
                 }
             });
         }); };
         _this.getTxs = function (address, currency, pageSize, pageNo, fingerprint) { return __awaiter(_this, void 0, void 0, function () {
-            var txArr, rest, _i, rest_1, t, balanceRecord, rest, _a, rest_2, t, from, to, value, c, balanceRecord, ret;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var txArr, meta, rest, _i, _a, t, balanceRecord, rest, _b, _c, t, from, to, value, c, balanceRecord, ret;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
                     case 0:
                         txArr = [];
+                        console.log("fingerprint:: ", fingerprint);
                         if (!(currency == "USDT")) return [3 /*break*/, 2];
                         return [4 /*yield*/, tronGrid.account.getTrc20Transactions(address, {
                                 limit: pageSize,
@@ -143,46 +148,51 @@ var TronApi = /** @class */ (function (_super) {
                                 contract_address: constant.TRC20_ADDRESS.USDT
                             })];
                     case 1:
-                        rest = _b.sent();
-                        for (_i = 0, rest_1 = rest; _i < rest_1.length; _i++) {
-                            t = rest_1[_i];
+                        rest = _d.sent();
+                        console.log("USDT>>", rest);
+                        pageSize = rest.meta.page_size;
+                        for (_i = 0, _a = rest.data; _i < _a.length; _i++) {
+                            t = _a[_i];
                             balanceRecord = {
-                                address: t.from,
-                                currency: "USDT",
-                                amount: address == t.from ? new bignumber_js_1.default(t.value).multipliedBy(-1).toString(10) : t.value,
+                                address: address,
+                                currency: "TRX",
+                                amount: "0x0",
                                 type: address == t.from ? types_1.TxType.OUT : types_1.TxType.IN,
                                 txHash: t.transaction_id,
                                 num: 0,
-                                timestamp: t.block_timestamp,
+                                timestamp: t.block_timestamp / 1000,
                             };
+                            balanceRecord.from = t.from;
+                            balanceRecord.to = t.to;
+                            if (t.type == "Transfer" || t.type == "TransferFrom") {
+                                balanceRecord.amount = address == t.from ? new bignumber_js_1.default(t.value).multipliedBy(-1).toString(10) : t.value;
+                                balanceRecord.currency = "USDT";
+                            }
                             txArr.push(balanceRecord);
                         }
+                        meta = rest.meta;
                         return [3 /*break*/, 4];
                     case 2: return [4 /*yield*/, tronGrid.account.getTransactions(address, {
                             limit: pageSize,
                             fingerprint: fingerprint
-                        })
-                        /**
-                         * TransferContract
-                         ● TransferAssetContract
-                         ● CreateSmartContract
-                         ● TriggerSmartContract
-                         */
-                    ];
+                        })];
                     case 3:
-                        rest = _b.sent();
+                        rest = _d.sent();
+                        pageSize = rest.meta.page_size;
+                        // console.log("TRON>>",rest)
                         /**
                          * TransferContract
                          ● TransferAssetContract
                          ● CreateSmartContract
                          ● TriggerSmartContract
                          */
-                        for (_a = 0, rest_2 = rest; _a < rest_2.length; _a++) {
-                            t = rest_2[_a];
+                        for (_b = 0, _c = rest.data; _b < _c.length; _b++) {
+                            t = _c[_b];
                             from = "";
                             to = "";
-                            value = "";
-                            c = t.raw_data.contract;
+                            value = "0";
+                            c = t.raw_data.contract[0];
+                            console.log(c);
                             if ("TransferContract" == c.type) {
                                 from = c.parameter.value.owner_address;
                                 to = c.parameter.value.to_address;
@@ -201,77 +211,49 @@ var TronApi = /** @class */ (function (_super) {
                                 to = c.parameter.value.contract_address;
                                 value = "0x0";
                             }
+                            from = tronWeb.address.fromHex(from);
+                            to = tronWeb.address.fromHex(to);
                             balanceRecord = {
                                 address: address,
                                 currency: "TRX",
-                                amount: address == from ? new bignumber_js_1.default(t.value).multipliedBy(-1).toString(10) : t.value,
+                                amount: address == from ? new bignumber_js_1.default(value).multipliedBy(-1).toString(10) : value,
                                 type: address == from ? types_1.TxType.OUT : types_1.TxType.IN,
                                 txHash: t.txID,
                                 num: t.blockNumber,
-                                timestamp: t.block_timestamp,
+                                timestamp: t.block_timestamp / 1000,
                             };
+                            balanceRecord.from = from;
+                            balanceRecord.to = to;
                             txArr.push(balanceRecord);
                         }
-                        _b.label = 4;
+                        meta = rest.meta;
+                        _d.label = 4;
                     case 4:
                         ret = {
-                            txs: txArr,
+                            total: txArr.length,
+                            data: txArr,
                             pageNo: pageNo,
-                            pageSize: pageSize
+                            pageSize: pageSize,
+                            meta: meta
                         };
                         return [2 /*return*/, Promise.resolve(ret)];
                 }
             });
         }); };
-        _this.countPendingTx = function (address, currency) { return __awaiter(_this, void 0, void 0, function () {
-            var rest;
+        _this.getBalanceRecords = function (address, currency, hash, pageSize, pageNo, fingerprint) { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.db.countPendingTx(address, currency)];
-                    case 1:
-                        rest = _a.sent();
-                        return [2 /*return*/, Promise.resolve(rest)];
-                }
-            });
-        }); };
-        _this.getBalanceRecords = function (address, currency, hash, pageSize, pageNo) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getTxs(address, currency, pageSize, pageNo)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        }); };
-        _this.getEvents = function (txHash, depositNonce) { return __awaiter(_this, void 0, void 0, function () {
-            var retn;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.db.queryEvents(txHash, depositNonce)];
-                    case 1:
-                        retn = _a.sent();
-                        return [2 /*return*/, Promise.resolve(retn)];
-                }
-            });
-        }); };
-        _this.getAppVersion = function (tag, versionNum) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.db.getAppVersion(tag, versionNum)];
+                    case 0: return [4 /*yield*/, this.getTxs(address, currency, pageSize, pageNo, fingerprint)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         }); };
         return _this;
     }
-    TronApi.prototype.commitTx = function (tx, txInfo) {
-        return Promise.resolve(undefined);
-    };
-    TronApi.prototype.genParams = function (txPrams) {
-        return Promise.resolve(undefined);
-    };
     TronApi.prototype.proxyPost = function (method, params) {
         return Promise.resolve(undefined);
     };
     return TronApi;
 }(index_1.Api));
 exports.default = TronApi;
+//# sourceMappingURL=tron.js.map

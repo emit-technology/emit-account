@@ -32,14 +32,14 @@ export abstract class Api {
         return Promise.resolve(rest);
     }
 
-    getBalanceRecords = async (address: string,currency: string, hash:string,pageSize: number, pageNo: number): Promise<TxsView> => {
-        console.log("default")
-        const retn: TxsView = await this.db.queryBalanceRecords(address,currency,hash, pageSize, pageNo)
+    getBalanceRecords = async (address: string,currency: string, hash:string,pageSize: number, pageNo: number,fingerprint?:string): Promise<TxsView> => {
+        const retn: any = await this.db.queryBalanceRecords(address,currency,hash, pageSize, pageNo)
         return Promise.resolve(retn);
     }
 
-    getEvents = async (txHash: string,depositNonce: string): Promise<Array<EventStruct>> => {
-        const retn: Array<EventStruct> = await this.db.queryEvents(txHash,depositNonce)
+    getEvents = async (txHash: string,depositNonce: string,originChainID:string,resourceID:string): Promise<Array<EventStruct>> => {
+        console.log("getEvent::",txHash)
+        const retn: Array<EventStruct> = await this.db.queryEvents(txHash,depositNonce,originChainID,resourceID)
         return Promise.resolve(retn);
     }
 

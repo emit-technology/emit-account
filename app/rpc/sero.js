@@ -447,3 +447,4 @@ var SeroRPC = /** @class */ (function (_super) {
 }(index_1.default));
 var seroRPC = new SeroRPC();
 exports.default = seroRPC;
+//# sourceMappingURL=sero.js.map

@@ -1,5 +1,6 @@
 import SyncThreadEth from "./ethereum/";
 import SyncThreadSero from "./sero/"
+import TronEvent from "./tron/event";
 import gasTracker from "../api/gasTracker";
 import * as constant from "../common/constant"
 
@@ -9,11 +10,14 @@ class Threads {
 
     syncSero:SyncThreadSero;
     syncEth:SyncThreadEth;
+    tronEvent:TronEvent;
 
     constructor() {
         this.timeSyncBlock = 1000 * 5;
         this.syncSero = new SyncThreadSero();
         this.syncEth = new SyncThreadEth();
+        this.tronEvent = new TronEvent()
+
     }
 
     run = ()=>{
@@ -24,6 +28,9 @@ class Threads {
 
         this.startSyncPendingEth();
         this.startSyncPendingSero();
+
+        this.startTronEvent();
+        this.startTronEventApi()
     }
 
     startGasTracker = () => {
@@ -95,6 +102,34 @@ class Threads {
             console.error("sero sync pending err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.startSyncPendingSero();
+            },this.timeSyncBlock)
+        });
+    }
+
+    startTronEvent = () => {
+        this.tronEvent.runByNum().then(()=>{
+            console.info("startTronEvent, sleep 5s...")
+            setTimeout(()=>{
+                this.startTronEvent();
+            },this.timeSyncBlock / 5000)
+        }).catch(e=>{
+            console.error("startTronEvent err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.startTronEvent();
+            },this.timeSyncBlock / 5)
+        });
+    }
+
+    startTronEventApi = () => {
+        this.tronEvent.runByEventApi().then(()=>{
+            console.info("startTronEventApi, sleep 5s...")
+            setTimeout(()=>{
+                this.startTronEventApi();
+            },this.timeSyncBlock * 2)
+        }).catch(e=>{
+            console.error("startTronEventApi err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.startTronEventApi();
             },this.timeSyncBlock)
         });
     }

@@ -152,7 +152,14 @@ class Base {
         return await db.insertMany(events, {session})
     }
 
-    queryEvents = async (txHash: string, depositNonce: string) => {
+    insertEventOne = async (event: EventStruct) => {
+        const client = await this.client();
+        const db: any = await this.events(client);
+        await db.insertOne(event)
+        this.release(client);
+    }
+
+    queryEvents = async (txHash: string, depositNonce: string,originChainID:string,resourceID:string,eventName?:string) => {
         const client = await this.client();
         const db: any = await this.events(client);
         const query: any = {};
@@ -162,10 +169,32 @@ class Base {
         if (depositNonce) {
             query["event.depositNonce"] = depositNonce
         }
+        if (originChainID) {
+            query["event.originChainID"] = originChainID
+        }
+        if (resourceID) {
+            query["event.resourceID"] = resourceID
+        }
+        if (eventName) {
+            query.eventName = eventName
+        }
         const cursor = await db.find(query);
         const rests = await cursor.toArray();
         this.release(client);
         return rests;
+    }
+
+    eventExist = async (txHash: string):Promise<boolean> => {
+        const client = await this.client();
+        const db: any = await this.events(client);
+        const query: any = {};
+        if (txHash) {
+            query.txHash = txHash
+        }
+        const cursor = await db.find(query);
+        const count = await cursor.count();
+        this.release(client);
+        return count>0;
     }
 
     queryBalanceRecords = async (address: string, currency: string, hash: string, pageSize: number, pageNo: number) => {

@@ -1,4 +1,21 @@
 "use strict";
+/**
+ * Copyright 2020 EMIT Foundation.
+ This file is part of E.M.I.T. .
+
+ E.M.I.T. is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ E.M.I.T. is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -42,7 +59,7 @@ var HttpProvider = TronWeb.providers.HttpProvider;
 var fullNode = new HttpProvider(constant.TRON_API_HOST.fullNode);
 var solidityNode = new HttpProvider(constant.TRON_API_HOST.fullNode);
 var eventServer = new HttpProvider(constant.TRON_API_HOST.fullNode);
-var privateKey = "3481E79956D4BD95F358AC96D151C976392FC4E3FC132F78A847906DE588C145";
+var privateKey = "67cf7062cc23b5165d5b47578e2afcfab8eeb3e906d92fc5ea7ea816e7b51831";
 var tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
 var TronGrid = require('trongrid');
 // const TronWeb = require('tronweb');
@@ -52,8 +69,15 @@ var TronGrid = require('trongrid');
 var tronGrid = new TronGrid(tronWeb);
 function queryToken() {
     return __awaiter(this, void 0, void 0, function () {
+        var assets;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, tronWeb.trx.getAccount('TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG')];
+                case 1:
+                    assets = _a.sent();
+                    console.log(assets);
+                    return [2 /*return*/];
+            }
         });
     });
 }
@@ -68,24 +92,46 @@ function queryToken() {
 // tronWeb.trx.getTokenListByName("TetherToken").then(result => {console.log(result)});
 //111
 // async function triggercontract(){
-//     let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
-//     let totalSupply = await instance.totalSupply().call();
-//     console.log("totalSupply::",new BigNumber(totalSupply._hex).toString(10));
-//     let balanceOf = await instance.balanceOf("TSaJqQ1AZ2bEYyqBwBmJqCBSPv8KPRTAdv").call();
-//     console.log("balanceOf::",new BigNumber(balanceOf._hex).toString(10));
+//     // let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
+//
+//     console.log(tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
+//
+//     const parameter1 = [{type:'address',value:tronWeb.address.toHex("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu")},{type:'uint256',value:100}]
+//     const transaction = await tronWeb.transactionBuilder.triggerSmartContract(constant.TRC20_ADDRESS.USDT, "transfer(address,uint256)", {},
+//         parameter1,tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
+//
+//     // const transaction = await tronWeb.transactionBuilder.sendTrx("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", 10,"TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG",1);
+//
+//     console.log(transaction,"transaction1>>");
+//
+//     const signedtxn = await tronWeb.trx.sign(transaction.transaction, privateKey);
+//     console.log(signedtxn,"transaction2>>");
+//
+//     const receipt = await tronWeb.trx.sendRawTransaction(signedtxn);
+//
+//     console.log(receipt)
+//
 // }
-// triggercontract();
+// triggercontract().catch(e=>{
+//     console.error(e)
+// });
 // tronWeb.trx.getTokenListByName("USDT");
 // const accountAddress = "TTaiQ6eWoEwUnNz4SmcnZbzdf1fTmVnqVT";
 // //
-tronGrid.account.getTrc20Transactions("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG", { limit: 10 }).then(function (e) {
-    console.log(JSON.stringify(e));
-});
-// tronGrid.account.getTransactions("TEg5pgd2uBst9d4mWfnAjJYqBnUTJWawDA", {limit:10}).then(e=>{
+// tronGrid.account.getTrc20Transactions("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", {limit:10}).then(e=>{
+//     console.log("test>",JSON.stringify(e))
+// })
+// tronWeb.getEventByTransactionID("91525b2e6f949f0b73880b359e517e75d5efa85b3a12396e0dfb1094c80b48ce").then((result:any) => {console.log(result)})
+// tronWeb.getEventResult("TUPz3wD356e3iV337s4cnjQS2weUdhX5ci",{eventName:"RNGIterated",size:2})
+// tronGrid.account.getTransactions("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", {limit:10}).then((e:any)=>{
 //     console.log(JSON.stringify(e))
 // })
-// tronWeb.trx.getTransactionInfo("818c9c2f1f3b91545b77cf3395b194945c23f8b816ebb27cc5258e55febd3e6d").then(v=>{
+// tronWeb.trx.getTransaction("c3a9f885ac26adec9e98bcbe886012e253441d0fdf70c64b8a45ba8d70d02472").then((v:any)=>{
 //     console.log(JSON.stringify(v))
+// });
+//
+// tronWeb.trx.getTransactionInfo("c3a9f885ac26adec9e98bcbe886012e253441d0fdf70c64b8a45ba8d70d02472").then((v:any)=>{
+//     console.log("info::: ",JSON.stringify(v))
 // });
 //
 // tronWeb.trx.getTransaction("818c9c2f1f3b91545b77cf3395b194945c23f8b816ebb27cc5258e55febd3e6d").then(v=>{
@@ -96,3 +142,12 @@ tronGrid.account.getTrc20Transactions("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG", { li
 // tronWeb.trx.getTransaction("818c9c2f1f3b91545b77cf3395b194945c23f8b816ebb27cc5258e55febd3e6d").then(v=>{
 //     console.log(JSON.stringify(v))
 // });
+tronWeb.getEventResult("TAongUaLfhatu89hZAxgkinS57zfViBYMj", {
+    // eventName:"Deposit",
+    size: 10,
+}).then(function (rest) {
+    console.log(rest);
+}).catch(function (e) {
+    console.log(">>>>", e);
+});
+//# sourceMappingURL=tron_test.js.map

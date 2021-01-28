@@ -82,6 +82,8 @@ for(var i=0;i<tables.length;i++){
     {index:{topic:1},unique:false},
     {index:{num:-1},unique:false},
     {index:{"event.depositNonce":1},unique:false},
+    {index:{"event.originChainID":1},unique:false},
+    {index:{"event.resourceID":1},unique:false},
     {index:{contractAddress:1},unique:false}
 
 ].forEach((v)=>{
@@ -155,12 +157,39 @@ for(var i=0;i<tables.length;i++){
     {index:{topic:1},unique:false},
     {index:{num:-1},unique:false},
     {index:{"event.depositNonce":1},unique:false},
+    {index:{"event.originChainID":1},unique:false},
+    {index:{"event.resourceID":1},unique:false},
     {index:{contractAddress:1},unique:false}
 
 ].forEach((v)=>{
     db.events.createIndex(v.index,{unique:v.unique});
  });
 
+========================================================================
+========================================================================
+========================================================================
+========================================================================
+
+use tron
+
+var tables = ["events","blockNum"];
+
+for(var i=0;i<tables.length;i++){
+    db.createCollection(tables[i]);
+};
+
+[
+    {index:{txHash:1},unique:false},
+    {index:{topic:1},unique:false},
+    {index:{num:-1},unique:false},
+    {index:{"event.depositNonce":1},unique:false},
+    {index:{"event.originChainID":1},unique:false},
+    {index:{"event.resourceID":1},unique:false},
+    {index:{contractAddress:1},unique:false}
+
+].forEach((v)=>{
+    db.events.createIndex(v.index,{unique:v.unique});
+ });
 
 ```
 

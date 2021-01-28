@@ -17,3 +17,4 @@ var EVENT_TYPE;
     EVENT_TYPE[EVENT_TYPE["WETH_DEPOSIT"] = 5] = "WETH_DEPOSIT";
     EVENT_TYPE[EVENT_TYPE["WETH_WITHDRAW"] = 6] = "WETH_WITHDRAW";
 })(EVENT_TYPE = exports.EVENT_TYPE || (exports.EVENT_TYPE = {}));
+//# sourceMappingURL=index.js.map

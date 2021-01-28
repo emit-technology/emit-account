@@ -1,7 +1,7 @@
 import {Api} from "./index";
 import * as db from "../db";
 import ethRpc from "../rpc/eth";
-import {Balance, TxInfo, TxType} from "../types";
+import {Balance} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
 import Ierc20 from "./tokens/ierc20";

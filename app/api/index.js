@@ -73,7 +73,7 @@ var Api = /** @class */ (function () {
                 }
             });
         }); };
-        this.getBalanceRecords = function (address, currency, hash, pageSize, pageNo) { return __awaiter(_this, void 0, void 0, function () {
+        this.getBalanceRecords = function (address, currency, hash, pageSize, pageNo, fingerprint) { return __awaiter(_this, void 0, void 0, function () {
             var retn;
             return __generator(this, function (_a) {
                 switch (_a.label) {
@@ -84,11 +84,13 @@ var Api = /** @class */ (function () {
                 }
             });
         }); };
-        this.getEvents = function (txHash, depositNonce) { return __awaiter(_this, void 0, void 0, function () {
+        this.getEvents = function (txHash, depositNonce, originChainID, resourceID) { return __awaiter(_this, void 0, void 0, function () {
             var retn;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.db.queryEvents(txHash, depositNonce)];
+                    case 0:
+                        console.log("getEvent::", txHash);
+                        return [4 /*yield*/, this.db.queryEvents(txHash, depositNonce, originChainID, resourceID)];
                     case 1:
                         retn = _a.sent();
                         return [2 /*return*/, Promise.resolve(retn)];
@@ -114,3 +116,4 @@ var Api = /** @class */ (function () {
     return Api;
 }());
 exports.Api = Api;
+//# sourceMappingURL=index.js.map

@@ -5,7 +5,7 @@ import {Block, Log, TransactionReceipt} from "../types/eth";
 import * as utils from "../common/utils";
 import Ierc20 from "../api/tokens/ierc20";
 import {EVENT_ABI_CONFIG} from "../event";
-import {Asset, Transaction, TxInfo} from "../types";
+import {Transaction} from "../types";
 import {ChainType} from "../../../emit-wallet/src/types";
 
 const Web3 = require('web3');
