@@ -116,7 +116,7 @@ async function queryToken(){
 tronWeb.getEventResult("TAongUaLfhatu89hZAxgkinS57zfViBYMj",
     {
         // eventName:"Deposit",
-        size:10,
+        size:1,
         // sort:"block_timestamp",
         // fingerprint:"2zBebNWewNaGN3zRstfbrBMwqNGhiYJmMjdX3jNww1MehLVgfukh5hG6ADcPuGUEDqffd4LjostPUSWmD7sR7zTwbqgcXpfr"
     }).then((rest:any)=>{
