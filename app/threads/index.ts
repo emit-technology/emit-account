@@ -13,7 +13,7 @@ class Threads {
     tronEvent:TronEvent;
 
     constructor() {
-        this.timeSyncBlock = 1000 * 5;
+        this.timeSyncBlock = 1000 * 1;
         this.syncSero = new SyncThreadSero();
         this.syncEth = new SyncThreadEth();
         this.tronEvent = new TronEvent()
@@ -38,12 +38,12 @@ class Threads {
             console.info("gasTracker, sleep 5s...")
             setTimeout(()=>{
                 this.startGasTracker();
-            },this.timeSyncBlock*2)
+            },1000)
         }).catch(e=>{
             console.error("gasTracker err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.startGasTracker();
-            },this.timeSyncBlock*2)
+            },this.timeSyncBlock)
         });
     }
 
