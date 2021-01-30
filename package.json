@@ -5,7 +5,7 @@
   "main": "./build/app.js",
   "scripts": {
     "tsc": "tsc",
-    "dev": "ts-node-dev --respawn ./app/app.ts",
+    "start": "ts-node-dev --respawn ./app/app.ts",
     "build": "tsc && supervisor ./build/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
