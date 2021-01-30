@@ -29,7 +29,7 @@ class Threads {
         this.startSyncPendingEth();
         this.startSyncPendingSero();
 
-        this.startTronEvent();
+        // this.startTronEvent();
         this.startTronEventApi()
     }
 
