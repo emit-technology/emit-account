@@ -1,4 +1,3 @@
-import {ChainType} from "../../../emit-wallet/src/types";
 
 export interface Balance {
     address: string
@@ -67,12 +66,19 @@ export interface Transaction {
     data?: string
     gas: string
     gasPrice: string
-    chain: ChainType
+    chain: any
     nonce: string
     chainId?: any
     amount:any
     feeCy?:string
     feeValue?:string
+}
+
+export enum ChainType {
+    _,
+    SERO,
+    ETH,
+    TRON
 }
 
 export interface LatestBlock {

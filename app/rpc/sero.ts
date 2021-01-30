@@ -7,7 +7,7 @@ import * as db from '../db'
 import BigNumber from "bignumber.js";
 import RPC from "./index";
 import {TransactionReceipt} from "../types/eth";
-import {ChainType} from "../../../emit-wallet/src/types";
+import {ChainType} from "../types/";
 
 class SeroRPC extends RPC {
 
