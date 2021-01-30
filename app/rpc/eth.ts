@@ -79,21 +79,24 @@ class EthRpc extends RPC {
         if (data && data.length > 0) {
             for (let hash of data) {
                 const tx: any = await this.post("eth_getTransactionByHash", [hash]);
-                txArray.push({
-                    hash: tx.hash,
-                    from: tx.from,
-                    to: tx.to,
-                    cy: "ETH",
-                    value: tx.value,
-                    data: tx.input,
-                    gas: tx.gas,
-                    gasPrice: tx.gasPrice,
-                    chain: ChainType.ETH,
-                    nonce: tx.nonce,
-                    amount: "0x0",
-                    feeCy: "ETH",
-                    feeValue: "0x" + new BigNumber(tx.gas).multipliedBy(new BigNumber(tx.gasPrice)).toString(16)
-                })
+                if(tx){
+                    txArray.push({
+                        hash: tx.hash,
+                        from: tx.from,
+                        to: tx.to,
+                        cy: "ETH",
+                        value: tx.value,
+                        data: tx.input,
+                        gas: tx.gas,
+                        gasPrice: tx.gasPrice,
+                        chain: ChainType.ETH,
+                        nonce: tx.nonce,
+                        amount: "0x0",
+                        feeCy: "ETH",
+                        feeValue: "0x" + new BigNumber(tx.gas).multipliedBy(new BigNumber(tx.gasPrice)).toString(16)
+                    })
+                }
+
             }
         }
         return txArray
