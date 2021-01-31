@@ -45,13 +45,17 @@ class Eth extends Base {
             timestamp: {"$lte": timestamp},
             num: 0
         }
-        const cursor = await txInfoClient.find(query)
+        const option = {
+            limit: 100
+        }
+        const cursor = await txInfoClient.find(query,option)
         const txInfos: Array<any> = await cursor.toArray();
         if (txInfos && txInfos.length > 0) {
             for (let tx of txInfos) {
-                await recordClient.deleteMany({txHash: tx.txHash, num: 0})
+                const dOption = {txHash: tx.txHash, num: 0};
+                await recordClient.deleteMany(dOption);
+                await txInfoClient.deleteMany(dOption);
             }
-            await txInfoClient.deleteMany(query)
         }
     }
 }

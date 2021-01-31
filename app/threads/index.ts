@@ -141,12 +141,12 @@ class Threads {
             console.info("removeEthUnPendingTx, sleep 5s...")
             setTimeout(()=>{
                 this.removeEthUnPendingTx();
-            },this.timeSyncBlock * 100)
+            },this.timeSyncBlock * 5)
         }).catch(e=>{
             console.error("removeEthUnPendingTx err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.removeEthUnPendingTx();
-            },this.timeSyncBlock * 100)
+            },this.timeSyncBlock * 5)
         });
     }
 
