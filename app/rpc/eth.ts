@@ -72,9 +72,7 @@ class EthRpc extends RPC {
         if (!this.pendingFilterId) {
             this.pendingFilterId = await this.post("eth_newPendingTransactionFilter", []);
         }
-        console.log("pendingFilterId", this.pendingFilterId)
         const data: any = await this.filterChanges();
-        console.log("filterChanges data: ", data)
         const txArray: Array<Transaction> = [];
         if (data && data.length > 0) {
             for (let hash of data) {

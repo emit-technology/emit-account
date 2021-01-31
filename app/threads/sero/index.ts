@@ -80,7 +80,7 @@ class Index {
 
             if (!(outs && outs.length > 0)) {
                 const updateNum = start + endLimit > chainNum ? chainNum : start + endLimit;
-                console.log("outs is nil, update latest block num: ",updateNum)
+                // console.log("outs is nil, update latest block num: ",updateNum)
                 const timestamp: number = await seroRPC.getBlockTimestamp(updateNum)
                 await db.sero.upsertLatestBlock(updateNum, timestamp, session, client);
                 return
@@ -171,9 +171,7 @@ class Index {
 
             //build balance records of outs
             this.convertToBRS(addressOuts, balanceRecords, TxType.OUT, timestampMap);
-
-
-            console.log("balanceRecords",balanceRecords)
+            // console.log("balanceRecords",balanceRecords)
 
             const txRecords:Map<string,BalanceRecord> = new Map<string, BalanceRecord>();
             for(let record of balanceRecords){

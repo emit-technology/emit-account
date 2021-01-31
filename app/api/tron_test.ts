@@ -37,7 +37,7 @@ const tronGrid = new TronGrid(tronWeb);
 
 async function queryToken(){
     const assets = await tronWeb.trx.getAccount('TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG')
-    console.log(assets);
+    // console.log(assets);
     // for(let t of assets.assetV2){
     //     const token = await tronWeb.trx.getTokenByID(t.key);
     //     console.log(`>>>>>>>>> key=[${t.key}] ,value=[${t.value}], token=[${JSON.stringify(token)}] `)

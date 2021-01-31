@@ -71,14 +71,14 @@ class TronApi extends Api{
     getTxs = async (address: string,currency: string, pageSize: number, pageNo: number,fingerprint?:string): Promise<any> => {
         const txArr:Array<BalanceRecord> = [];
         let meta:any;
-        console.log("fingerprint:: ",fingerprint)
+        // console.log("fingerprint:: ",fingerprint)
         if (currency == "USDT"){
             const rest:any = await tronGrid.account.getTrc20Transactions(address, {
                 limit:pageSize,
                 fingerprint:fingerprint,
                 contract_address:constant.TRC20_ADDRESS.USDT
             })
-            console.log("USDT>>",rest)
+            // console.log("USDT>>",rest)
             pageSize = rest.meta.page_size;
             for(let t of rest.data){
                 const balanceRecord:any = {
@@ -117,7 +117,7 @@ class TronApi extends Api{
                 let to = "";
                 let value = "0";
                 const c = t.raw_data.contract[0];
-                console.log(c)
+                // console.log(c)
                 if("TransferContract" == c.type){
                     from = c.parameter.value.owner_address;
                     to = c.parameter.value.to_address;

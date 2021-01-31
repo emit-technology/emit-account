@@ -325,7 +325,7 @@ class Index {
         //WETH Deposit
         else if (key=="WETH") {
             const logRet:any = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
-            console.log("logRet>> ",logRet)
+            // console.log("logRet>> ",logRet)
             if(logRet.eventName == EVENT_TYPE.WETH_DEPOSIT){
                 balanceRecords.push({
                     address: logRet.event.dst.toLowerCase(),

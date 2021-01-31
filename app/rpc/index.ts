@@ -35,7 +35,7 @@ class RPC {
             axios.get(this.host + path).then((resp: any) => {
                 resolve(resp.data)
             }).catch((e: any) => {
-                console.log(e,"promise get")
+                console.error(e,"promise get")
                 reject(e);
             })
         })

@@ -38,7 +38,6 @@ class TronEvent {
                             tmp.push(d)
                         }
                     }
-                    console.log("tmp")
                     if(tmp.length>0){
                         await db.tron.insertEvents(tmp,session,client)
                     }

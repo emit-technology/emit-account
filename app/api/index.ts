@@ -38,7 +38,7 @@ export abstract class Api {
     }
 
     getEvents = async (txHash: string,depositNonce: string,originChainID:string,resourceID:string): Promise<Array<EventStruct>> => {
-        console.log("getEvent::",txHash)
+        // console.log("getEvent::",txHash)
         const retn: Array<EventStruct> = await this.db.queryEvents(txHash,depositNonce,originChainID,resourceID)
         return Promise.resolve(retn);
     }

@@ -17,7 +17,7 @@ class GasTracker {
         const gasPrice:any = await ethRpc.post("eth_gasPrice",[]);
         const data:any = await this.rpc.get(constant.GAS_TRACKER)
         const tracker:any = data.result;
-        console.log("tracker>>> ",tracker)
+        // console.log("tracker>>> ",tracker)
         const safeData:any = await this.rpc.get(this.gasEstimate(tracker.SafeGasPrice))
         const proposeData:any = await this.rpc.get(this.gasEstimate(tracker.ProposeGasPrice))
         const fastData:any = await this.rpc.get(this.gasEstimate(tracker.FastGasPrice))

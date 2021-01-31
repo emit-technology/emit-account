@@ -135,7 +135,7 @@ app.post('/', function (req, res) {
             sendResult(r, res, gasTracker.gasPriceLevel)
             break;
         case "getEvents":
-            console.log("getEvents>>>")
+            // console.log("getEvents>>>")
             api.getEvents(r.params[0],r.params[1],r.params[2],r.params[3]).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
@@ -167,7 +167,7 @@ app.post('/', function (req, res) {
 });
 
 app.listen(7655, function () {
-    console.log('Example app listening on port 7655!');
+    console.log('App listening on port 7655!');
 })
 
 interface JsonParams {
