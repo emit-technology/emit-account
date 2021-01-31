@@ -55,6 +55,7 @@ export interface TxInfo {
     timestamp: number | undefined
     extra?: any
     contractAddress?: string
+    nonce?:number
 }
 
 export interface Transaction {
@@ -67,7 +68,7 @@ export interface Transaction {
     gas: string
     gasPrice: string
     chain: any
-    nonce: string
+    nonce: any
     chainId?: any
     amount:any
     feeCy?:string

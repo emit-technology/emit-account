@@ -56,12 +56,10 @@ class Tron{
             eventName:"ProposalEvent",
             blockNumber: num
         }
-        console.log("option>>",option1,option2)
         const rest1 = await tronWeb.getEventResult(constant.CROSS_ADDRESS.TRON,option1)
         const rest2 = await tronWeb.getEventResult(constant.CROSS_ADDRESS.TRON,option2)
         const result:Array<any> = [];
         const rests= rest1.concat(rest2);
-        console.log("queryDeposit>>>> ",rests)
         if(rest1 && rests.length>0){
             for(let rest of rests){
                 const ret:any = {

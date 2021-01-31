@@ -29,7 +29,6 @@ class TronEvent {
         const session = client.startSession();
         try{
             const rest:Array<any> = await tronEvent.queryByEventApi();
-            console.log(rest,"restProposal")
             const transactionResults = await session.withTransaction(async () => {
                 const tmp :Array<any> = [];
                 if(rest && rest.length>0){
@@ -66,7 +65,6 @@ class TronEvent {
             const rest:any = await db.tron.latestBlock()
             const num = rest ? rest+1:THREAD_CONFIG.START_AT.TRON;
             const restProposal:Array<any> = await tronEvent.queryByNum(num);
-            console.log(restProposal,"restProposal")
             const transactionResults = await session.withTransaction(async () => {
                 if(restProposal && restProposal.length>0){
                     await db.tron.insertEvents(restProposal,session,client)

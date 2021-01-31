@@ -94,7 +94,8 @@ class Base {
                 ins: [],
                 transactionIndex: "0x0",
                 contract: null,
-                timestamp: timestamp
+                timestamp: timestamp,
+                nonce:t.nonce?new BigNumber(t.nonce).toNumber():0
             };
             const records: Array<any> = [];
             [t.value].forEach(value => {

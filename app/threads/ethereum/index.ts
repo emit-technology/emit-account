@@ -108,7 +108,6 @@ class Index {
             }
 
             const logs:Array<Log> = await ethRpc.getLogs(start,end)
-            console.log("listener event>> ",logs && logs.length)
             if (logs && logs.length > 0) {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
@@ -124,6 +123,11 @@ class Index {
                         if (logRet) {
                             events.push(logRet)
                         }
+                    }
+                    if(token || utils.isCrossAddress(log.address)){
+                        db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                            console.error("remove unpending tx, err: ", e);
+                        })
                     }
                 }
             }
@@ -194,6 +198,7 @@ class Index {
             transactionIndex: t.transactionIndex,
             contract: null,
             timestamp: parseInt(block.timestamp),
+            nonce:t.nonce?new BigNumber(t.nonce).toNumber():0
         };
         return txInfo;
     }
