@@ -18,7 +18,7 @@ class EthApi extends Api {
         const hash = await ethRpc.sendRawTransaction(data);
         t.feeCy = "ETH";
         t.feeValue = new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-        // await this.insertTxInfo(hash, t)
+        await this.insertTxInfo(hash, t)
         return Promise.resolve(hash);
     }
 
