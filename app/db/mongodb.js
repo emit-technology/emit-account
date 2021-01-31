@@ -13,7 +13,7 @@ const factory = {
     }
 }
 const opts = {
-    max: 500,
+    max: 5000,
     min: 10
 }
 
