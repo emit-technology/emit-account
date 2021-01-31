@@ -45,6 +45,10 @@ class Index {
         }
     }
 
+    removeUnPendingTxTimeout = async () => {
+        await db.eth.removeUnPendingTxTimeout();
+    }
+
     syncTransactions = async (startNum:number, maxNum:number) => {
         const client: any = await myPool.acquire();
         const session = client.startSession();

@@ -31,6 +31,8 @@ class Threads {
 
         // this.startTronEvent();
         this.startTronEventApi()
+
+        this.removeEthUnPendingTx();
     }
 
     startGasTracker = () => {
@@ -131,6 +133,20 @@ class Threads {
             setTimeout(()=>{
                 this.startTronEventApi();
             },this.timeSyncBlock)
+        });
+    }
+
+    removeEthUnPendingTx = () => {
+        this.syncEth.removeUnPendingTxTimeout().then(()=>{
+            console.info("removeEthUnPendingTx, sleep 5s...")
+            setTimeout(()=>{
+                this.removeEthUnPendingTx();
+            },this.timeSyncBlock * 100)
+        }).catch(e=>{
+            console.error("removeEthUnPendingTx err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.removeEthUnPendingTx();
+            },this.timeSyncBlock * 100)
         });
     }
 
