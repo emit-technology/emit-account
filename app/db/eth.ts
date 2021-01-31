@@ -57,6 +57,7 @@ class Eth extends Base {
                 await txInfoClient.deleteMany(dOption);
             }
         }
+        this.release(client);
     }
 }
 
