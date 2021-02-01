@@ -42,7 +42,8 @@ class Index {
         const txInfos = await ethRpc.getFilterChangesPending();
         for(let tx of txInfos){
             db.eth.insertTxInfo(tx.hash,tx).catch(e=>{
-                console.error("syncPendingTransactions",e)
+                const err = typeof e == "string"?e:e.message;
+                console.error("syncPendingTransactions",err)
             });
         }
     }
