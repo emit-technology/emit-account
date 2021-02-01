@@ -40,7 +40,7 @@ class Threads {
             console.info("gasTracker, sleep 5s...")
             setTimeout(()=>{
                 this.startGasTracker();
-            },1000)
+            },this.timeSyncBlock)
         }).catch(e=>{
             console.error("gasTracker err: ",e," restart 5s later...")
             setTimeout(()=>{
@@ -73,7 +73,7 @@ class Threads {
             console.info(`eth sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
             setTimeout(()=>{
                 this.startEth();
-            },this.timeSyncBlock)
+            },this.timeSyncBlock/10)
         }).catch(e=>{
             console.error("eth sync err: ",e," restart 5s later...")
             setTimeout(()=>{
@@ -113,7 +113,7 @@ class Threads {
             console.info("startTronEvent, sleep 5s...")
             setTimeout(()=>{
                 this.startTronEvent();
-            },this.timeSyncBlock / 5000)
+            },this.timeSyncBlock / 5)
         }).catch(e=>{
             console.error("startTronEvent err: ",e," restart 5s later...")
             setTimeout(()=>{
