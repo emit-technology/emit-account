@@ -72,10 +72,16 @@ function queryToken() {
         var assets;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, tronWeb.trx.getAccount('TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG')];
+                case 0: return [4 /*yield*/, tronWeb.trx.getAccount('TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG')
+                    // console.log(assets);
+                    // for(let t of assets.assetV2){
+                    //     const token = await tronWeb.trx.getTokenByID(t.key);
+                    //     console.log(`>>>>>>>>> key=[${t.key}] ,value=[${t.value}], token=[${JSON.stringify(token)}] `)
+                    // }
+                    // tronWeb.trx.getBalance('TTSFjEG3Lu9WkHdp4JrWYhbGP6K1REqnGQ').then(result => console.log(result))
+                ];
                 case 1:
                     assets = _a.sent();
-                    console.log(assets);
                     return [2 /*return*/];
             }
         });
@@ -91,30 +97,36 @@ function queryToken() {
 // }
 // tronWeb.trx.getTokenListByName("TetherToken").then(result => {console.log(result)});
 //111
-// async function triggercontract(){
-//     // let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
-//
-//     console.log(tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
-//
-//     const parameter1 = [{type:'address',value:tronWeb.address.toHex("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu")},{type:'uint256',value:100}]
-//     const transaction = await tronWeb.transactionBuilder.triggerSmartContract(constant.TRC20_ADDRESS.USDT, "transfer(address,uint256)", {},
-//         parameter1,tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
-//
-//     // const transaction = await tronWeb.transactionBuilder.sendTrx("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", 10,"TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG",1);
-//
-//     console.log(transaction,"transaction1>>");
-//
-//     const signedtxn = await tronWeb.trx.sign(transaction.transaction, privateKey);
-//     console.log(signedtxn,"transaction2>>");
-//
-//     const receipt = await tronWeb.trx.sendRawTransaction(signedtxn);
-//
-//     console.log(receipt)
-//
-// }
-// triggercontract().catch(e=>{
-//     console.error(e)
-// });
+function triggercontract() {
+    return __awaiter(this, void 0, void 0, function () {
+        var parameter1, transaction, signedtxn, receipt;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    // let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
+                    console.log(tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
+                    parameter1 = [{ type: 'address', value: tronWeb.address.toHex("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu") }, { type: 'uint256', value: 100 }];
+                    return [4 /*yield*/, tronWeb.transactionBuilder.triggerSmartContract(constant.TRC20_ADDRESS.USDT, "transfer(address,uint256)", {}, parameter1, tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"))];
+                case 1:
+                    transaction = _a.sent();
+                    // const transaction = await tronWeb.transactionBuilder.sendTrx("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", 10,"TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG",1);
+                    console.log(transaction, "transaction1>>");
+                    return [4 /*yield*/, tronWeb.trx.sign(transaction.transaction, privateKey)];
+                case 2:
+                    signedtxn = _a.sent();
+                    console.log(signedtxn, "transaction2>>");
+                    return [4 /*yield*/, tronWeb.trx.sendRawTransaction(signedtxn)];
+                case 3:
+                    receipt = _a.sent();
+                    console.log(receipt);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+triggercontract()["catch"](function (e) {
+    console.error(e);
+});
 // tronWeb.trx.getTokenListByName("USDT");
 // const accountAddress = "TTaiQ6eWoEwUnNz4SmcnZbzdf1fTmVnqVT";
 // //
@@ -144,7 +156,7 @@ function queryToken() {
 // });
 tronWeb.getEventResult("TAo46rvXgYorCL1xfWEQ1MqRqwnZxuCp8P", {
     // eventName:"Deposit",
-    size: 10
+    size: 50
 }).then(function (rest) {
     console.log(rest);
 })["catch"](function (e) {

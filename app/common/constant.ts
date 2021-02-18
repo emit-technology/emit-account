@@ -60,8 +60,8 @@ export const THREAD_CONFIG = {
         TRON:27214560,
     },
     LIMIT: {
-        SERO: 5000,
-        ETH: 10,
+        SERO: 50,
+        ETH: 20,
         TRON:50
     }
 }

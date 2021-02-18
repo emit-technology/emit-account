@@ -75,7 +75,7 @@ class SeroRPC extends RPC {
                     outInfos.push(outInfo);
                 }
             }
-            if (out.State.OS.Out_P) {
+            if (out.State.OS.Out_P && out.State.OS.Out_P.Asset.Tkn && out.State.OS.Out_P.Asset.Tkn.Currency) {
                 const outInfo: OutInfo = {
                     address: utils.addrToString(out.State.OS.Out_P.PKr),
                     asset: {

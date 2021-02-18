@@ -55,30 +55,30 @@ async function queryToken(){
 // }
 // tronWeb.trx.getTokenListByName("TetherToken").then(result => {console.log(result)});
 //111
-// async function triggercontract(){
-//     // let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
-//
-//     console.log(tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
-//
-//     const parameter1 = [{type:'address',value:tronWeb.address.toHex("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu")},{type:'uint256',value:100}]
-//     const transaction = await tronWeb.transactionBuilder.triggerSmartContract(constant.TRC20_ADDRESS.USDT, "transfer(address,uint256)", {},
-//         parameter1,tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
-//
-//     // const transaction = await tronWeb.transactionBuilder.sendTrx("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", 10,"TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG",1);
-//
-//     console.log(transaction,"transaction1>>");
-//
-//     const signedtxn = await tronWeb.trx.sign(transaction.transaction, privateKey);
-//     console.log(signedtxn,"transaction2>>");
-//
-//     const receipt = await tronWeb.trx.sendRawTransaction(signedtxn);
-//
-//     console.log(receipt)
-//
-// }
-// triggercontract().catch(e=>{
-//     console.error(e)
-// });
+async function triggercontract(){
+    // let instance = await tronWeb.contract().at(constant.TRC20_ADDRESS.USDT);
+
+    console.log(tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
+
+    const parameter1 = [{type:'address',value:tronWeb.address.toHex("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu")},{type:'uint256',value:100}]
+    const transaction = await tronWeb.transactionBuilder.triggerSmartContract(constant.TRC20_ADDRESS.USDT, "transfer(address,uint256)", {},
+        parameter1,tronWeb.address.toHex("TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG"));
+
+    // const transaction = await tronWeb.transactionBuilder.sendTrx("TGUVVWjYpsFj5o5okydLncEXk8xitq9LTu", 10,"TYdRxvWxSBRmm76tKX73rULihnpxi5aGjG",1);
+
+    console.log(transaction,"transaction1>>");
+
+    const signedtxn = await tronWeb.trx.sign(transaction.transaction, privateKey);
+    console.log(signedtxn,"transaction2>>");
+
+    const receipt = await tronWeb.trx.sendRawTransaction(signedtxn);
+
+    console.log(receipt)
+
+}
+triggercontract().catch(e=>{
+    console.error(e)
+});
 
 // tronWeb.trx.getTokenListByName("USDT");
 // const accountAddress = "TTaiQ6eWoEwUnNz4SmcnZbzdf1fTmVnqVT";
@@ -116,9 +116,9 @@ async function queryToken(){
 tronWeb.getEventResult("TAo46rvXgYorCL1xfWEQ1MqRqwnZxuCp8P",
     {
         // eventName:"Deposit",
-        size:10,
+        size:50,
         // sort:"block_timestamp",
-        // fingerprint:"2zBebNWewNaGN3zRstfbrBMwqNGhiYJmMjdX3jNww1MehLVgfukh5hG6ADcPuGUEDqffd4LjostPUSWmD7sR7zTwbqgcXpfr"
+        // fingerprint:"9mPzvhwuzujE1TfigFV5NK5pvjiYHpsYV27iJmFYYTDhAUyFGYX5vb3Ts1ktx2mG2KNmGrxn9gAdFmG78DG82cMJP2DJujNme"
     }).then((rest:any)=>{
     console.log(rest)
 }).catch((e:any)=>{
