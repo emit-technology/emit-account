@@ -49,7 +49,7 @@ class SeroRPC extends RPC {
     private convertOuts(outs: Array<any>):Array<OutInfo> {
         const outInfos: Array<OutInfo> = [];
         for (let out of outs) {
-            if (out.State.OS.Out_O) {
+            if (out.State.OS.Out_O && out.State.OS.Out_O.Asset && out.State.OS.Out_O.Asset.Tkn) {
                 const outInfo: OutInfo = {
                     address: utils.addrToString(out.State.OS.Out_O.Addr),
                     asset: {

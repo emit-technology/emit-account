@@ -75,3 +75,5 @@ export const TRON_API_HOST = {
 export const TRC20_ADDRESS = {
     USDT:"TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"
 }
+
+export const SYNC_TIME = 1000 * 1

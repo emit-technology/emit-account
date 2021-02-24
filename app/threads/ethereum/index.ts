@@ -111,6 +111,10 @@ class Index {
                     if (balanceRecords.length == 0) {
                         this.setBalanceRecordDefault(t, balanceRecords, txInfo);
                     }
+
+                    db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                        console.error("remove unpending tx, err: ", e);
+                    })
                 }
             }
 
@@ -130,11 +134,6 @@ class Index {
                         if (logRet) {
                             events.push(logRet)
                         }
-                    }
-                    if(token || utils.isCrossAddress(log.address)){
-                        db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                            console.error("remove unpending tx, err: ", e);
-                        })
                     }
                 }
             }
