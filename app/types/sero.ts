@@ -8,7 +8,8 @@ export interface OutInfo {
     root: string //unique
     asset: Asset
     used: boolean
-    utxo:utxo
+    utxo: utxo
+    ticket?:TicketInfo
 }
 
 
@@ -22,8 +23,12 @@ export interface TxPrams {
     data: string
     gas: string
     gasPrice: string
-    feeCy?:string
-    feeValue?:string
+    feeCy?: string
+    feeValue?: string
+    tickets?:Array<TicketInfo>
 }
 
-
+export interface TicketInfo {
+    Value:string
+    Category:string
+}

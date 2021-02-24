@@ -48,6 +48,20 @@ class Sero extends Base{
         return await dbOuts.insertMany(outs, {session})
     }
 
+    findTickets = async (address:string,tickets?:Array<string>):Promise<any> =>{
+        const client = await this.client();
+        const connection: any = await this.outs(client);
+        const query:any = {}
+        query.address = address;
+        query.used = false;
+        if(tickets && tickets.length>0){
+            query.ticket = {"$in":tickets}
+        }
+        const rest = await connection.find(query).toArray()
+        myPool.release(client);
+        return rest;
+    }
+
 }
 
 export default Sero

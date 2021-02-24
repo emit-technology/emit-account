@@ -132,9 +132,11 @@ class Index {
                         }
                     }
                     if(token || utils.isCrossAddress(log.address)){
-                        db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                            console.error("remove unpending tx, err: ", e);
-                        })
+                        if(txInfo.num>0){
+                            db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                                console.error("remove unpending tx, err: ", e);
+                            })
+                        }
                     }
                 }
             }

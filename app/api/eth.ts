@@ -89,6 +89,10 @@ class EthApi extends Api {
             myPool.release(client);
         }
     }
+
+    getTicket(address: string): Promise<any> {
+        return Promise.resolve(undefined);
+    }
 }
 
 export default EthApi;

@@ -3,6 +3,7 @@ import SyncThreadSero from "./sero/"
 import TronEvent from "./tron/event";
 import gasTracker from "../api/gasTracker";
 import * as constant from "../common/constant"
+import Pending from "../rpc/repair/pending";
 
 class Threads {
 
@@ -13,14 +14,18 @@ class Threads {
     tronEvent:TronEvent;
 
     constructor() {
-        this.timeSyncBlock = 1000 * 1;
+        this.timeSyncBlock = constant.SYNC_TIME;
         this.syncSero = new SyncThreadSero();
         this.syncEth = new SyncThreadEth();
         this.tronEvent = new TronEvent()
-
     }
 
     run = ()=>{
+
+        const repairPending = new Pending();
+        repairPending.repair().catch(e=>{
+            console.log("repair")
+        });
 
         this.startSero();
         this.startEth();
@@ -50,14 +55,14 @@ class Threads {
     }
 
     startSero = () => {
-        // this.syncSero.run(constant.THREAD_CONFIG.START_AT.SERO,constant.THREAD_CONFIG.LIMIT.SERO,177128)
+        // this.syncSero.run(constant.THREAD_CONFIG.START_AT.SERO,constant.THREAD_CONFIG.LIMIT.SERO,384180)
 
         console.info("sero sync start...")
         this.syncSero.run(constant.THREAD_CONFIG.START_AT.SERO,constant.THREAD_CONFIG.LIMIT.SERO).then(()=>{
             console.info("sero sync end, sleep 5s...")
             setTimeout(()=>{
                 this.startSero();
-            },this.timeSyncBlock)
+            },this.timeSyncBlock/10)
         }).catch(e=>{
             console.error("sero sync err: ",e," restart 5s later...")
             setTimeout(()=>{
