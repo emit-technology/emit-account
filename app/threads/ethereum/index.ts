@@ -112,9 +112,9 @@ class Index {
                         this.setBalanceRecordDefault(t, balanceRecords, txInfo);
                     }
 
-                    db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                        console.error("remove unpending tx, err: ", e);
-                    })
+                    // db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                    //     console.error("remove unpending tx, err: ", e);
+                    // })
                 }
             }
 
