@@ -22,11 +22,6 @@ class Threads {
 
     run = ()=>{
 
-        const repairPending = new Pending();
-        repairPending.repair().catch(e=>{
-            console.log("repair")
-        });
-
         this.startSero();
         this.startEth();
         this.startGasTracker();
