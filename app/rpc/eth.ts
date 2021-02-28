@@ -55,6 +55,7 @@ class EthRpc extends RPC {
             addresses.push(constant.TOKEN_ADDRESS[key]);
         }
         addresses.push(constant.CROSS_ADDRESS.ETH)
+        addresses.push(constant.CROSS_NFT_ADDRESS.ETH)
         for (let conf of EVENT_ABI_CONFIG) {
             topics.push(web3.eth.abi.encodeEventSignature(conf.abi))
         }

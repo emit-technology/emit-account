@@ -65,15 +65,12 @@ class SeroApi extends Api {
                     fee.Value = txPrams.feeValue;
                 }
 
-                const asset = {
+                const asset:any = {
                     Tkn: tkn,
                 }
-                const reception = {
-                    Addr: to,
-                    Asset: asset
-                }
-                const tknReceptions = [reception]
-                const tktReceptions = []
+
+
+                // const tktReceptions = []
 
                 if(txPrams.tickets && txPrams.tickets.length>0){
                     const tktArray = txPrams.tickets;
@@ -82,16 +79,21 @@ class SeroApi extends Api {
                             Category:utils.cyToHex(d.Category),
                             Value:d.Value
                         }
-                        const assetTkt:any = {
-                            Tkt:tkt
-                        }
-                        tktReceptions.push({
-                            Addr: to,
-                            Asset: assetTkt
-                        })
+                        asset.Tkt = tkt
+                        // tktReceptions.push({
+                        //     Addr: to,
+                        //     Asset: assetTkt
+                        // })
+                        console.log("assetTkt:: ",tkt)
                     }
                 }
-                const receptions = tknReceptions.concat(tktReceptions)
+                const reception = {
+                    Addr: to,
+                    Asset: asset
+                }
+                const receptions = [reception]
+                // const receptions = tknReceptions.concat(tktReceptions)
+                console.log("receptions:: ",receptions)
 
                 const preTxParam: PreTxParam = {
                     From: from,
@@ -156,6 +158,7 @@ class TxGenerator {
                         break;
                     }
                     utxos.push(out.utxo)
+                    console.log("rests[0].utxo.Asset.Tkt??",out.utxo.Asset.Tkt)
                     remain = remain.sub(utils.toBN(out.asset.value));
                 }
             }
@@ -171,6 +174,7 @@ class TxGenerator {
             while (!res.done) {
                 let value = res.value[0]
                 const rests:Array<OutInfo> = await db.sero.findTickets(address,[value])
+                console.log("rests:: ",rests[0].utxo.Asset.Tkt,value,address);
                 if(rests && rests.length>0){
                     const out = rests[0];
                     utxos.push(out.utxo)

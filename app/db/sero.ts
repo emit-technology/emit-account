@@ -33,7 +33,7 @@ class Sero extends Base{
     findUnusedOutsByAddress = async (address:string,currency:string):Promise<Array<OutInfo>> => {
         const client = await this.client();
         const dbOuts: any = await this.outs(client);
-        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency}, "used": {"$eq":false}}).toArray();
+        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency},"asset.value":{"$ne":"0x0"}, "used": {"$eq":false}}).toArray();
         myPool.release(client);
         return rest;
     }
@@ -55,8 +55,9 @@ class Sero extends Base{
         query.address = address;
         query.used = false;
         if(tickets && tickets.length>0){
-            query.ticket = {"$in":tickets}
+            query["ticket.Value"] = {"$in":tickets}
         }
+        console.log("query ticket:: ",query)
         const rest = await connection.find(query).toArray()
         myPool.release(client);
         return rest;

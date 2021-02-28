@@ -124,14 +124,14 @@ class Index {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
-                    if (!utils.isCrossAddress(log.address)) {
-                    } else {
+                    if (utils.isCrossAddress(log.address)  || utils.isCrossNftAddress(log.address)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
+                        console.log("logRet::",logRet)
                         if (logRet) {
                             events.push(logRet)
                         }
                     }
-                    if(token || utils.isCrossAddress(log.address)){
+                    if(token || utils.isCrossAddress(log.address) || utils.isCrossNftAddress(log.address)){
                         if(txInfo.num>0){
                             db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
                                 console.error("remove unpending tx, err: ", e);

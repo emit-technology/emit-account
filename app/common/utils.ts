@@ -41,6 +41,18 @@ export function isCrossAddress(address: string) {
     return "";
 }
 
+export function isCrossNftAddress(address: string) {
+    const cKeys: any = Object.keys(constant.CROSS_NFT_ADDRESS);
+    for (let key of cKeys) {
+        // @ts-ignore
+        const addr: string = constant.CROSS_NFT_ADDRESS[key];
+        if (address.toLowerCase() === addr.toLowerCase()) {
+            return key;
+        }
+    }
+    return "";
+}
+
 function toHex(value: string | BigNumber | number) {
     if(!value){
         return "0x0";

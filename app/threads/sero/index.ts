@@ -145,8 +145,7 @@ class Index {
                     const logs: Array<Log> = txReceipt.logs;
                     if (logs && logs.length > 0) {
                         for (let log of logs) {
-                            if (!utils.isCrossAddress(log.address)) {
-                            } else {
+                            if (utils.isCrossAddress(log.address) || utils.isCrossNftAddress(log.address)) {
                                 const logRet = event.decodeLog(txInfo.num,txInfo.txHash,log.address,log.topics,log.data)
                                 if(logRet){
                                     events.push(logRet)

@@ -55,7 +55,7 @@ class SeroRPC extends RPC {
                     address: utils.addrToString(out.State.OS.Out_O.Addr),
                     asset: {
                         currency: asset.Tkn?utils.hexToCy(asset.Tkn.Currency):"SERO",
-                        value: asset.Tkn?asset.Tkn.Value:"0x0"
+                        value: asset.Tkn?asset.Tkn.Value:"0"
                     },
                     txHash: out.State.TxHash,
                     num: new BigNumber(out.State.Num).toNumber(),
@@ -86,7 +86,7 @@ class SeroRPC extends RPC {
                     address: utils.addrToString(out.State.OS.Out_P.PKr),
                     asset: {
                         currency: asset.Tkn?utils.hexToCy(asset.Tkn.Currency):"SERO",
-                        value: asset.Tkn?asset.Tkn.Value:"0x0"
+                        value: asset.Tkn?asset.Tkn.Value:"0"
                     },
                     txHash: out.State.TxHash,
                     num: new BigNumber(out.State.Num).toNumber(),
@@ -222,7 +222,12 @@ class SeroRPC extends RPC {
                 }
                 let toAddr:string = "";
                 for(let out of Outs_P){
-                    const cy = utils.hexToCy(out.Asset.Tkn.Currency);
+                    let cy = "SERO"
+                    let value = "0x0";
+                    if(out.Asset.Tkn){
+                        cy = utils.hexToCy(out.Asset.Tkn.Currency);
+                        value = out.Asset.Tkn.Value;
+                    }
                     const to = utils.addrToString(out.PKr);
                     if(to != tx.from){
                         toAddr = to;
@@ -230,7 +235,7 @@ class SeroRPC extends RPC {
                     const key = [to,cy].join(":");
                     const tmpAsset:Asset = {
                         currency:cy,
-                        value:out.Asset.Tkn.Value
+                        value:value
                     };
                     if(outMap.has(key)){
                         const asset:any = outMap.get(key);
