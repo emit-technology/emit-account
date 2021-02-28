@@ -33,7 +33,7 @@ class Sero extends Base{
     findUnusedOutsByAddress = async (address:string,currency:string):Promise<Array<OutInfo>> => {
         const client = await this.client();
         const dbOuts: any = await this.outs(client);
-        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency},"asset.value":{"$ne":"0x0"}, "used": {"$eq":false}}).toArray();
+        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency},"asset.value":{"$ne":"0"}, "used": {"$eq":false}}).toArray();
         myPool.release(client);
         return rest;
     }
