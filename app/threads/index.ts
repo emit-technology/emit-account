@@ -90,7 +90,8 @@ class Threads {
                 this.startSyncPendingEth();
             },1000)
         }).catch(e=>{
-            console.log("eth sync pending err: ",e," restart 5s later...")
+            const err = typeof e == "string"?e:e.message;
+            console.log("eth sync pending err: ",err," restart 5s later...")
             setTimeout(()=>{
                 this.startSyncPendingEth();
             },1000)
@@ -103,7 +104,8 @@ class Threads {
                 this.dealSyncPendingEth();
             },1)
         }).catch(e=>{
-            console.log("dealSyncPendingEth err: ",e)
+            const err = typeof e == "string"?e:e.message;
+            console.log("dealSyncPendingEth err: ",err)
             setTimeout(()=>{
                 this.dealSyncPendingEth();
             },1)
@@ -116,7 +118,8 @@ class Threads {
                 this.startSyncPendingSero();
             },this.timeSyncBlock)
         }).catch(e=>{
-            console.error("sero sync pending err: ",e," restart 5s later...")
+            const err = typeof e == "string"?e:e.message;
+            console.error("sero sync pending err: ",err," restart 5s later...")
             setTimeout(()=>{
                 this.startSyncPendingSero();
             },this.timeSyncBlock)
