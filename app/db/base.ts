@@ -132,7 +132,7 @@ class Base {
             }
         } catch (e) {
             err = e;
-            console.error("The pending transaction was aborted due to an unexpected error: ", e);
+            // console.error("The pending transaction was aborted due to an unexpected error: ", e);
         } finally {
             await session.endSession();
             myPool.release(client);
