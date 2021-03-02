@@ -378,7 +378,6 @@ class Base {
         const db: any = await this.txInfo(client);
         const dbRecord: any = await this.balanceRecords(client);
 
-        console.log("removePendingTxByHash::",hashArray)
         await db.deleteMany({txHash: {"$in": hashArray}, num: 0}, {session})
         await dbRecord.deleteMany({txHash: {"$in": hashArray}, num: 0}, {session})
         return;

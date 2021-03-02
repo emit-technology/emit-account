@@ -130,7 +130,6 @@ class Index {
                     }
                     if (utils.isCrossAddress(log.address)  || utils.isCrossNftAddress(log.address)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
-                        console.log("logRet::",logRet)
                         if (logRet) {
                             events.push(logRet)
                         }

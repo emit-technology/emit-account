@@ -84,7 +84,6 @@ class SeroApi extends Api {
                         //     Addr: to,
                         //     Asset: assetTkt
                         // })
-                        console.log("assetTkt:: ",tkt)
                     }
                 }
                 const reception = {
@@ -93,7 +92,6 @@ class SeroApi extends Api {
                 }
                 const receptions = [reception]
                 // const receptions = tknReceptions.concat(tktReceptions)
-                console.log("receptions:: ",receptions)
 
                 const preTxParam: PreTxParam = {
                     From: from,
@@ -158,7 +156,6 @@ class TxGenerator {
                         break;
                     }
                     utxos.push(out.utxo)
-                    console.log("rests[0].utxo.Asset.Tkt??",out.utxo.Asset.Tkt)
                     remain = remain.sub(utils.toBN(out.asset.value));
                 }
             }

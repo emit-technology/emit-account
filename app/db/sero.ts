@@ -57,7 +57,6 @@ class Sero extends Base{
         if(tickets && tickets.length>0){
             query["ticket.Value"] = {"$in":tickets}
         }
-        console.log("query ticket:: ",query)
         const rest = await connection.find(query).toArray()
         myPool.release(client);
         return rest;
