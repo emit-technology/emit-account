@@ -29,6 +29,8 @@ class Threads {
         this.startSyncPendingEth();
         this.startSyncPendingSero();
 
+        this.dealSyncPendingEth();
+
         // this.startTronEvent();
         this.startTronEventApi()
 
@@ -86,12 +88,25 @@ class Threads {
         this.syncEth.syncPendingTransactions().then(()=>{
             setTimeout(()=>{
                 this.startSyncPendingEth();
-            },this.timeSyncBlock)
+            },1000)
         }).catch(e=>{
-            console.error("eth sync pending err: ",e," restart 5s later...")
+            console.log("eth sync pending err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.startSyncPendingEth();
-            },this.timeSyncBlock)
+            },1000)
+        });
+    }
+
+    dealSyncPendingEth = () =>{
+        this.syncEth.dealPending().then(()=>{
+            setTimeout(()=>{
+                this.dealSyncPendingEth();
+            },1)
+        }).catch(e=>{
+            console.log("dealSyncPendingEth err: ",e)
+            setTimeout(()=>{
+                this.dealSyncPendingEth();
+            },1)
         });
     }
 

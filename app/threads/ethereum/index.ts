@@ -21,7 +21,7 @@ import ethRpc from "../../rpc/eth";
 import {AddressTx, Balance, BalanceRecord, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
 import * as constant from "../../common/constant";
 import * as utils from '../../common/utils'
-import {ApprovalEvent, Block, Log, Transaction, TransactionReceipt, TransferEvent} from "../../types/eth";
+import {ApprovalEvent, Block, Log, TransactionReceipt,Transaction, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
@@ -34,18 +34,27 @@ class Index {
 
     ethWeb3: any;
 
+    txInfos: Array<any>
+
     constructor() {
         this.ethWeb3 = new Web3(constant.ETH_HOST);
+        this.txInfos = [];
     }
 
     syncPendingTransactions = async () => {
-        const txInfos = await ethRpc.getFilterChangesPending();
-        for(let tx of txInfos){
-            db.eth.insertTxInfo(tx.hash,tx).catch(e=>{
-                const err = typeof e == "string"?e:e.message;
-                console.log("syncPendingTransactions",err)
-            });
+        const rests:any = await ethRpc.getFilterChangesPending();
+        const c:any = this.txInfos.concat(rests);
+        this.txInfos = c;
+        console.log(`syncPendingTransactions,len[${this.txInfos.length}]`)
+        return Promise.resolve();
+    }
+
+    dealPending = async ()=>{
+        if(this.txInfos && this.txInfos.length>0){
+            const tx:any = this.txInfos.pop();
+            await db.eth.insertTxInfo(tx.hash,tx)
         }
+        return Promise.resolve();
     }
 
     removeUnPendingTxTimeout = async () => {
