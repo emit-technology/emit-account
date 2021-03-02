@@ -105,7 +105,7 @@ class Threads {
             },1)
         }).catch(e=>{
             const err = typeof e == "string"?e:e.message;
-            console.log("dealSyncPendingEth err: ",err)
+            // console.log("dealSyncPendingEth err: ",err)
             setTimeout(()=>{
                 this.dealSyncPendingEth();
             },1)
