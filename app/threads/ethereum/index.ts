@@ -41,10 +41,11 @@ class Index {
     syncPendingTransactions = async () => {
         const txInfos = await ethRpc.getFilterChangesPending();
         for(let tx of txInfos){
-            db.eth.insertTxInfo(tx.hash,tx).catch(e=>{
-                const err = typeof e == "string"?e:e.message;
-                console.error("syncPendingTransactions",err)
-            });
+            await db.eth.insertTxInfo(tx.hash,tx)
+            //     .catch(e=>{
+            //     const err = typeof e == "string"?e:e.message;
+            //     console.error("syncPendingTransactions",err)
+            // });
         }
     }
 
@@ -134,13 +135,13 @@ class Index {
                             events.push(logRet)
                         }
                     }
-                    if(token || utils.isCrossAddress(log.address) || utils.isCrossNftAddress(log.address)){
-                        if(txInfo.num>0){
-                            db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                                console.error("remove unpending tx, err: ", e);
-                            })
-                        }
-                    }
+                    // if(token || utils.isCrossAddress(log.address) || utils.isCrossNftAddress(log.address)){
+                    //     if(txInfo.num>0){
+                    //         db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                    //             console.error("remove unpending tx, err: ", e);
+                    //         })
+                    //     }
+                    // }
                 }
             }
 
