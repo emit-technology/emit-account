@@ -41,11 +41,10 @@ class Index {
     syncPendingTransactions = async () => {
         const txInfos = await ethRpc.getFilterChangesPending();
         for(let tx of txInfos){
-            await db.eth.insertTxInfo(tx.hash,tx)
-            //     .catch(e=>{
-            //     const err = typeof e == "string"?e:e.message;
-            //     console.error("syncPendingTransactions",err)
-            // });
+            db.eth.insertTxInfo(tx.hash,tx).catch(e=>{
+                const err = typeof e == "string"?e:e.message;
+                console.log("syncPendingTransactions",err)
+            });
         }
     }
 
