@@ -174,7 +174,6 @@ class TxGenerator {
             while (!res.done) {
                 let value = res.value[0]
                 const rests:Array<OutInfo> = await db.sero.findTickets(address,[value])
-                console.log("rests:: ",rests[0].utxo.Asset.Tkt,value,address);
                 if(rests && rests.length>0){
                     const out = rests[0];
                     utxos.push(out.utxo)
