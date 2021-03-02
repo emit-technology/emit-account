@@ -138,7 +138,6 @@ class Index {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
 
-                    console.log("utils.isErc721Address(log.address)",utils.isErc721Address(log.address),log.address)
                     if(utils.isErc721Address(log.address)){
                         this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
                     }
@@ -212,7 +211,6 @@ class Index {
     private handleERC721Event(log: Log, addressTxs: Array<AddressTx>, txInfo:TxInfo, balanceRecords: Array<BalanceRecord>) {
         const key = "ETH";
         const txEvent: TransferEvent = event.decodeERC721_Transfer(log.topics, log.data);
-        console.log("txEvent::",txEvent)
         txEvent.from && addressTxs.push({
             address: txEvent.from.toLowerCase(),
             txHash: txInfo.txHash,

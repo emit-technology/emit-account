@@ -209,7 +209,6 @@ class Event {
             }
         ]
         const rest4: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
-        console.log("rest4::",rest4)
         const ret: TransferEvent = {
             from: rest4.from,
             to: rest4.to,
