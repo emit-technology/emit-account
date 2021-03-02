@@ -126,7 +126,7 @@ class Base {
             }, constant.mongo.eth.transactionOptions)
 
             if (transactionResults) {
-                console.log("The pending tx was successfully created.");
+                // console.log("The pending tx was successfully created.");
             } else {
                 console.log("The pending tx was intentionally aborted.");
             }
