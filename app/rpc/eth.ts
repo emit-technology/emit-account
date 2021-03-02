@@ -54,6 +54,12 @@ class EthRpc extends RPC {
         for (let key of keys) {
             addresses.push(constant.TOKEN_ADDRESS[key]);
         }
+
+        const keys2 = Object.keys(constant.ERC721_ADDRESS);
+        for (let k of keys2) {
+            addresses.push(constant.ERC721_ADDRESS[k]);
+        }
+
         addresses.push(constant.CROSS_ADDRESS.ETH)
         addresses.push(constant.CROSS_NFT_ADDRESS.ETH)
         for (let conf of EVENT_ABI_CONFIG) {

@@ -108,7 +108,9 @@ export enum EVENT_TYPE {
     CROSS_PROPOSAL,
 
     WETH_DEPOSIT,
-    WETH_WITHDRAW
+    WETH_WITHDRAW,
+
+    ERC721_Transfer,
 }
 
 export interface EventStruct {

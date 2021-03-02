@@ -22,6 +22,18 @@ export function isErc20Address(address: string) {
     return "";
 }
 
+export function isErc721Address(address: string) {
+    const cKeys: any = Object.keys(constant.ERC721_ADDRESS);
+    for (let key of cKeys) {
+        // @ts-ignore
+        const addr: string = constant.ERC721_ADDRESS[key];
+        if (address.toLowerCase() === addr.toLowerCase()) {
+            return key;
+        }
+    }
+    return "";
+}
+
 export function isWETHAddress(address: string) {
     if (address.toLowerCase() === constant.TOKEN_ADDRESS.WETH.toLowerCase()) {
         return "WETH";

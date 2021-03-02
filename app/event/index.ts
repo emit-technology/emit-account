@@ -1,4 +1,4 @@
-import {EVENT_TYPE, EventStruct, EventType} from "../types";
+import {EVENT_TYPE, EventStruct} from "../types";
 import * as constant from "../common/constant";
 import {
     ApprovalEvent,
@@ -185,6 +185,37 @@ export const EVENT_ABI_CONFIG: Array<configType> = [
 class Event {
 
     constructor() {
+    }
+
+    decodeERC721_Transfer(topics: Array<string>, data: string):TransferEvent{
+        const input = [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "from",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "to",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "tokenId",
+                "type": "uint256"
+            }
+        ]
+        const rest4: any = web3.eth.abi.decodeLog(input, data, topics.slice(1));
+        console.log("rest4::",rest4)
+        const ret: TransferEvent = {
+            from: rest4.from,
+            to: rest4.to,
+            value: rest4.tokenId
+        }
+        return ret
     }
 
     decodeLog(num: number, txHash: string, contractAddress: string, topics: Array<string>, data: string): EventStruct | undefined {

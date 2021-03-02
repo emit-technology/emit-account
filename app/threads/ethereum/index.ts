@@ -137,6 +137,12 @@ class Index {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
+
+                    console.log("utils.isErc721Address(log.address)",utils.isErc721Address(log.address),log.address)
+                    if(utils.isErc721Address(log.address)){
+                        this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
+                    }
+
                     if (utils.isCrossAddress(log.address)  || utils.isCrossNftAddress(log.address)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
@@ -200,6 +206,46 @@ class Index {
         } finally {
             await session.endSession();
             myPool.release(client);
+        }
+    }
+
+    private handleERC721Event(log: Log, addressTxs: Array<AddressTx>, txInfo:TxInfo, balanceRecords: Array<BalanceRecord>) {
+        const key = "ETH";
+        const txEvent: TransferEvent = event.decodeERC721_Transfer(log.topics, log.data);
+        console.log("txEvent::",txEvent)
+        txEvent.from && addressTxs.push({
+            address: txEvent.from.toLowerCase(),
+            txHash: txInfo.txHash,
+            num: txInfo.num,
+            currency: key
+        })
+        txEvent.to && addressTxs.push({
+            address: txEvent.to.toLowerCase(),
+            txHash: txInfo.txHash,
+            num: txInfo.num,
+            currency: key
+        })
+        if (txEvent.from) {
+            balanceRecords.push({
+                address: txEvent.from.toLowerCase(),
+                currency: key,
+                amount: "0",
+                type: TxType.OUT,
+                txHash: txInfo.txHash,
+                num: txInfo.num,
+                timestamp: txInfo.timestamp
+            })
+        }
+        if (txEvent.to) {
+            balanceRecords.push({
+                address: txEvent.to.toLowerCase(),
+                currency: key,
+                amount: "0",
+                type: TxType.IN,
+                txHash: txInfo.txHash,
+                num: txInfo.num,
+                timestamp: txInfo.timestamp
+            })
         }
     }
 
