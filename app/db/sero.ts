@@ -33,7 +33,7 @@ class Sero extends Base{
     findUnusedOutsByAddress = async (address:string,currency:string):Promise<Array<OutInfo>> => {
         const client = await this.client();
         const dbOuts: any = await this.outs(client);
-        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency}, "used": {"$eq":false}}).toArray();
+        const rest = await dbOuts.find({"address": {'$eq': address},"asset.currency":{"$eq":currency},"asset.value":{"$ne":"0"}, "used": {"$eq":false}}).toArray();
         myPool.release(client);
         return rest;
     }
@@ -46,6 +46,21 @@ class Sero extends Base{
     insertOuts = async (outs: Array<OutInfo>, session: any, client: any) => {
         const dbOuts: any = await this.outs(client);
         return await dbOuts.insertMany(outs, {session})
+    }
+
+    findTickets = async (address:string,tickets?:Array<string>):Promise<any> =>{
+        const client = await this.client();
+        const connection: any = await this.outs(client);
+        const query:any = {}
+        query.address = address;
+        query.used = false;
+        if(tickets && tickets.length>0){
+            query["ticket.Value"] = {"$in":tickets}
+        }
+        console.log("query ticket:: ",query)
+        const rest = await connection.find(query).toArray()
+        myPool.release(client);
+        return rest;
     }
 
 }

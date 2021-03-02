@@ -156,6 +156,13 @@ app.post('/', function (req, res) {
                 sendError(r, res, typeof e == "string" ? e : e.message);
             })
             break;
+        case "getTicket":
+            api.getTicket(r.params[0]).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
+            break;
         default:
             api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
                 sendResult(r, res, rest)

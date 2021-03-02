@@ -65,20 +65,43 @@ class SeroApi extends Api {
                     fee.Value = txPrams.feeValue;
                 }
 
-                const asset = {
+                const asset:any = {
                     Tkn: tkn,
+                }
+
+
+                // const tktReceptions = []
+
+                if(txPrams.tickets && txPrams.tickets.length>0){
+                    const tktArray = txPrams.tickets;
+                    for(let d of tktArray){
+                        const tkt:any = {
+                            Category:utils.cyToHex(d.Category),
+                            Value:d.Value
+                        }
+                        asset.Tkt = tkt
+                        // tktReceptions.push({
+                        //     Addr: to,
+                        //     Asset: assetTkt
+                        // })
+                        console.log("assetTkt:: ",tkt)
+                    }
                 }
                 const reception = {
                     Addr: to,
                     Asset: asset
                 }
+                const receptions = [reception]
+                // const receptions = tknReceptions.concat(tktReceptions)
+                console.log("receptions:: ",receptions)
+
                 const preTxParam: PreTxParam = {
                     From: from,
                     RefundTo: from,
                     Fee: fee,
                     GasPrice: utils.toBN(gasPrice).toString(10),
                     Cmds: null,
-                    Receptions: [reception],
+                    Receptions: receptions,
                 }
                 // contract
                 if (data) {
@@ -102,6 +125,24 @@ class SeroApi extends Api {
             }
         })
     }
+
+    getTicket = async (address: string): Promise<any>=> {
+        const rest:Array<OutInfo> = await db.sero.findTickets(address)
+        const ret:any = {};
+        for (let out of rest){
+            if(out.ticket){
+                const key = utils.hexToCy(out.ticket.Category)
+                if(ret[key]){
+                    const arr = ret[key];
+                    arr.push(out.ticket.Value);
+                    ret[key] = arr;
+                }else{
+                    ret[key] = [out.ticket.Value];
+                }
+            }
+        }
+        return Promise.resolve(ret);
+    }
 }
 
 
@@ -117,6 +158,7 @@ class TxGenerator {
                         break;
                     }
                     utxos.push(out.utxo)
+                    console.log("rests[0].utxo.Asset.Tkt??",out.utxo.Asset.Tkt)
                     remain = remain.sub(utils.toBN(out.asset.value));
                 }
             }
@@ -125,7 +167,21 @@ class TxGenerator {
     }
 
     async findRootsByTicket(address: string, tickets: Map<string, string>): Promise<{ utxos: Array<utxo>; remain: Map<string, string> }> {
-        return {utxos: [], remain: new Map<string, string>()}
+        const utxos:Array<utxo> = new Array<utxo>();
+        if(tickets && tickets.size>0){
+            let entries = tickets.entries();
+            let res = entries.next();
+            while (!res.done) {
+                let value = res.value[0]
+                const rests:Array<OutInfo> = await db.sero.findTickets(address,[value])
+                if(rests && rests.length>0){
+                    const out = rests[0];
+                    utxos.push(out.utxo)
+                }
+                res = entries.next()
+            }
+        }
+        return {utxos: utxos, remain: new Map<string, string>()}
     }
 
     async getRoot(root: string): Promise<any> {

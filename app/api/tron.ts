@@ -35,6 +35,10 @@ const tronGrid = new TronGrid(tronWeb);
 
 class TronApi extends Api{
 
+    getTicket(address: string): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+
     constructor() {
         super(db.tron);
     }

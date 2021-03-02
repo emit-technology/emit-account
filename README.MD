@@ -90,7 +90,12 @@ for(var i=0;i<tables.length;i++){
     db.events.createIndex(v.index,{unique:v.unique});
  });
 
-
+[
+    {index:{"ticket.Category":1},unique:false},
+    {index:{"ticket.Value":1},unique:false},
+].forEach((v)=>{
+    db.outs.createIndex(v.index,{unique:v.unique});
+});
 
 ========================================================================
 ========================================================================

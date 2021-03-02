@@ -17,6 +17,8 @@ export abstract class Api {
 
     abstract getBalance(address: string,cy:string): Promise<any>;
 
+    abstract getTicket(address: string): Promise<any>;
+
     getTxInfo = async (txHash: string): Promise<TxInfo> => {
         const txInfo: TxInfo = await this.db.queryTxByHash(txHash);
         return Promise.resolve(txInfo);

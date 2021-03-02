@@ -49,12 +49,13 @@ class SeroRPC extends RPC {
     private convertOuts(outs: Array<any>):Array<OutInfo> {
         const outInfos: Array<OutInfo> = [];
         for (let out of outs) {
-            if (out.State.OS.Out_O && out.State.OS.Out_O.Asset && out.State.OS.Out_O.Asset.Tkn) {
+            if (out.State.OS.Out_O && out.State.OS.Out_O.Asset) {
+                const asset = out.State.OS.Out_O.Asset;
                 const outInfo: OutInfo = {
                     address: utils.addrToString(out.State.OS.Out_O.Addr),
                     asset: {
-                        currency: utils.hexToCy(out.State.OS.Out_O.Asset.Tkn.Currency),
-                        value: out.State.OS.Out_O.Asset.Tkn.Value
+                        currency: asset.Tkn?utils.hexToCy(asset.Tkn.Currency):"SERO",
+                        value: asset.Tkn?asset.Tkn.Value:"0"
                     },
                     txHash: out.State.TxHash,
                     num: new BigNumber(out.State.Num).toNumber(),
@@ -62,10 +63,14 @@ class SeroRPC extends RPC {
                     used: false,
                     utxo: {
                         Root: out.Root,
-                        Asset: out.State.OS.Out_O.Asset,
+                        Asset: asset,
                         State: out.State
                     }
                 };
+                if(asset.Tkt){
+                    outInfo.ticket = asset.Tkt
+                }
+
                 if (utils.isV1(outInfo.address) &&
                     ["0x0000000000000000000000000000000000000000000000000000000000000000",
                         "0x0000000000000000000000000000000000000000000000000000000000000001",
@@ -75,12 +80,13 @@ class SeroRPC extends RPC {
                     outInfos.push(outInfo);
                 }
             }
-            if (out.State.OS.Out_P && out.State.OS.Out_P.Asset.Tkn && out.State.OS.Out_P.Asset.Tkn.Currency) {
+            if (out.State.OS.Out_P && out.State.OS.Out_P.Asset) {
+                const asset = out.State.OS.Out_P.Asset;
                 const outInfo: OutInfo = {
                     address: utils.addrToString(out.State.OS.Out_P.PKr),
                     asset: {
-                        currency: utils.hexToCy(out.State.OS.Out_P.Asset.Tkn.Currency),
-                        value: out.State.OS.Out_P.Asset.Tkn.Value
+                        currency: asset.Tkn?utils.hexToCy(asset.Tkn.Currency):"SERO",
+                        value: asset.Tkn?asset.Tkn.Value:"0"
                     },
                     txHash: out.State.TxHash,
                     num: new BigNumber(out.State.Num).toNumber(),
@@ -88,10 +94,13 @@ class SeroRPC extends RPC {
                     used: false,
                     utxo: {
                         Root: out.Root,
-                        Asset: out.State.OS.Out_P.Asset,
+                        Asset: asset,
                         State: out.State
                     }
                 };
+                if(asset.Tkt){
+                    outInfo.ticket = asset.Tkt
+                }
                 if (["0x0000000000000000000000000000000000000000000000000000000000000000",
                         "0x0000000000000000000000000000000000000000000000000000000000000001",
                         "0x0000000000000000000000000000000000000000000000000000000000000002",
@@ -213,7 +222,12 @@ class SeroRPC extends RPC {
                 }
                 let toAddr:string = "";
                 for(let out of Outs_P){
-                    const cy = utils.hexToCy(out.Asset.Tkn.Currency);
+                    let cy = "SERO"
+                    let value = "0x0";
+                    if(out.Asset.Tkn){
+                        cy = utils.hexToCy(out.Asset.Tkn.Currency);
+                        value = out.Asset.Tkn.Value;
+                    }
                     const to = utils.addrToString(out.PKr);
                     if(to != tx.from){
                         toAddr = to;
@@ -221,7 +235,7 @@ class SeroRPC extends RPC {
                     const key = [to,cy].join(":");
                     const tmpAsset:Asset = {
                         currency:cy,
-                        value:out.Asset.Tkn.Value
+                        value:value
                     };
                     if(outMap.has(key)){
                         const asset:any = outMap.get(key);
