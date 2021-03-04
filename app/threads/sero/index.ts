@@ -248,7 +248,8 @@ class Index {
                 }
             }
             if (out) {
-                const key = [txInfo.fromAddress, txInfo.txHash, out.asset.currency, txInfo.num].join(":");
+                // txInfo.fromAddress,
+                const key = [out.address,txInfo.txHash, out.asset.currency, txInfo.num].join(":");
                 if (addressOuts.has(key)) {
                     const tmp: any = addressOuts.get(key);
                     tmp.push(out)
@@ -259,7 +260,7 @@ class Index {
                 }
                 if (!addressAndTxMap.has(key)) {
                     addressAndTxMap.set(key, {
-                        address: txInfo.fromAddress,
+                        address: out.address,
                         txHash: txInfo.txHash,
                         num: txInfo.num,
                         currency: out.asset.currency
