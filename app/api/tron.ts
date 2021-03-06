@@ -124,10 +124,11 @@ class TronApi extends Api{
                     to = c.parameter.value.to_address;
                     value =  c.parameter.value.amount;
                 }else if("TransferAssetContract" == c.type){
-                    from = c.parameter.value.owner_address;
-                    to = c.parameter.value.to_address;
-                    value =  c.parameter.value.amount;
+                    // from = c.parameter.value.owner_address;
+                    // to = c.parameter.value.to_address;
+                    // value =  c.parameter.value.amount;
                     //Currency
+                    continue
                 }else if("CreateSmartContract" == c.type){
 
                 }else if("TriggerSmartContract" == c.type){
