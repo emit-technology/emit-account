@@ -23,9 +23,16 @@ import EthApi from "./api/eth";
 import SeroApi from "./api/sero";
 import gasTracker from "./api/gasTracker";
 import TronApi from "./api/tron";
+import BscApi from "./api/bsc";
+import {ChainType} from "./types";
 
 const bodyParser = require('body-parser');
 const app: express.Application = express();
+
+const seroApi = new SeroApi();
+const bscApi = new BscApi();
+const ethApi = new EthApi();
+const tronApi = new TronApi();
 
 app.use(bodyParser.json({limit: '1mb'}));
 app.use(bodyParser.urlencoded({
@@ -58,7 +65,7 @@ function sendResult(reqJson: JsonParams, res: any, result: any) {
 
 app.all("*", function (req, res, next) {
     res.header("Access-Control-Allow-Origin", req.headers.origin || '*');
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With,chain");
     res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Credentials", "true");
     if (req.method == 'OPTIONS') {
@@ -69,21 +76,35 @@ app.all("*", function (req, res, next) {
 })
 
 app.post('/', function (req, res) {
+    const chain:any = req.header("chain");
+    console.log("chain:::",chain);
     const r: JsonParams = req.body;
     if(!r.method){
         console.log(JSON.stringify(req.body));
         sendError(r, res, "invalid request!");
         return;
     }
-    let api: Api = new EthApi();;
+    let api: Api = ethApi;
     const prefix = r.method.split("_")[0];
     const method = r.method.split("_")[1];
-    if (prefix === "sero") {
-        api = new SeroApi();
-    } else if (prefix === "eth") {
-        api = new EthApi();
-    } else if (prefix === "tron") {
-        api = new TronApi();
+    if(chain){
+        if(chain == ChainType.ETH){
+            api = ethApi
+        }else if(chain == ChainType.SERO){
+            api = seroApi
+        }else if(chain == ChainType.TRON){
+            api = tronApi
+        }else if(chain == ChainType.BSC){
+            api = bscApi
+        }
+    }else {
+        if (prefix === "sero") {
+            api = seroApi;
+        } else if (prefix === "eth") {
+            api = ethApi;
+        } else if (prefix === "tron") {
+            api = tronApi;
+        }
     }
 
     switch (method) {

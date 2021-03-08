@@ -1,23 +1,23 @@
 import {Api} from "./index";
-import * as db from "../db";
-import ethRpc from "../rpc/eth";
+import {bsc} from "../db";
+import bscRpc from "../rpc/bsc";
 import {Balance} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
 import Ierc20 from "./tokens/ierc20";
-import {ETH_HOST} from "../common/constant";
+import {BSC_HOST} from "../common/constant";
 
 const myPool = require('../db/mongodb');
 
-class EthApi extends Api {
+class BscApi extends Api {
 
     constructor() {
-        super(db.eth);
+        super(bsc);
     }
 
     commitTx = async (data: any, t: any): Promise<any> => {
-        const hash = await ethRpc.sendRawTransaction(data);
-        t.feeCy = "ETH";
+        const hash = await bscRpc.sendRawTransaction(data);
+        t.feeCy = "BNB";
         t.feeValue = new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
         await this.insertTxInfo(hash, t)
         return Promise.resolve(hash);
@@ -28,10 +28,11 @@ class EthApi extends Api {
     }
 
     proxyPost = async (method: string, params: any): Promise<any> => {
-        return await ethRpc.post(method, params)
+        return await bscRpc.post(method, params)
     }
 
     getBalance = async (address: string,cy:string): Promise<any> => {
+        console.log("bsc...getbalance>>",address)
         const balances: Array<Balance> = await this.db.queryBalance(address,cy)
         const assets: any = {};
         for (let b of balances) {
@@ -46,10 +47,10 @@ class EthApi extends Api {
 
     initBalance = async (address:string) => {
         const balanceArr:Array<any> = [];
-        const tokens:any = Object.keys(constant.TOKEN_ADDRESS);
+        const tokens:any = Object.keys(constant.TOKEN_ADDRESS_BSC);
         for(let cy of tokens){
-            const addressContract:any = constant.TOKEN_ADDRESS[cy];
-            const ierc20: Ierc20 = new Ierc20(addressContract,ETH_HOST);
+            const addressContract:any = constant.TOKEN_ADDRESS_BSC[cy];
+            const ierc20: Ierc20 = new Ierc20(addressContract,BSC_HOST);
             // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
 
@@ -61,10 +62,10 @@ class EthApi extends Api {
                 totalFrozen: "0"
             })
         }
-        const balance = await ethRpc.getBalance(address)
+        const balance = await bscRpc.getBalance(address)
         balanceArr.push( {
             address: address.toLowerCase(),
-            currency: "ETH",
+            currency: "BNB",
             totalIn: balance.toString(10),
             totalOut: "0",
             totalFrozen: "0"
@@ -74,9 +75,9 @@ class EthApi extends Api {
         try {
             const transactionResults = await session.withTransaction(async () => {
                 for(let balance of balanceArr){
-                    await db.eth.updateBalance(balance,session,client)
+                    await this.db.updateBalance(balance,session,client)
                 }
-            }, constant.mongo.eth.transactionOptions)
+            }, constant.mongo.bsc.transactionOptions)
 
             if (transactionResults) {
                 console.log("The reservation was successfully created.");
@@ -96,4 +97,4 @@ class EthApi extends Api {
     }
 }
 
-export default EthApi;
+export default BscApi;

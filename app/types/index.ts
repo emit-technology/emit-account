@@ -79,7 +79,8 @@ export enum ChainType {
     _,
     SERO,
     ETH,
-    TRON
+    TRON,
+    BSC
 }
 
 export interface LatestBlock {

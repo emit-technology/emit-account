@@ -1,9 +1,9 @@
 import SyncThreadEth from "./ethereum/";
+import SyncThreadBsc from "./bsc/";
 import SyncThreadSero from "./sero/"
 import TronEvent from "./tron/event";
 import gasTracker from "../api/gasTracker";
 import * as constant from "../common/constant"
-import Pending from "../rpc/repair/pending";
 
 class Threads {
 
@@ -12,29 +12,35 @@ class Threads {
     syncSero:SyncThreadSero;
     syncEth:SyncThreadEth;
     tronEvent:TronEvent;
+    syncBsc:SyncThreadBsc;
 
     constructor() {
         this.timeSyncBlock = constant.SYNC_TIME;
         this.syncSero = new SyncThreadSero();
         this.syncEth = new SyncThreadEth();
-        this.tronEvent = new TronEvent()
+        this.tronEvent = new TronEvent();
+        this.syncBsc = new SyncThreadBsc();
     }
 
     run = ()=>{
 
         this.startSero();
-        this.startEth();
-        this.startGasTracker();
-
-        this.startSyncPendingEth();
         this.startSyncPendingSero();
 
+        this.startEth();
+        this.startSyncPendingEth();
         this.dealSyncPendingEth();
+        this.removeEthUnPendingTx();
 
+        this.startGasTracker();
         // this.startTronEvent();
         this.startTronEventApi()
 
-        this.removeEthUnPendingTx();
+        //bsc
+        this.startBsc();
+        this.startSyncPendingBsc();
+        this.dealSyncPendingBsc();
+        this.removeBscUnPendingTx();
     }
 
     startGasTracker = () => {
@@ -164,6 +170,65 @@ class Threads {
             console.error("removeEthUnPendingTx err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.removeEthUnPendingTx();
+            },this.timeSyncBlock * 5)
+        });
+    }
+
+    //
+    startBsc = () => {
+        console.info("bsc sync start...")
+        const begin = Date.now();
+        this.syncBsc.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,constant.THREAD_CONFIG.LIMIT.BSC).then(()=>{
+            console.info(`bsc sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
+            setTimeout(()=>{
+                this.startBsc();
+            },this.timeSyncBlock/10)
+        }).catch(e=>{
+            console.error("bsc sync err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.startBsc();
+            },this.timeSyncBlock)
+        });
+    }
+
+    startSyncPendingBsc = () => {
+        this.syncBsc.syncPendingTransactions().then(()=>{
+            setTimeout(()=>{
+                this.startSyncPendingBsc();
+            },1000)
+        }).catch(e=>{
+            const err = typeof e == "string"?e:e.message;
+            console.log("startSyncPendingBsc err: ",err," restart 5s later...")
+            setTimeout(()=>{
+                this.startSyncPendingBsc();
+            },1000)
+        });
+    }
+
+    dealSyncPendingBsc = () =>{
+        this.syncBsc.dealPending().then(()=>{
+            setTimeout(()=>{
+                this.dealSyncPendingBsc();
+            },1)
+        }).catch(e=>{
+            const err = typeof e == "string"?e:e.message;
+            console.log("dealSyncPendingBsc err: ",err)
+            setTimeout(()=>{
+                this.dealSyncPendingBsc();
+            },1)
+        });
+    }
+
+    removeBscUnPendingTx = () => {
+        this.syncBsc.removeUnPendingTxTimeout().then(()=>{
+            console.info("removeBscUnPendingTx, sleep 5s...")
+            setTimeout(()=>{
+                this.removeBscUnPendingTx();
+            },this.timeSyncBlock * 5)
+        }).catch(e=>{
+            console.error("removeBscUnPendingTx err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.removeBscUnPendingTx();
             },this.timeSyncBlock * 5)
         });
     }

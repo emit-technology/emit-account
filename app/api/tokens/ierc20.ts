@@ -73,8 +73,8 @@ export class Ierc20 {
     protected contract: any;
     protected web3: any;
 
-    constructor(address: string) {
-        this.web3 = new Web3(constant.ETH_HOST);
+    constructor(address: string,host:string) {
+        this.web3 = new Web3(host);
         this.contract = new this.web3.eth.Contract(this.abi, address);
     }
 
