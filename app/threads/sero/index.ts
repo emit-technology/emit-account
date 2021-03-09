@@ -18,13 +18,12 @@
 import * as db from "../../db";
 import seroRPC from "../../rpc/sero";
 import {OutInfo} from "../../types/sero";
-import {AddressTx, BalanceRecord, EventStruct, TxInfo, TxType} from "../../types/";
+import {AddressTx, BalanceRecord, ChainType, EventStruct, TxInfo, TxType} from "../../types/";
 import * as constant from "../../common/constant";
 import BigNumber from "bignumber.js";
 import event from "../../event";
 import {Log, TransactionReceipt} from "../../types/eth";
 import * as utils from "../../common/utils";
-import ethRpc from "../../rpc/eth";
 
 const myPool = require('../../db/mongodb');
 
@@ -145,7 +144,7 @@ class Index {
                     const logs: Array<Log> = txReceipt.logs;
                     if (logs && logs.length > 0) {
                         for (let log of logs) {
-                            if (utils.isCrossAddress(log.address) || utils.isCrossNftAddress(log.address)) {
+                            if (utils.isCrossAddress(log.address,ChainType.ETH) || utils.isCrossNftAddress(log.address,ChainType.ETH)) {
                                 const logRet = event.decodeLog(txInfo.num,txInfo.txHash,log.address,log.topics,log.data)
                                 if(logRet){
                                     events.push(logRet)

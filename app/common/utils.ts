@@ -1,6 +1,7 @@
-import utils, {isNewVersion, hexToCy, addrToString} from 'jsuperzk/src/utils/utils'
+import utils, {addrToString, hexToCy, isNewVersion} from 'jsuperzk/src/utils/utils'
 import BigNumber from "bignumber.js";
 import * as constant from "./constant";
+import {ChainType} from "../types";
 
 export function isV1(pkr: string) {
     return !isNewVersion(utils.toBuffer(pkr));
@@ -10,11 +11,13 @@ export function toNum(v: string | BigNumber): number {
     return new BigNumber(v).toNumber()
 }
 
-export function isErc20Address(address: string) {
-    const cKeys: any = Object.keys(constant.TOKEN_ADDRESS);
+export function isErc20Address(address: string,chain:ChainType) {
+    const obj = chain == ChainType.BSC?constant.TOKEN_ADDRESS_BSC:constant.TOKEN_ADDRESS;
+
+    const cKeys: any = Object.keys(obj);
     for (let key of cKeys) {
         // @ts-ignore
-        const addr: string = constant.TOKEN_ADDRESS[key];
+        const addr: string = obj[key];
         if (address.toLowerCase() === addr.toLowerCase()) {
             return key;
         }
@@ -22,11 +25,12 @@ export function isErc20Address(address: string) {
     return "";
 }
 
-export function isErc721Address(address: string) {
-    const cKeys: any = Object.keys(constant.ERC721_ADDRESS);
+export function isErc721Address(address: string,chain:ChainType) {
+    const obj = chain == ChainType.BSC?constant.ERC721_ADDRESS_BSC:constant.ERC721_ADDRESS;
+    const cKeys: any = Object.keys(obj);
     for (let key of cKeys) {
         // @ts-ignore
-        const addr: string = constant.ERC721_ADDRESS[key];
+        const addr: string = obj[key];
         if (address.toLowerCase() === addr.toLowerCase()) {
             return key;
         }
@@ -41,11 +45,12 @@ export function isWETHAddress(address: string) {
     return "";
 }
 
-export function isCrossAddress(address: string) {
-    const cKeys: any = Object.keys(constant.CROSS_ADDRESS);
+export function isCrossAddress(address: string,chain:ChainType) {
+    const obj = chain == ChainType.BSC?constant.CROSS_ADDRESS_BSC:constant.CROSS_ADDRESS;
+    const cKeys: any = Object.keys(obj);
     for (let key of cKeys) {
         // @ts-ignore
-        const addr: string = constant.CROSS_ADDRESS[key];
+        const addr: string = obj[key];
         if (address.toLowerCase() === addr.toLowerCase()) {
             return key;
         }
@@ -53,11 +58,12 @@ export function isCrossAddress(address: string) {
     return "";
 }
 
-export function isCrossNftAddress(address: string) {
-    const cKeys: any = Object.keys(constant.CROSS_NFT_ADDRESS);
+export function isCrossNftAddress(address: string,chain:ChainType) {
+    const obj = chain == ChainType.BSC?constant.CROSS_NFT_ADDRESS_BSC:constant.CROSS_NFT_ADDRESS;
+    const cKeys: any = Object.keys(obj);
     for (let key of cKeys) {
         // @ts-ignore
-        const addr: string = constant.CROSS_NFT_ADDRESS[key];
+        const addr: string = obj[key];
         if (address.toLowerCase() === addr.toLowerCase()) {
             return key;
         }

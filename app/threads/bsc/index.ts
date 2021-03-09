@@ -18,14 +18,14 @@
 
 import * as db from "../../db";
 import bsc from "../../rpc/bsc";
-import {AddressTx, Balance, BalanceRecord, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
+import {AddressTx, Balance, BalanceRecord, ChainType, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
 import * as constant from "../../common/constant";
+import {BSC_HOST} from "../../common/constant";
 import * as utils from '../../common/utils'
-import {ApprovalEvent, Block, Log, TransactionReceipt,Transaction, TransferEvent} from "../../types/eth";
+import {ApprovalEvent, Block, Log, Transaction, TransactionReceipt, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
-import {BSC_HOST} from "../../common/constant";
 
 const Web3 = require('web3');
 
@@ -135,17 +135,17 @@ class Index {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
                     const txInfo = txInfos[index];
-                    const token = utils.isErc20Address(log.address);
+                    const token = utils.isErc20Address(log.address,ChainType.BSC);
                     if (!token) {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
 
-                    if(utils.isErc721Address(log.address)){
+                    if(utils.isErc721Address(log.address,ChainType.BSC)){
                         this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
                     }
 
-                    if (utils.isCrossAddress(log.address)  || utils.isCrossNftAddress(log.address)) {
+                    if (utils.isCrossAddress(log.address,ChainType.BSC)  || utils.isCrossNftAddress(log.address,ChainType.BSC)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
                             events.push(logRet)

@@ -76,8 +76,10 @@ app.all("*", function (req, res, next) {
 })
 
 app.post('/', function (req, res) {
-    const chain:any = req.header("chain");
-    console.log("chain:::",chain);
+    let chain:any = req.header("chain");
+    if(!chain){
+        chain = req.query["chain"];
+    }
     const r: JsonParams = req.body;
     if(!r.method){
         console.log(JSON.stringify(req.body));

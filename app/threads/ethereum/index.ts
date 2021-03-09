@@ -18,7 +18,7 @@
 
 import * as db from "../../db";
 import ethRpc from "../../rpc/eth";
-import {AddressTx, Balance, BalanceRecord, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
+import {AddressTx, Balance, BalanceRecord, ChainType, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
 import * as constant from "../../common/constant";
 import * as utils from '../../common/utils'
 import {ApprovalEvent, Block, Log, TransactionReceipt,Transaction, TransferEvent} from "../../types/eth";
@@ -135,17 +135,17 @@ class Index {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
                     const txInfo = txInfos[index];
-                    const token = utils.isErc20Address(log.address);
+                    const token = utils.isErc20Address(log.address,ChainType.ETH);
                     if (!token) {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
 
-                    if(utils.isErc721Address(log.address)){
+                    if(utils.isErc721Address(log.address,ChainType.ETH)){
                         this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
                     }
 
-                    if (utils.isCrossAddress(log.address)  || utils.isCrossNftAddress(log.address)) {
+                    if (utils.isCrossAddress(log.address,ChainType.ETH)  || utils.isCrossNftAddress(log.address,ChainType.ETH)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
                             events.push(logRet)
