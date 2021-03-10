@@ -182,7 +182,7 @@ class Threads {
             console.info(`bsc sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
             setTimeout(()=>{
                 this.startBsc();
-            },this.timeSyncBlock/10)
+            },this.timeSyncBlock/100)
         }).catch(e=>{
             console.error("bsc sync err: ",e," restart 5s later...")
             setTimeout(()=>{
