@@ -44,8 +44,14 @@ class TronApi extends Api{
     }
 
     commitTx = async (tx: any, txInfo: any): Promise<any> => {
-        const receipt = await tronWeb.trx.sendRawTransaction(tx);
-        return Promise.resolve(receipt);
+        return new Promise((resolve,reject)=>{
+            tronWeb.trx.sendRawTransaction(tx).then((receipt:any)=>{
+                resolve(receipt)
+            }).catch((e:any)=>{
+                console.log(tx,e,txInfo,"TRON commitTx Error")
+                reject(e)
+            })
+        })
     }
 
     genParams = async (txPrams: any): Promise<any> =>{
