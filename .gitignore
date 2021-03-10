@@ -26,3 +26,5 @@ yarn-error.log*
 app/common/constant.ts
 app/common/constant_dev.ts
 app/common/constant_prod.ts
+
+package-lock.json

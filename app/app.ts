@@ -25,6 +25,9 @@ import gasTracker from "./api/gasTracker";
 import TronApi from "./api/tron";
 import BscApi from "./api/bsc";
 import {ChainType} from "./types";
+const log4js = require("log4js");
+const logger = log4js.getLogger();
+logger.level = "debug";
 
 const bodyParser = require('body-parser');
 const app: express.Application = express();
@@ -213,4 +216,16 @@ interface JsonResult {
     method: string
     result?: any
     error?: any
+}
+
+console.log = function (message:any){
+    logger.log(message);
+}
+
+console.info = function (message:any){
+    logger.info(message);
+}
+
+console.debug = function (message:any){
+    logger.debug(message);
 }
