@@ -14,8 +14,6 @@ class SeroRPC extends RPC {
 
     protected pendingFilterId:any = "";
 
-    protected pendingCache = new Cache(10000)
-
     constructor() {
         super(constant.SERO_RPC_HOST)
     }
@@ -192,9 +190,6 @@ class SeroRPC extends RPC {
         const txArray:Array<Transaction> = [];
         if(data && data.length > 0){
             for(let hash of data){
-                if(this.pendingCache.has(hash)){
-                    continue
-                }
                 const tx:any = await this.post("sero_getTransactionByHash",[hash]);
                 const Ins_P0: any = tx.stx.Tx1.Ins_P0;
                 const inOutMap:Map<string,Asset> = new Map<string, Asset>()
@@ -310,8 +305,6 @@ class SeroRPC extends RPC {
                 }
 
                 if (toAddr && utils.isV1(toAddr) || utils.isV1(tx.from)){
-                    this.pendingCache.push(hash)
-
                     txArray.push({
                         hash:tx.hash,
                         from: tx.from,

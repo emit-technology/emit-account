@@ -22,6 +22,22 @@ class Cache {
         this.data.push(d)
         return true
     }
+
+    concat = (arr:Array<any>) =>{
+        const lo = this.data.length + arr.length - this.max;
+        if(lo>0){
+            if(lo >= this.data.length){
+                this.data = [];
+            }else {
+                this.data = this.data.slice(lo)
+            }
+        }
+        this.data = this.data.concat(arr)
+    }
+
+    length = ()=>{
+        return this.data.length
+    }
 }
 
 export default Cache

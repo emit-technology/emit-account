@@ -310,7 +310,7 @@ class Base {
         datas.pageSize = pageSize;
         datas.pageNo = pageNo;
         const rests: Array<AddressTx> = await cursor.toArray();
-        console.debug("queryTxByAddress>>", rests);
+        // console.debug("queryTxByAddress>>", rests);
         const txHashArr: Array<string> = [];
         for (let d of rests) {
             txHashArr.push(d.txHash)
@@ -324,7 +324,7 @@ class Base {
     }
 
     queryTxByHash = async (txHash: string) => {
-        console.debug(txHash, "queryTxByHash")
+        // console.debug(txHash, "queryTxByHash")
         const client = await this.client();
         const db: any = await this.txInfo(client);
         const dbRecord: any = await this.balanceRecords(client);

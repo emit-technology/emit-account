@@ -24,15 +24,23 @@ import BigNumber from "bignumber.js";
 import event from "../../event";
 import {Log, TransactionReceipt} from "../../types/eth";
 import * as utils from "../../common/utils";
+import Cache from "../../cache";
 
 const myPool = require('../../db/mongodb');
 
 class Index {
 
+    protected pendingCache = new Cache(10000)
+
     syncPendingTransactions = async () => {
         const txInfos = await seroRPC.getFilterChangesPending();
+
         for(let tx of txInfos){
+            if(this.pendingCache.has(tx.hash)){
+                continue
+            }
             await db.sero.insertTxInfo(tx.hash,tx);
+            this.pendingCache.push(tx.hash)
         }
     }
 
@@ -44,7 +52,7 @@ class Index {
             let dbNum: any = await db.sero.latestBlock();
             const remoteNum = await seroRPC.blockNumber() ;
             const chainNum = remoteNum - constant.THREAD_CONFIG.CONFIRM_BLOCK_NUM;
-            console.debug(`SERO>>> Latest Block, remote=[${remoteNum}], start=[${chainNum}], db= [${dbNum}]`);
+            console.log(`SERO>>> Latest Block, remote=[${remoteNum}], start=[${chainNum}], db= [${dbNum}]`);
             if (!dbNum) {
                 dbNum = startNum;
             } else {
@@ -225,7 +233,8 @@ class Index {
             }, constant.mongo.sero.transactionOptions);
 
             if (transactionResults) {
-                console.log("The sero reservation was successfully created.");
+                this.pendingCache.concat(removeTxHashArray)
+                console.log(`The sero reservation was successfully created, cache=[${this.pendingCache.length()}]`);
             } else {
                 console.log("The sero transaction was intentionally aborted.");
             }
