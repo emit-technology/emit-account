@@ -85,7 +85,7 @@ app.post('/', function (req, res) {
     }
     const r: JsonParams = req.body;
     if(!r.method){
-        console.log(JSON.stringify(req.body));
+        console.log("req.body=",JSON.stringify(req.body));
         sendError(r, res, "invalid request!");
         return;
     }
@@ -219,7 +219,7 @@ interface JsonResult {
 }
 
 console.log = function (message:any){
-    logger.log(message);
+    logger.info(message);
 }
 
 console.info = function (message:any){

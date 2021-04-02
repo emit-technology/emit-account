@@ -6,6 +6,7 @@ import * as utils from "../common/utils";
 import Ierc20 from "../api/tokens/ierc20";
 import {EVENT_ABI_CONFIG} from "../event";
 import {Transaction,ChainType} from "../types";
+import Cache from "../cache";
 
 const Web3 = require('web3');
 const web3 = new Web3(constant.ETH_HOST);
@@ -13,6 +14,8 @@ const web3 = new Web3(constant.ETH_HOST);
 class EthRpc extends RPC {
 
     protected pendingFilterId: any = "";
+
+    protected pendingCache = new Cache(10000)
 
     constructor() {
         super(constant.ETH_HOST)
@@ -81,15 +84,16 @@ class EthRpc extends RPC {
         }
         const data: any = await this.filterChanges();
         const txArray: Array<Transaction> = [];
-        const tmpMap:Map<string,number> = new Map<string,number>();
+        // const tmpMap:Map<string,number> = new Map<string,number>();
         if (data && data.length > 0) {
             for (let hash of data) {
-                if(tmpMap.has(hash)){
+                if(this.pendingCache.has(hash)){
                     continue;
                 }
                 const tx: any = await this.post("eth_getTransactionByHash", [hash]);
                 if(tx){
-                    tmpMap.set(hash,1)
+                    this.pendingCache.push(hash)
+                    // tmpMap.set(hash,1)
                     txArray.push({
                         hash: tx.hash,
                         from: tx.from,

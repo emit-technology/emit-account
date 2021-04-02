@@ -5,7 +5,7 @@ const MongodbClient = require('mongodb').MongoClient;
 const factory = {
     create: function () {
         //USE Server optional to support remote url
-        return MongodbClient.connect(constant.mongo.host, {useUnifiedTopology: true,useNewUrlParser:true});
+        return MongodbClient.connect(constant.mongo.host, {useUnifiedTopology: true, useNewUrlParser: true});
     },
 
     destroy: function (client) {
@@ -14,7 +14,8 @@ const factory = {
 }
 const opts = {
     max: 5000,
-    min: 10
+    min: 10,
+    idleTimeoutMillis: 30000
 }
 
 const myPool = GenericPool.createPool(factory, opts);

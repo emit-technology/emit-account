@@ -48,7 +48,7 @@ class Index {
         const rests:any = await ethRpc.getFilterChangesPending();
         const c:any = this.txInfos.concat(rests);
         this.txInfos = c;
-        console.log(`syncPendingTransactions,len[${this.txInfos.length}]`)
+        console.info(`ethereum syncPendingTransactions,len[${this.txInfos.length}]`)
         return Promise.resolve();
     }
 
