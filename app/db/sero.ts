@@ -30,7 +30,7 @@ class Sero extends Base{
         const rest = await dbOuts.find({
             "root": {'$in': roots},
             "used": false,
-            "$or":[{timeout:{"$gt":Date.now()-outTimeout}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
+            "$or":[{timeout:{"$lt":Date.now()}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
         }).toArray();
         myPool.release(client);
         return rest;
@@ -43,9 +43,8 @@ class Sero extends Base{
             "address": {'$eq': address},
             "asset.currency":{"$eq":currency},"asset.value":{"$ne":"0"},
             "used": {"$eq":false},
-            "$or":[{timeout:{"$gt":Date.now()-outTimeout}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
-        })
-            .toArray();
+            "$or":[{timeout:{"$lt":Date.now()}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
+        }).toArray();
         myPool.release(client);
         return rest;
     }
@@ -58,8 +57,9 @@ class Sero extends Base{
     updateOutLocked = async (roots: Array<string>) => {
         const client = await this.client();
         const dbOuts: any = await this.outs(client);
-        await dbOuts.updateMany({"root": {'$in': roots}}, {"$set":{"timeout": Date.now()}});
+        await dbOuts.updateMany({"root": {'$in': roots}}, {"$set":{"timeout": Date.now()+outTimeout}});
         myPool.release(client);
+        return
     }
 
     insertOuts = async (outs: Array<OutInfo>, session: any, client: any) => {
