@@ -30,7 +30,8 @@ class Sero extends Base{
         const rest = await dbOuts.find({
             "root": {'$in': roots},
             "used": false,
-            "timeout":{"$gt":Date.now()-outTimeout}}).toArray();
+            "$or":[{timeout:{"$gt":Date.now()-outTimeout}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
+        }).toArray();
         myPool.release(client);
         return rest;
     }
@@ -42,7 +43,8 @@ class Sero extends Base{
             "address": {'$eq': address},
             "asset.currency":{"$eq":currency},"asset.value":{"$ne":"0"},
             "used": {"$eq":false},
-            "timeout":{"$gt":Date.now()-outTimeout}})
+            "$or":[{timeout:{"$gt":Date.now()-outTimeout}},{timeout:{"$eq":0}},{timeout:{"$exists":false}}]
+        })
             .toArray();
         myPool.release(client);
         return rest;

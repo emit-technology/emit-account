@@ -36,6 +36,7 @@ for(var i=0;i<tables.length;i++){
     {index:{txHash:1},unique:false},
     {index:{num:1},unique:false},
     {index:{used:1},unique:false}
+    {index:{timeout:1},unique:false}
 ].forEach((v)=>{
     db.outs.createIndex(v.index,{unique:v.unique});
 });
