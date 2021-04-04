@@ -33,6 +33,17 @@ class SeroApi extends Api {
     commitTx = async (signTx: any,t:any): Promise<any> => {
         const resp = await seroRPC.post('sero_commitTx', [signTx])
         // await this.insertTxInfo(signTx.Hash,t);
+        const rootArr:Array<string> = [];
+        const ins = signTx.Tx && signTx.Tx.Tx1 && signTx.Tx.Tx1.Ins_P0;
+        if(ins){
+            for(let o of ins){
+                rootArr.push(o.Root)
+            }
+            console.log("commitTx,locked:",JSON.stringify(rootArr))
+            if(rootArr && rootArr.length>0){
+                await this.db.updateOutLocked(rootArr)
+            }
+        }
         return Promise.resolve(resp);
     }
 
