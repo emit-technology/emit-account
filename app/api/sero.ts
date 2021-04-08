@@ -33,8 +33,7 @@ class SeroApi extends Api {
     commitTx = async (signTx: any,t:any): Promise<any> => {
         const resp = await seroRPC.post('sero_commitTx', [signTx])
         if(t && t.gasPrice && t.gas){
-            t.gasPrice = "0x"+ new BigNumber(t.gasPrice).multipliedBy(2).toString(16);
-            t.feeValue =  new BigNumber(t.gas).multipliedBy(t.gasPrice).toString(10)
+            this.multiGasPrice(t);
         }
         await this.insertTxInfo(signTx.Hash,t);
         const rootArr:Array<string> = [];
@@ -51,11 +50,17 @@ class SeroApi extends Api {
         return Promise.resolve(resp);
     }
 
+    multiGasPrice = (txPrams: TxPrams)=>{
+        const times = 2;
+        const seroFeeValue =  new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice)
+        txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).multipliedBy(times).toString(16);
+        const feeValue = new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice);
+        txPrams.feeValue = new BigNumber(txPrams.feeValue?txPrams.feeValue:seroFeeValue).multipliedBy(feeValue).dividedBy(seroFeeValue).toString(10)
+    }
+
     genParams = async (txPrams: TxPrams): Promise<any> => {
-        console.log(txPrams,"aaaaa")
-        txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).multipliedBy(2).toString(16);
-        txPrams.feeValue =  new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice).toString(10)
-        console.log(txPrams,"bbbbb")
+
+        this.multiGasPrice(txPrams);
 
         const preTxParam = await this.genPreParams(txPrams);
         let rest: any = await genTxParam(preTxParam, new TxGenerator(), new TxState());
