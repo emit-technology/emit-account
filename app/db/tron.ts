@@ -40,12 +40,17 @@ class Tron extends Base{
 
     updateEventOne = async (event: any) => {
         const client = await this.client();
-        const db: any = await this.events(client);
-        await db.updateOne(
-            {txHash:event.txHash,eventName:event.eventName},
-            {fingerprint:{"$set":event.fingerprint}}
+        try{
+            const db: any = await this.events(client);
+            await db.updateOne(
+                {txHash:event.txHash,eventName:event.eventName},
+                {fingerprint:{"$set":event.fingerprint}}
             )
-        this.release(client);
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
     }
 }
 

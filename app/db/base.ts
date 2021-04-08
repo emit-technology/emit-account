@@ -155,73 +155,94 @@ class Base {
 
     insertEventOne = async (event: EventStruct) => {
         const client = await this.client();
-        const db: any = await this.events(client);
-        await db.insertOne(event)
-        this.release(client);
+        try{
+            const db: any = await this.events(client);
+            await db.insertOne(event)
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
     }
 
     queryEvents = async (txHash: string, depositNonce: string,originChainID:string,resourceID:string,eventName?:string) => {
         const client = await this.client();
-        const db: any = await this.events(client);
-        const query: any = {};
-        if (txHash) {
-            query.txHash = txHash
+        try{
+            const db: any = await this.events(client);
+            const query: any = {};
+            if (txHash) {
+                query.txHash = txHash
+            }
+            if (depositNonce) {
+                query["event.depositNonce"] = depositNonce
+            }
+            if (originChainID) {
+                query["event.originChainID"] = originChainID
+            }
+            if (resourceID) {
+                query["event.resourceID"] = resourceID
+            }
+            if (eventName) {
+                query.eventName = eventName
+            }
+            const cursor = await db.find(query);
+            const rests = await cursor.toArray();
+            return rests;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        if (depositNonce) {
-            query["event.depositNonce"] = depositNonce
-        }
-        if (originChainID) {
-            query["event.originChainID"] = originChainID
-        }
-        if (resourceID) {
-            query["event.resourceID"] = resourceID
-        }
-        if (eventName) {
-            query.eventName = eventName
-        }
-        const cursor = await db.find(query);
-        const rests = await cursor.toArray();
-        this.release(client);
-        return rests;
     }
 
     eventExist = async (txHash: string):Promise<boolean> => {
         const client = await this.client();
-        const db: any = await this.events(client);
-        const query: any = {};
-        if (txHash) {
-            query.txHash = txHash
+        try{
+            const db: any = await this.events(client);
+            const query: any = {};
+            if (txHash) {
+                query.txHash = txHash
+            }
+            const cursor = await db.find(query);
+            const count = await cursor.count();
+            return count>0;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        const cursor = await db.find(query);
-        const count = await cursor.count();
-        this.release(client);
-        return count>0;
+        return false
     }
 
     queryBalanceRecords = async (address: string, currency: string, hash: string, pageSize: number, pageNo: number) => {
-
         const client = await this.client();
-        const db: any = await this.balanceRecords(client);
-        const query: any = {};
-        if (address) {
-            query.address = address
-        }
-        if (currency) {
-            query.currency = currency
-        }
-        if (hash) {
-            query.txHash = {"$regex": hash}
-        }
+        try{
+            const db: any = await this.balanceRecords(client);
+            const query: any = {};
+            if (address) {
+                query.address = address
+            }
+            if (currency) {
+                query.currency = currency
+            }
+            if (hash) {
+                query.txHash = {"$regex": hash}
+            }
 
-        const cursor = await db.find(query, {
-            limit: pageSize,
-            skip: (pageNo - 1) * pageSize,
-            sort: {timestamp: -1}
-        });
-        const count = await cursor.count();
-        const rests = await cursor.toArray();
-        this.release(client);
-        return {total: count, data: rests, pageSize: pageSize, pageNo: pageNo};
+            const cursor = await db.find(query, {
+                limit: pageSize,
+                skip: (pageNo - 1) * pageSize,
+                sort: {timestamp: -1}
+            });
+            const count = await cursor.count();
+            const rests = await cursor.toArray();
+            return {total: count, data: rests, pageSize: pageSize, pageNo: pageNo};
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
+        return {total: 0, data: [], pageSize: pageSize, pageNo: pageNo};
     }
 
     upsertBalance = async (record: BalanceRecord, session: any, client: any) => {
@@ -257,31 +278,36 @@ class Base {
     }
 
     queryBalance = async (address: string, cy: string): Promise<Array<Balance>> => {
-        const self = this;
         const client = await this.client();
-        const db: any = await this.balance(client);
-        const query: any = {address: address}
-        if (cy) {
-            query.currency = cy;
+        try{
+            const db: any = await this.balance(client);
+            const query: any = {address: address}
+            if (cy) {
+                query.currency = cy;
+            }
+            const options = {
+                // "limit": 1,
+                // "skip": 0,
+                "sort": "address"
+            }
+            return await db.find(query,options).toArray();
+            // const cursor = await db.find(query, options);
+            // // const count = await cursor.count()
+            // return new Promise((resolve, reject) => {
+            //     cursor.toArray((err: any, res: any) => {
+            //         if (err) {
+            //             reject(err)
+            //         } else {
+            //             resolve(res)
+            //         }
+            //     });
+            // })
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        const options = {
-            // "limit": 1,
-            // "skip": 0,
-            "sort": "address"
-        }
-        // return await db.find(query,options).toArray();
-        const cursor = await db.find(query, options);
-        // const count = await cursor.count()
-        return new Promise((resolve, reject) => {
-            cursor.toArray((err: any, res: any) => {
-                if (err) {
-                    reject(err)
-                } else {
-                    resolve(res)
-                }
-            });
-            self.release(client);
-        })
+        return []
     }
 
     // tx
@@ -292,67 +318,78 @@ class Base {
 
     queryTxByAddress = async (address: string, currency: string, pageSize: number, pageNo: number) => {
         const client = await this.client();
-        const db1: any = await this.addressTx(client);
-        let datas: TxsView = {};
-        const query: any = {};
-        if (address) {
-            query.address = address;
+        try{
+            const db1: any = await this.addressTx(client);
+            let datas: TxsView = {};
+            const query: any = {};
+            if (address) {
+                query.address = address;
+            }
+            if (currency) {
+                query.currency = currency;
+            }
+            const cursor = await db1.find(query, {
+                limit: pageSize,
+                skip: (pageNo - 1) * pageSize,
+                sort: {num: 1}
+            });
+            datas.total = await cursor.count()
+            datas.pageSize = pageSize;
+            datas.pageNo = pageNo;
+            const rests: Array<AddressTx> = await cursor.toArray();
+            // console.debug("queryTxByAddress>>", rests);
+            const txHashArr: Array<string> = [];
+            for (let d of rests) {
+                txHashArr.push(d.txHash)
+            }
+            if (txHashArr.length > 0) {
+                const db: any = await this.txInfo(client);
+                datas.txs = await db.find({"txHash": {"$in": txHashArr}}, {sort: {num: -1}}).toArray()
+            }
+            return datas
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        if (currency) {
-            query.currency = currency;
-        }
-        const cursor = await db1.find(query, {
-            limit: pageSize,
-            skip: (pageNo - 1) * pageSize,
-            sort: {num: 1}
-        });
-        datas.total = await cursor.count()
-        datas.pageSize = pageSize;
-        datas.pageNo = pageNo;
-        const rests: Array<AddressTx> = await cursor.toArray();
-        // console.debug("queryTxByAddress>>", rests);
-        const txHashArr: Array<string> = [];
-        for (let d of rests) {
-            txHashArr.push(d.txHash)
-        }
-        if (txHashArr.length > 0) {
-            const db: any = await this.txInfo(client);
-            datas.txs = await db.find({"txHash": {"$in": txHashArr}}, {sort: {num: -1}}).toArray()
-        }
-        this.release(client);
-        return datas
+        return []
     }
 
     queryTxByHash = async (txHash: string) => {
-        // console.debug(txHash, "queryTxByHash")
         const client = await this.client();
-        const db: any = await this.txInfo(client);
-        const dbRecord: any = await this.balanceRecords(client);
-        const txInfo: any = await db.findOne({"txHash": txHash},
-            {
-                projection: {
-                    ins: 0,
-                    outs: 0,
-                    _id: 0
+        try{
+            const db: any = await this.txInfo(client);
+            const dbRecord: any = await this.balanceRecords(client);
+            const txInfo: any = await db.findOne({"txHash": txHash},
+                {
+                    projection: {
+                        ins: 0,
+                        outs: 0,
+                        _id: 0
+                    }
+                })
+            const records: any = await dbRecord.find({
+                    txHash: txHash
+                }, {
+                    projection: {
+                        num: 0,
+                        timestamp: 0,
+                        txHash: 0,
+                        type: 0,
+                        _id: 0
+                    }
                 }
-            })
-        const records: any = await dbRecord.find({
-                txHash: txHash
-            }, {
-                projection: {
-                    num: 0,
-                    timestamp: 0,
-                    txHash: 0,
-                    type: 0,
-                    _id: 0
-                }
+            ).toArray();
+            if (records) {
+                txInfo.records = records;
             }
-        ).toArray();
-        if (records) {
-            txInfo.records = records;
+            return txInfo;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        this.release(client);
-        return txInfo;
+        return
     }
 
     //block num
@@ -368,10 +405,16 @@ class Base {
 
     latestBlock = async () => {
         const client = await this.client();
-        const db: any = await this.blockNum(client);
-        const rest = await db.findOne({"tag": "latest"});
-        this.release(client);
-        return rest ? rest.num : 0;
+        try{
+            const db: any = await this.blockNum(client);
+            const rest = await db.findOne({"tag": "latest"});
+            return rest ? rest.num : 0;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
+        return 0
     }
 
     removePendingTxByHash = async (hashArray: Array<string>, session: any, client: any) => {
@@ -385,32 +428,44 @@ class Base {
 
     getAppVersion = async (tag: string, versionNum?: number): Promise<any> => {
         const client = await this.client();
-        const db: any = await this.versions(client);
-        const query: any = {};
-        if (tag) {
-            query.tag = tag;
+        try{
+            const db: any = await this.versions(client);
+            const query: any = {};
+            if (tag) {
+                query.tag = tag;
+            }
+            if (versionNum) {
+                query.num = versionNum;
+            }
+            const results = await db.find(query, {
+                sort: {num: -1}
+            }).toArray();
+            return results;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
         }
-        if (versionNum) {
-            query.num = versionNum;
-        }
-        const results = await db.find(query, {
-            sort: {num: -1}
-        }).toArray();
-        this.release(client);
-        return results;
+        return
     }
 
     countPendingTx = async (address:string,currency:string) => {
         const client = await this.client();
-        const db: any = await this.balanceRecords(client);
-        const query: any = {
-            address:address,
-            num:0,
-            currency:currency
-        };
-        const count = await db.find(query).count();
-        this.release(client);
-        return count;
+        try{
+            const db: any = await this.balanceRecords(client);
+            const query: any = {
+                address:address,
+                num:0,
+                currency:currency
+            };
+            const count = await db.find(query).count();
+            return count;
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
+        return
     }
 
 }
