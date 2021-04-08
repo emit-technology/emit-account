@@ -380,7 +380,7 @@ class Base {
                     }
                 }
             ).toArray();
-            if (records) {
+            if (txInfo && records) {
                 txInfo.records = records;
             }
             return txInfo;
