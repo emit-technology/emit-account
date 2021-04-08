@@ -51,9 +51,9 @@ class SeroApi extends Api {
     }
 
     multiGasPrice = (txPrams: TxPrams)=>{
-        const times = 2;
+        const times = 1;
         const seroFeeValue =  new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice)
-        txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).multipliedBy(times).toString(16);
+        txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).plus(times).toString(16);
         const feeValue = new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice);
         txPrams.feeValue = new BigNumber(txPrams.feeValue?txPrams.feeValue:seroFeeValue).multipliedBy(feeValue).dividedBy(seroFeeValue).toString(10)
     }
