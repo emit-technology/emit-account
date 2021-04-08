@@ -39,7 +39,7 @@ class SeroApi extends Api {
             for(let o of ins){
                 rootArr.push(o.Root)
             }
-            console.log("commitTx,locked:",JSON.stringify(rootArr))
+            console.log(`commitTx,locked:[${JSON.stringify(rootArr)}]`)
             if(rootArr && rootArr.length>0){
                 await this.db.updateOutLocked(rootArr)
             }

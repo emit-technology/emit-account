@@ -36,7 +36,9 @@ class Index {
         const txInfos = await seroRPC.getFilterChangesPending();
 
         for(let tx of txInfos){
+            console.log("sero pending=",tx.hash)
             if(this.pendingCache.has(tx.hash)){
+                console.log("sero pending=",tx.hash,"exist")
                 continue
             }
             await db.sero.insertTxInfo(tx.hash,tx);
