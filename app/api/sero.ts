@@ -35,7 +35,7 @@ class SeroApi extends Api {
         if(t && t.gasPrice && t.gas){
             this.multiGasPrice(t);
         }
-        await this.insertTxInfo(signTx.Hash,t);
+        // await this.insertTxInfo(signTx.Hash,t);
         const rootArr:Array<string> = [];
         const ins = signTx.Tx && signTx.Tx.Tx1 && signTx.Tx.Tx1.Ins_P0;
         if(ins){
