@@ -55,7 +55,7 @@ class SeroApi extends Api {
         const seroFeeValue =  new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice)
         txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).plus(times).toString(16);
         const feeValue = new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice);
-        txPrams.feeValue = new BigNumber(txPrams.feeValue?txPrams.feeValue:seroFeeValue).multipliedBy(feeValue).dividedBy(seroFeeValue).toString(10)
+        txPrams.feeValue = new BigNumber(txPrams.feeValue?txPrams.feeValue:seroFeeValue).multipliedBy(feeValue).dividedBy(seroFeeValue).toFixed(0)
     }
 
     genParams = async (txPrams: TxPrams): Promise<any> => {
