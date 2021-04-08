@@ -32,6 +32,10 @@ class SeroApi extends Api {
 
     commitTx = async (signTx: any,t:any): Promise<any> => {
         const resp = await seroRPC.post('sero_commitTx', [signTx])
+        if(t && t.gasPrice && t.gas){
+            t.gasPrice = "0x"+ new BigNumber(t.gasPrice).multipliedBy(2).toString(16);
+            t.feeValue =  new BigNumber(t.gas).multipliedBy(t.gasPrice).toString(10)
+        }
         await this.insertTxInfo(signTx.Hash,t);
         const rootArr:Array<string> = [];
         const ins = signTx.Tx && signTx.Tx.Tx1 && signTx.Tx.Tx1.Ins_P0;
@@ -49,8 +53,8 @@ class SeroApi extends Api {
 
     genParams = async (txPrams: TxPrams): Promise<any> => {
         console.log(txPrams,"aaaaa")
-        txPrams.gasPrice = "0x"+ new BigNumber(new BigNumber(txPrams.gasPrice).multipliedBy(105).dividedBy(100).toFixed(0,1)).toString(16);
-        txPrams.feeValue = "0x" + new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice).toString(16)
+        txPrams.gasPrice = "0x"+ new BigNumber(txPrams.gasPrice).multipliedBy(2).toString(16);
+        txPrams.feeValue =  new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice).toString(10)
         console.log(txPrams,"bbbbb")
 
         const preTxParam = await this.genPreParams(txPrams);
