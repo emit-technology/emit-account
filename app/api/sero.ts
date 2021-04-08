@@ -48,7 +48,10 @@ class SeroApi extends Api {
     }
 
     genParams = async (txPrams: TxPrams): Promise<any> => {
+        console.log(txPrams,"aaaaa")
         txPrams.gasPrice = "0x"+ new BigNumber(new BigNumber(txPrams.gasPrice).multipliedBy(5).dividedBy(100).toFixed(0,1)).toString(16);
+        txPrams.feeValue = "0x" + new BigNumber(txPrams.gas).multipliedBy(txPrams.gasPrice).toString(16)
+        console.log(txPrams,"bbbbb")
 
         const preTxParam = await this.genPreParams(txPrams);
         let rest: any = await genTxParam(preTxParam, new TxGenerator(), new TxState());
