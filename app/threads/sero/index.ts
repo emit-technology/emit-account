@@ -149,6 +149,7 @@ class Index {
 
                     const txReceipt: TransactionReceipt = await seroRPC.getTransactionReceipt(txInfo.txHash);
                     if(!txReceipt || !txInfo.gasUsed){
+                        console.log("tx receipt not exist!")
                         console.log(JSON.stringify(txInfo))
                         data = entries.next();
                         continue
