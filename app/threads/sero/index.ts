@@ -148,10 +148,11 @@ class Index {
                     await this.pickOuts(txInfo, outsMap, addressOuts, addressAndTxMap);
 
                     const txReceipt: TransactionReceipt = await seroRPC.getTransactionReceipt(txInfo.txHash);
-                    // if(!txReceipt || !txInfo.gasUsed){
-                    //     console.log(JSON.stringify(txInfo))
-                    //     continue
-                    // }
+                    if(!txReceipt || !txInfo.gasUsed){
+                        console.log(JSON.stringify(txInfo))
+                        data = entries.next();
+                        continue
+                    }
                     // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(txInfo.gasPrice)).toString(10)
                     txInfo.gasUsed = txReceipt.gasUsed;
                     txInfos.push(txInfo)
