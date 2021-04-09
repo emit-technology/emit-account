@@ -148,7 +148,7 @@ class Index {
                     await this.pickOuts(txInfo, outsMap, addressOuts, addressAndTxMap);
 
                     const txReceipt: TransactionReceipt = await seroRPC.getTransactionReceipt(txInfo.txHash);
-                    if(!txReceipt){
+                    if(!txReceipt || !txInfo.gasUsed){
                         console.log(JSON.stringify(txInfo))
                         continue
                     }
