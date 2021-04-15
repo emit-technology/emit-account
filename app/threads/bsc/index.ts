@@ -110,8 +110,8 @@ class Index {
 
                     this.addTxAddress(t, addressTxs);
                     const txInfo = this.genTxInfo(t, block);
-                    await this.setBalanceMap(t.from, balanceMap, defaultCurrency);
-                    await this.setBalanceMap(t.to, balanceMap, defaultCurrency);
+                    // await this.setBalanceMap(t.from, balanceMap, defaultCurrency);
+                    // await this.setBalanceMap(t.to, balanceMap, defaultCurrency);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
                     // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
                     // console.log("eth block sync>>> ",t.hash)
@@ -130,7 +130,9 @@ class Index {
                 }
             }
 
+            const logBegin = Date.now();
             const logs:Array<Log> = await bsc.getLogs(start,end)
+            console.info(`log cost:[${Math.floor((Date.now()-logBegin)/1000)}]`)
             if (logs && logs.length > 0) {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
@@ -180,12 +182,12 @@ class Index {
                 if (events && events.length > 0) {
                     await db.bsc.insertEvents(events, session, client)
                 }
-                const blEntries = balanceMap.entries();
-                let blNext = blEntries.next();
-                while (!blNext.done) {
-                    await db.bsc.updateBalance(blNext.value[1], session, client)
-                    blNext = blEntries.next();
-                }
+                // const blEntries = balanceMap.entries();
+                // let blNext = blEntries.next();
+                // while (!blNext.done) {
+                //     await db.bsc.updateBalance(blNext.value[1], session, client)
+                //     blNext = blEntries.next();
+                // }
                 const updateNum = txInfos[txInfos.length-1];;
                 // const t = await ethRpc.getBlockByNum(updateNum);
                 if (updateNum) {
@@ -338,7 +340,7 @@ class Index {
 
     private async handelErc20Event(log: Log, balanceMap: Map<string, Balance>, key: string, addressTxs: Array<AddressTx>, balanceRecords: Array<BalanceRecord>, txInfo: TxInfo) {
         const ierc20: Ierc20 = new Ierc20(log.address,BSC_HOST);
-        await this.setBalanceMap(txInfo.fromAddress, balanceMap, key, ierc20);
+        // await this.setBalanceMap(txInfo.fromAddress, balanceMap, key, ierc20);
 
         if (ierc20.encodeEventSignature("Transfer") === log.topics[0]) {
             const e: TransferEvent = ierc20.decodeTransferLog(log.data, log.topics)
@@ -355,8 +357,8 @@ class Index {
                 currency: key
             })
 
-            await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
-            await this.setBalanceMap(e.to.toLowerCase(), balanceMap, key, ierc20);
+            // await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
+            // await this.setBalanceMap(e.to.toLowerCase(), balanceMap, key, ierc20);
 
             if (e.from) {
                 balanceRecords.push({
@@ -381,10 +383,10 @@ class Index {
                 })
             }
         } else if (ierc20.encodeEventSignature("Approval") === log.topics[0]) {
-            const e: ApprovalEvent = ierc20.decodeApprovalLog(log.data, log.topics)
+            // const e: ApprovalEvent = ierc20.decodeApprovalLog(log.data, log.topics)
 
-            await this.setBalanceMap(e.owner, balanceMap, key, ierc20);
-            await this.setBalanceMap(e.spender, balanceMap, key, ierc20);
+            // await this.setBalanceMap(e.owner, balanceMap, key, ierc20);
+            // await this.setBalanceMap(e.spender, balanceMap, key, ierc20);
         }
         //WETH Deposit
         else if (key=="WETH") {
