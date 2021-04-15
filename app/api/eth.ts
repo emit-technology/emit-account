@@ -72,7 +72,7 @@ class EthApi extends Api {
         const client: any = await myPool.acquire();
         const session = client.startSession();
         try {
-            console.log("eth balanceArr===> ",balanceArr)
+            // console.log("eth balanceArr===> ",balanceArr)
             const transactionResults = await session.withTransaction(async () => {
                 for(let balance of balanceArr){
                     await db.eth.updateBalance(balance,session,client)
