@@ -113,11 +113,11 @@ class Index {
                     await this.setBalanceMap(t.from, balanceMap, defaultCurrency);
                     await this.setBalanceMap(t.to, balanceMap, defaultCurrency);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
-                    const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
+                    // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
                     // console.log("eth block sync>>> ",t.hash)
                     // const logs: Array<Log> = txReceipt.logs;
-                    txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-                    txInfo.gasUsed = txReceipt.gasUsed;
+                    // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
+                    // txInfo.gasUsed = txReceipt.gasUsed;
                     txInfos.push(txInfo);
                     txInfoMap.set(txInfo.txHash,txInfos.length-1)
                     if (balanceRecords.length == 0) {
