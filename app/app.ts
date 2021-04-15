@@ -200,7 +200,7 @@ app.post('/', function (req, res) {
 });
 
 app.listen(7655, function () {
-    console.log('App listening on port 7655!');
+    console.log('App listening on port 7655!',"started!");
 })
 
 interface JsonParams {
@@ -218,14 +218,14 @@ interface JsonResult {
     error?: any
 }
 
-console.log = function (message:any){
-    logger.info(message);
+console.log = function (message?: any, ...optionalParams: any[]){
+    logger.info(message,...optionalParams);
 }
 
-console.info = function (message:any){
-    logger.info(message);
+console.info = function (message?: any, ...optionalParams: any[]){
+    logger.info(message,...optionalParams);
 }
 
-console.debug = function (message:any){
-    logger.debug(message);
+console.debug = function (message?: any, ...optionalParams: any[]){
+    logger.debug(message,...optionalParams);
 }
