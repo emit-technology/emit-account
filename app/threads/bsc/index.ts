@@ -100,10 +100,14 @@ class Index {
             const removeTxHashArray: Array<string> = [];
             const events: Array<EventStruct> = [];
             for (let i = start; i <= end; i++) {
+                let begin = Date.now()
                 const block: Block = await bsc.getBlockByNum(i);
                 if(!block){
                     continue
                 }
+                console.log(`bsc getBlock cost:[${(Date.now()-begin)/1000}]`)
+
+                begin = Date.now();
                 const transactions: Array<Transaction> = block.transactions;
                 for (let t of transactions) {
                     removeTxHashArray.push(t.hash);
@@ -128,6 +132,7 @@ class Index {
                     //     console.error("remove unpending tx, err: ", e);
                     // })
                 }
+                console.log(`bsc transaction cost:[${(Date.now()-begin)/1000}]`)
             }
 
             const logBegin = Date.now();
@@ -175,6 +180,7 @@ class Index {
 
             //==== insert mongo
             const transactionResults = await session.withTransaction(async () => {
+                const begin = Date.now()
                 await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
                 await db.bsc.insertAddressTx(addressTxs, session, client)
                 await db.bsc.insertTxInfos(txInfos, session, client)
@@ -198,6 +204,7 @@ class Index {
                     }
                     await db.bsc.upsertLatestBlock(updateNum.num, timestamp, session, client);
                 }
+                console.log(`bsc store data cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
             }, constant.mongo.bsc.transactionOptions);
 
             if (transactionResults) {
