@@ -182,13 +182,24 @@ class Index {
             const begin = Date.now()
             const transactionResults = await session.withTransaction(async () => {
 
+                let begin = Date.now();
                 await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
+                console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
                 await db.bsc.insertAddressTx(addressTxs, session, client)
+                console.log(`db.bsc.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
                 await db.bsc.insertTxInfos(txInfos, session, client)
+                console.log(`db.bsc.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
                 await db.bsc.insertBalanceRecord(balanceRecords, session, client)
+                console.log(`db.bsc.insertBalanceRecord cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
                 if (events && events.length > 0) {
                     await db.bsc.insertEvents(events, session, client)
                 }
+                console.log(`db.bsc.insertEvents cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
                 // const blEntries = balanceMap.entries();
                 // let blNext = blEntries.next();
                 // while (!blNext.done) {
@@ -205,6 +216,7 @@ class Index {
                     }
                     await db.bsc.upsertLatestBlock(updateNum.num, timestamp, session, client);
                 }
+                console.log(`db.bsc.upsertLatestBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
 
             }, constant.mongo.bsc.transactionOptions);
 
