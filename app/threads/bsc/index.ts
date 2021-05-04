@@ -179,8 +179,9 @@ class Index {
             }
 
             //==== insert mongo
+            const begin = Date.now()
             const transactionResults = await session.withTransaction(async () => {
-                const begin = Date.now()
+
                 await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
                 await db.bsc.insertAddressTx(addressTxs, session, client)
                 await db.bsc.insertTxInfos(txInfos, session, client)
@@ -204,11 +205,12 @@ class Index {
                     }
                     await db.bsc.upsertLatestBlock(updateNum.num, timestamp, session, client);
                 }
-                console.log(`bsc store data cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+
             }, constant.mongo.bsc.transactionOptions);
 
+            // console.log(`bsc store data cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
             if (transactionResults) {
-                console.log("BSC>>> The reservation was successfully created.");
+                console.log("BSC>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-begin)/1000)}]s`);
             } else {
                 console.log("BSC>>> The transaction was intentionally aborted.");
             }
