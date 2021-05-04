@@ -421,8 +421,8 @@ class Base {
         const db: any = await this.txInfo(client);
         const dbRecord: any = await this.balanceRecords(client);
 
-        await db.deleteMany({txHash: {"$in": hashArray}, num: 0}, {session})
-        await dbRecord.deleteMany({txHash: {"$in": hashArray}, num: 0}, {session})
+        await db.deleteMany({txHash: {"$in": hashArray}}, {session})
+        await dbRecord.deleteMany({txHash: {"$in": hashArray}}, {session})
         return;
     }
 
