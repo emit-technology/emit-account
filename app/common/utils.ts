@@ -12,14 +12,16 @@ export function toNum(v: string | BigNumber): number {
 }
 
 export function isContractAddress(address: string,chain:ChainType){
-    if(isErc20Address(address,chain)){
-        return true
-    }else if(isErc721Address(address,chain)){
-        return true
-    }else if(isCrossAddress(address,chain)){
-        return true
-    }else if(isCrossNftAddress(address,chain)){
-        return true
+    if(address){
+        if(isErc20Address(address,chain)){
+            return true
+        }else if(isErc721Address(address,chain)){
+            return true
+        }else if(isCrossAddress(address,chain)){
+            return true
+        }else if(isCrossNftAddress(address,chain)){
+            return true
+        }
     }
     return false
 }
