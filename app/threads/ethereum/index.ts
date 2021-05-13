@@ -173,7 +173,7 @@ class Index {
 
             //==== insert mongo
             const transactionResults = await session.withTransaction(async () => {
-                // await db.eth.removePendingTxByHash(removeTxHashArray, session, client);
+                await db.eth.removePendingTxByHash(removeTxHashArray, session, client);
                 await db.eth.insertAddressTx(addressTxs, session, client)
                 await db.eth.insertTxInfos(txInfos, session, client)
                 await db.eth.insertBalanceRecord(balanceRecords, session, client)
