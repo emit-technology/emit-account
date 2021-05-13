@@ -149,7 +149,7 @@ class Index {
             for (let t of transactions) {
 
                 //TODO
-                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ){
+                // if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ){
                     removeTxHashArray.push(t.hash);
 
                     this.addTxAddress(t, addressTxs);
@@ -165,7 +165,7 @@ class Index {
                     if (balanceRecords.length == 0) {
                         this.setBalanceRecordDefault(t, balanceRecords, txInfo);
                     }
-                }
+                // }
                 // db.bsc.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
                 //     console.error("remove unpending tx, err: ", e);
                 // })
