@@ -150,9 +150,9 @@ class Index {
                 const txInfo = this.genTxInfo(t, block);
                 txInfos.push(txInfo);
                 txInfoMap.set(txInfo.txHash,txInfos.length-1)
-
+                removeTxHashArray.push(t.hash);
                 if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ) {
-                    removeTxHashArray.push(t.hash);
+
                     this.addTxAddress(t, addressTxs);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
                     if (balanceRecords.length == 0) {
@@ -208,9 +208,9 @@ class Index {
             //==== insert mongo
             const transactionResults = await session.withTransaction(async () => {
 
-                // begin = Date.now();
-                // await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
-                // console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                begin = Date.now();
+                await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
+                console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
                 await db.bsc.insertAddressTx(addressTxs, session, client)
                 console.log(`db.bsc.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
