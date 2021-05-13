@@ -109,7 +109,7 @@ class Index {
                     const txInfo = this.genTxInfo(t, block);
                     txInfos.push(txInfo);
                     txInfoMap.set(txInfo.txHash,txInfos.length-1)
-                    if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ) {
+                    if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.ETH) ) {
                         removeTxHashArray.push(t.hash);
                         this.addTxAddress(t, addressTxs);
                         this.setBalanceRecords(t, balanceRecords, txInfo);
