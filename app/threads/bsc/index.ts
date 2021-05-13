@@ -215,9 +215,9 @@ class Index {
             //==== insert mongo
             const transactionResults = await session.withTransaction(async () => {
 
-                begin = Date.now();
-                await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
-                console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                // begin = Date.now();
+                // await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
+                // console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
                 await db.bsc.insertAddressTx(addressTxs, session, client)
                 console.log(`db.bsc.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)

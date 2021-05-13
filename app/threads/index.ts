@@ -37,7 +37,7 @@ class Threads {
         this.startTronEventApi()
 
         //bsc
-        // this.startBsc();
+        this.startBsc();
         // this.startSyncPendingBsc();
         // this.dealSyncPendingBsc();
         // this.removeBscUnPendingTx();
