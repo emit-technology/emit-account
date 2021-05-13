@@ -402,12 +402,25 @@ class Base {
             return await db.insertOne({"tag": "latest", num: num}, {session})
         }
     }
+    //block num
+    insertBlock = async (num: number, tag: string, session: any, client: any) => {
+        const db: any = await this.blockNum(client);
+        const data: any = await db.findOne({"tag": tag}, {session});
+        if (data) {
+            return await db.updateOne({"tag": tag}, {"$set": {num: num}}, {session})
+        } else {
+            return await db.insertOne({"tag": tag, num: num}, {session})
+        }
+    }
 
-    latestBlock = async () => {
+    latestBlock = async (tag?:string) => {
         const client = await this.client();
         try{
+            if(!tag){
+                tag = "latest"
+            }
             const db: any = await this.blockNum(client);
-            const rest = await db.findOne({"tag": "latest"});
+            const rest = await db.findOne({"tag": tag});
             return rest ? rest.num : 0;
         }catch (e){
             console.error(e)

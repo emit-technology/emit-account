@@ -177,18 +177,36 @@ class Threads {
     //
     startBsc = () => {
         console.info("bsc sync start...")
-        const begin = Date.now();
-        this.syncBsc.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,constant.THREAD_CONFIG.LIMIT.BSC).then(()=>{
-            console.info(`bsc sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
-            setTimeout(()=>{
-                this.startBsc();
-            },this.timeSyncBlock/100)
-        }).catch(e=>{
-            console.error("bsc sync err: ",e," restart 5s later...")
-            setTimeout(()=>{
-                this.startBsc();
-            },this.timeSyncBlock)
-        });
+        const step = 10;
+
+        for(let i=0;i<step;i++){
+            const syncBscThread = new SyncThreadBsc()
+            const tag = `thread-${i}`
+            setInterval(()=>{
+                try{
+                    const begin = Date.now();
+                    syncBscThread.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,tag).then(()=>{
+                        console.info(`bsc[${tag}] sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
+                    }).catch(e=>{
+                        console.error(`bsc[${tag}] sync err: `,e," restart 5s later...")
+                    });
+                }catch (e){
+                    console.error(e)
+                }
+            },1000)
+        }
+        // const begin = Date.now();
+        // this.syncBsc.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,constant.THREAD_CONFIG.LIMIT.BSC).then(()=>{
+        //     console.info(`bsc sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
+        //     setTimeout(()=>{
+        //         this.startBsc();
+        //     },this.timeSyncBlock/100)
+        // }).catch(e=>{
+        //     console.error("bsc sync err: ",e," restart 5s later...")
+        //     setTimeout(()=>{
+        //         this.startBsc();
+        //     },this.timeSyncBlock)
+        // });
     }
 
     startSyncPendingBsc = () => {

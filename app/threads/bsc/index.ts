@@ -64,15 +64,19 @@ class Index {
         await db.bsc.removeUnPendingTxTimeout();
     }
 
-    syncTransactions = async (startNum:number, maxNum:number) => {
+    //tag = thread-1
+    syncTransactions = async (startNum:number,tag:string) => {
+        const step = 10;
+        const threadTag = parseInt(tag.split("-")[1]);
         const client: any = await myPool.acquire();
         const session = client.startSession();
-        let limit = 1;
+        // let limit = 1;
         try {
-            let dbNum: any = await db.bsc.latestBlock();
+            const beginF = Date.now();
+            let dbNum: any = await db.bsc.latestBlock(tag);
             const remoteNum = await bsc.blockNumber()
             const chainNum = remoteNum - constant.THREAD_CONFIG.CONFIRM_BLOCK_NUM;
-            console.info(`BSC Thread>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
+            console.info(`BSC Thread[${tag}]>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
             if (!dbNum) {
                 dbNum = startNum;
             } else {
@@ -83,13 +87,23 @@ class Index {
                     return
                 }
             }
-            limit = chainNum - dbNum + 1;
-            if (limit > maxNum) {
-                limit = maxNum;
-            }
+            // limit = chainNum - dbNum + 1;
+            // if (limit > step) {
+            //     limit = step;
+            // }
             const start =  dbNum + 1;
-            const end = dbNum + limit;
-            console.info(`BSC Thread>>> limit=[${limit}], start=[${start}], end=[${end}]`);
+            let syncNum = 0;
+            for(let i=0;i<step;i++){
+                if((start+i)%step == threadTag){
+                    syncNum = start+i
+                }
+            }
+            console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}], start=[${start}], step=[${step}]`);
+            if(!syncNum || syncNum>remoteNum){
+                console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}] invalid return`);
+                return
+            }
+            // const end = dbNum + limit;
             const addressTxs: Array<AddressTx> = [];
             // const txInfos: Array<TxInfo> = [];
             const txInfoMap: Map<string,number> = new Map<string, number>();
@@ -99,44 +113,44 @@ class Index {
             const balanceMap: Map<string, Balance> = new Map<string, Balance>()
             const removeTxHashArray: Array<string> = [];
             const events: Array<EventStruct> = [];
-            for (let i = start; i <= end; i++) {
-                let begin = Date.now()
-                const block: Block = await bsc.getBlockByNum(i);
-                if(!block){
-                    continue
-                }
-                console.log(`bsc getBlock cost:[${(Date.now()-begin)/1000}]`)
+            // for (let i = start; i <= end; i++) {
+            //
+            // }
 
-                begin = Date.now();
-                const transactions: Array<Transaction> = block.transactions;
-                for (let t of transactions) {
-                    removeTxHashArray.push(t.hash);
-
-                    this.addTxAddress(t, addressTxs);
-                    const txInfo = this.genTxInfo(t, block);
-                    // await this.setBalanceMap(t.from, balanceMap, defaultCurrency);
-                    // await this.setBalanceMap(t.to, balanceMap, defaultCurrency);
-                    this.setBalanceRecords(t, balanceRecords, txInfo);
-                    // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
-                    // console.log("eth block sync>>> ",t.hash)
-                    // const logs: Array<Log> = txReceipt.logs;
-                    // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-                    // txInfo.gasUsed = txReceipt.gasUsed;
-                    txInfos.push(txInfo);
-                    txInfoMap.set(txInfo.txHash,txInfos.length-1)
-                    if (balanceRecords.length == 0) {
-                        this.setBalanceRecordDefault(t, balanceRecords, txInfo);
-                    }
-
-                    // db.bsc.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                    //     console.error("remove unpending tx, err: ", e);
-                    // })
-                }
-                console.log(`bsc transaction cost:[${(Date.now()-begin)/1000}]`)
+            let begin = Date.now()
+            const block: Block = await bsc.getBlockByNum(syncNum);
+            if(!block){
+                return
             }
+            console.log(`bsc getBlock cost:[${(Date.now()-begin)/1000}]`)
+
+            begin = Date.now();
+            const transactions: Array<Transaction> = block.transactions;
+            for (let t of transactions) {
+                removeTxHashArray.push(t.hash);
+
+                this.addTxAddress(t, addressTxs);
+                const txInfo = this.genTxInfo(t, block);
+                this.setBalanceRecords(t, balanceRecords, txInfo);
+                // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
+                // console.log("eth block sync>>> ",t.hash)
+                // const logs: Array<Log> = txReceipt.logs;
+                // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
+                // txInfo.gasUsed = txReceipt.gasUsed;
+                txInfos.push(txInfo);
+                txInfoMap.set(txInfo.txHash,txInfos.length-1)
+                if (balanceRecords.length == 0) {
+                    this.setBalanceRecordDefault(t, balanceRecords, txInfo);
+                }
+
+                // db.bsc.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
+                //     console.error("remove unpending tx, err: ", e);
+                // })
+            }
+            console.log(`bsc transaction cost:[${(Date.now()-begin)/1000}]`)
 
             const logBegin = Date.now();
-            const logs:Array<Log> = await bsc.getLogs(start,end)
+            const logs:Array<Log> = await bsc.getLogs(syncNum,syncNum)
             console.info(`log cost:[${Math.floor((Date.now()-logBegin)/1000)}]`)
             if (logs && logs.length > 0) {
                 for (let log of logs) {
@@ -170,19 +184,18 @@ class Index {
 
             console.log(`Address txs=[${addressTxs.length}], tx infos=[${txInfoMap.size}]  balance records=[${balanceRecords.length}]`)
             if (addressTxs.length == 0 || txInfoMap.size == 0 || balanceRecords.length == 0) {
-                const updateNum = limit + dbNum > chainNum ? chainNum : limit + dbNum;
-                const t = await bsc.getBlockByNum(updateNum);
+                // const updateNum = limit + dbNum > chainNum ? chainNum : limit + dbNum;
+                const t = await bsc.getBlockByNum(syncNum);
                 if (t) {
-                    await db.bsc.upsertLatestBlock(updateNum, utils.toNum(t.timestamp), session, client);
+                    await db.bsc.insertBlock(syncNum, tag, session, client);
                 }
                 return
             }
 
             //==== insert mongo
-            const begin = Date.now()
             const transactionResults = await session.withTransaction(async () => {
 
-                let begin = Date.now();
+                begin = Date.now();
                 await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
                 console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
@@ -206,23 +219,14 @@ class Index {
                 //     await db.bsc.updateBalance(blNext.value[1], session, client)
                 //     blNext = blEntries.next();
                 // }
-                const updateNum = txInfos[txInfos.length-1];;
-                // const t = await ethRpc.getBlockByNum(updateNum);
-                if (updateNum) {
-                    let timestamp:any = updateNum.timestamp;
-                    if(!timestamp){
-                        const t:any = await bsc.getBlockByNum(updateNum.num);
-                        timestamp = t.timestamp;
-                    }
-                    await db.bsc.upsertLatestBlock(updateNum.num, timestamp, session, client);
-                }
-                console.log(`db.bsc.upsertLatestBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.bsc.insertBlock(syncNum,tag, session, client);
+                console.log(`db.bsc.insertBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
 
             }, constant.mongo.bsc.transactionOptions);
 
             // console.log(`bsc store data cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
             if (transactionResults) {
-                console.log("BSC>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-begin)/1000)}]s`);
+                console.log("BSC>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-beginF)/1000)}]s`);
             } else {
                 console.log("BSC>>> The transaction was intentionally aborted.");
             }
