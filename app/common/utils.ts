@@ -11,6 +11,19 @@ export function toNum(v: string | BigNumber): number {
     return new BigNumber(v).toNumber()
 }
 
+export function isContractAddress(address: string,chain:ChainType){
+    if(isErc20Address(address,chain)){
+        return true
+    }else if(isErc721Address(address,chain)){
+        return true
+    }else if(isCrossAddress(address,chain)){
+        return true
+    }else if(isCrossNftAddress(address,chain)){
+        return true
+    }
+    return false
+}
+
 export function isErc20Address(address: string,chain:ChainType) {
     const obj = chain == ChainType.BSC?constant.TOKEN_ADDRESS_BSC:constant.TOKEN_ADDRESS;
 

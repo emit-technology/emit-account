@@ -22,7 +22,7 @@ import {AddressTx, Balance, BalanceRecord, ChainType, EVENT_TYPE, EventStruct, T
 import * as constant from "../../common/constant";
 import {BSC_HOST} from "../../common/constant";
 import * as utils from '../../common/utils'
-import {ApprovalEvent, Block, Log, Transaction, TransactionReceipt, TransferEvent} from "../../types/eth";
+import {Block, Log, Transaction, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
@@ -147,22 +147,25 @@ class Index {
             begin = Date.now();
             const transactions: Array<Transaction> = block.transactions;
             for (let t of transactions) {
-                removeTxHashArray.push(t.hash);
 
-                this.addTxAddress(t, addressTxs);
-                const txInfo = this.genTxInfo(t, block);
-                this.setBalanceRecords(t, balanceRecords, txInfo);
-                // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
-                // console.log("eth block sync>>> ",t.hash)
-                // const logs: Array<Log> = txReceipt.logs;
-                // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-                // txInfo.gasUsed = txReceipt.gasUsed;
-                txInfos.push(txInfo);
-                txInfoMap.set(txInfo.txHash,txInfos.length-1)
-                if (balanceRecords.length == 0) {
-                    this.setBalanceRecordDefault(t, balanceRecords, txInfo);
+                //TODO
+                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ){
+                    removeTxHashArray.push(t.hash);
+
+                    this.addTxAddress(t, addressTxs);
+                    const txInfo = this.genTxInfo(t, block);
+                    this.setBalanceRecords(t, balanceRecords, txInfo);
+                    // const txReceipt: TransactionReceipt = await bsc.getTransactionReceipt(t.hash)
+                    // console.log("eth block sync>>> ",t.hash)
+                    // const logs: Array<Log> = txReceipt.logs;
+                    // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
+                    // txInfo.gasUsed = txReceipt.gasUsed;
+                    txInfos.push(txInfo);
+                    txInfoMap.set(txInfo.txHash,txInfos.length-1)
+                    if (balanceRecords.length == 0) {
+                        this.setBalanceRecordDefault(t, balanceRecords, txInfo);
+                    }
                 }
-
                 // db.bsc.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
                 //     console.error("remove unpending tx, err: ", e);
                 // })
