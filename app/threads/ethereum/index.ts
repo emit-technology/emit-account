@@ -106,27 +106,17 @@ class Index {
                 }
                 const transactions: Array<Transaction> = block.transactions;
                 for (let t of transactions) {
-                    removeTxHashArray.push(t.hash);
-
-                    this.addTxAddress(t, addressTxs);
                     const txInfo = this.genTxInfo(t, block);
-                    // await this.setBalanceMap(t.from, balanceMap, defaultCurrency);
-                    // await this.setBalanceMap(t.to, balanceMap, defaultCurrency);
-                    this.setBalanceRecords(t, balanceRecords, txInfo);
-                    // const txReceipt: TransactionReceipt = await ethRpc.getTransactionReceipt(t.hash)
-                    // console.log("eth block sync>>> ",t.hash)
-                    // const logs: Array<Log> = txReceipt.logs;
-                    // txInfo.fee = new BigNumber(txReceipt.gasUsed).multipliedBy(new BigNumber(t.gasPrice)).toString(10)
-                    // txInfo.gasUsed = txReceipt.gasUsed;
                     txInfos.push(txInfo);
                     txInfoMap.set(txInfo.txHash,txInfos.length-1)
-                    if (balanceRecords.length == 0) {
-                        this.setBalanceRecordDefault(t, balanceRecords, txInfo);
+                    if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ) {
+                        removeTxHashArray.push(t.hash);
+                        this.addTxAddress(t, addressTxs);
+                        this.setBalanceRecords(t, balanceRecords, txInfo);
+                        if (balanceRecords.length == 0) {
+                            this.setBalanceRecordDefault(t, balanceRecords, txInfo);
+                        }
                     }
-
-                    // db.eth.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce).catch(e=>{
-                    //     console.error("remove unpending tx, err: ", e);
-                    // })
                 }
             }
 
