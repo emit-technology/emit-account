@@ -28,9 +28,9 @@ class Threads {
         this.startSyncPendingSero();
 
         this.startEth();
-        this.startSyncPendingEth();
-        this.dealSyncPendingEth();
-        this.removeEthUnPendingTx();
+        // this.startSyncPendingEth();
+        // this.dealSyncPendingEth();
+        // this.removeEthUnPendingTx();
 
         this.startGasTracker();
         // this.startTronEvent();
@@ -38,9 +38,9 @@ class Threads {
 
         //bsc
         this.startBsc();
-        this.startSyncPendingBsc();
-        this.dealSyncPendingBsc();
-        this.removeBscUnPendingTx();
+        // this.startSyncPendingBsc();
+        // this.dealSyncPendingBsc();
+        // this.removeBscUnPendingTx();
     }
 
     startGasTracker = () => {
