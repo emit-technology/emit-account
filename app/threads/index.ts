@@ -19,7 +19,7 @@ class Threads {
         this.syncSero = new SyncThreadSero();
         this.syncEth = new SyncThreadEth();
         this.tronEvent = new TronEvent();
-        this.syncBsc = new SyncThreadBsc();
+        this.syncBsc = new SyncThreadBsc(0,"pending");
     }
 
     run = ()=>{
@@ -180,20 +180,9 @@ class Threads {
         const step = 10;
 
         for(let i=0;i<step;i++){
-            const syncBscThread = new SyncThreadBsc()
             const tag = `thread-${i}`
-            setInterval(()=>{
-                try{
-                    const begin = Date.now();
-                    syncBscThread.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,tag).then(()=>{
-                        console.info(`bsc[${tag}] sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
-                    }).catch(e=>{
-                        console.error(`bsc[${tag}] sync err: `,e," restart 5s later...")
-                    });
-                }catch (e){
-                    console.error(e)
-                }
-            },1000)
+            const syncBscThread = new SyncThreadBsc(constant.THREAD_CONFIG.START_AT.BSC,tag)
+            syncBscThread.run();
         }
         // const begin = Date.now();
         // this.syncBsc.syncTransactions(constant.THREAD_CONFIG.START_AT.BSC,constant.THREAD_CONFIG.LIMIT.BSC).then(()=>{

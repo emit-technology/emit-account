@@ -38,10 +38,14 @@ class Index {
     web3: any;
 
     txInfos: Array<any>
+    startNum:number;
+    tag:string;
 
-    constructor() {
+    constructor(startNum:number,tag:string) {
         this.web3 = new Web3(constant.BSC_HOST);
         this.txInfos = [];
+        this.startNum = startNum;
+        this.tag=tag;
     }
 
     syncPendingTransactions = async () => {
@@ -64,8 +68,24 @@ class Index {
         await db.bsc.removeUnPendingTxTimeout();
     }
 
+    run= ()=>{
+        this.syncTransactions().then(()=>{
+            setTimeout(()=>{
+                this.run()
+            },500)
+        }).catch(e=>{
+            console.error(e)
+            setTimeout(()=>{
+                this.run()
+            },5000)
+        })
+    }
+
     //tag = thread-1
-    syncTransactions = async (startNum:number,tag:string) => {
+    syncTransactions = async () => {
+        const tag = this.tag;
+        const startNum = this.startNum;
+
         const step = 10;
         const threadTag = parseInt(tag.split("-")[1]);
         const client: any = await myPool.acquire();
