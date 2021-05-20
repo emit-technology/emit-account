@@ -46,6 +46,10 @@ class Index {
         }
     }
 
+    removeUnPendingTxTimeout = async () => {
+        await db.sero.removeUnPendingTxTimeout();
+    }
+
     async run(startNum:number, maxNum:number,repairBlockNumber?:number) {
         const client: any = await myPool.acquire();
         const session = client.startSession();

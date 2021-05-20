@@ -112,6 +112,34 @@ class Sero extends Base{
         return []
     }
 
+    removeUnPendingTxTimeout = async ()=>{
+        const client = await this.client();
+        try{
+            const txInfoClient: any = await this.txInfo(client);
+            const recordClient: any = await this.balanceRecords(client);
+            const timestamp = Math.floor(Date.now()/1000) - 60 * 60 * 24 * 3;
+            const query = {
+                timestamp: {"$lte": timestamp},
+                num: 0
+            }
+            const option = {
+                limit: 100
+            }
+            const cursor = await txInfoClient.find(query,option)
+            const txInfos: Array<any> = await cursor.toArray();
+            if (txInfos && txInfos.length > 0) {
+                for (let tx of txInfos) {
+                    const dOption = {txHash: tx.txHash, num: 0};
+                    await recordClient.deleteMany(dOption);
+                    await txInfoClient.deleteMany(dOption);
+                }
+            }
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
+    }
 }
 
 export default Sero

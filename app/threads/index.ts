@@ -26,10 +26,11 @@ class Threads {
 
         this.startSero();
         this.startSyncPendingSero();
+        this.removeSeroUnPendingTx();
 
         this.startEth();
-        this.startSyncPendingEth();
-        this.dealSyncPendingEth();
+        // this.startSyncPendingEth();
+        // this.dealSyncPendingEth();
         this.removeEthUnPendingTx();
 
         this.startGasTracker();
@@ -236,6 +237,20 @@ class Threads {
             console.error("removeBscUnPendingTx err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.removeBscUnPendingTx();
+            },this.timeSyncBlock * 5)
+        });
+    }
+
+    removeSeroUnPendingTx = () => {
+        this.syncSero.removeUnPendingTxTimeout().then(()=>{
+            console.info("removeSeroUnPendingTx, sleep 5s...")
+            setTimeout(()=>{
+                this.removeSeroUnPendingTx();
+            },this.timeSyncBlock * 5)
+        }).catch(e=>{
+            console.error("removeSeroUnPendingTx err: ",e," restart 5s later...")
+            setTimeout(()=>{
+                this.removeSeroUnPendingTx();
             },this.timeSyncBlock * 5)
         });
     }
