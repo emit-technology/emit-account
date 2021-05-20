@@ -28,9 +28,9 @@ class Threads {
         this.startSyncPendingSero();
 
         this.startEth();
-        // this.startSyncPendingEth();
-        // this.dealSyncPendingEth();
-        // this.removeEthUnPendingTx();
+        this.startSyncPendingEth();
+        this.dealSyncPendingEth();
+        this.removeEthUnPendingTx();
 
         this.startGasTracker();
         // this.startTronEvent();
