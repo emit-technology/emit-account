@@ -147,7 +147,7 @@ for(var i=0;i<tables.length;i++){
     {index:{fromAddress:1},unique:false},
     {index:{timestamp:-1},unique:false},
     {index:{contractAddress:1},unique:false},
-{index:{num:1},unique:false}
+    {index:{num:1},unique:false}
 ].forEach((v)=>{
     db.txInfo.createIndex(v.index,{unique:v.unique});
  });

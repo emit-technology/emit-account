@@ -17,10 +17,10 @@
  */
 
 import * as db from "../../db";
-import bsc from "../../rpc/bsc";
+import ethRpc from "../../rpc/eth";
 import {AddressTx, Balance, BalanceRecord, ChainType, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
 import * as constant from "../../common/constant";
-import {BSC_HOST} from "../../common/constant";
+import {ETH_HOST} from "../../common/constant";
 import * as utils from '../../common/utils'
 import {Block, Log, Transaction, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
@@ -31,7 +31,7 @@ const Web3 = require('web3');
 
 const myPool = require('../../db/mongodb');
 
-const defaultCurrency = "BNB";
+const defaultCurrency = "ETH";
 
 class Index {
 
@@ -42,30 +42,30 @@ class Index {
     tag:string;
 
     constructor(startNum:number,tag:string) {
-        this.web3 = new Web3(constant.BSC_HOST);
+        this.web3 = new Web3(ETH_HOST);
         this.txInfos = [];
         this.startNum = startNum;
         this.tag=tag;
     }
 
     syncPendingTransactions = async () => {
-        const rests:any = await bsc.getFilterChangesPending();
+        const rests:any = await ethRpc.getFilterChangesPending();
         const c:any = this.txInfos.concat(rests);
         this.txInfos = c;
-        console.info(`bsc syncPendingTransactions,len[${this.txInfos.length}]`)
+        console.info(`ETH syncPendingTransactions,len[${this.txInfos.length}]`)
         return Promise.resolve();
     }
 
     dealPending = async ()=>{
         if(this.txInfos && this.txInfos.length>0){
             const tx:any = this.txInfos.pop();
-            await db.bsc.insertTxInfo(tx.hash,tx)
+            await db.eth.insertTxInfo(tx.hash,tx)
         }
         return Promise.resolve();
     }
 
     removeUnPendingTxTimeout = async () => {
-        await db.bsc.removeUnPendingTxTimeout();
+        await db.eth.removeUnPendingTxTimeout();
     }
 
     run= ()=>{
@@ -93,10 +93,10 @@ class Index {
         // let limit = 1;
         try {
             const beginF = Date.now();
-            let dbNum: any = await db.bsc.latestBlock(tag);
-            const remoteNum = await bsc.blockNumber()
+            let dbNum: any = await db.eth.latestBlock(tag);
+            const remoteNum = await ethRpc.blockNumber()
             const chainNum = remoteNum - constant.THREAD_CONFIG.CONFIRM_BLOCK_NUM;
-            console.info(`BSC Thread[${tag}]>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
+            console.info(`ETH Thread[${tag}]>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
             if (!dbNum) {
                 dbNum = startNum;
             } else {
@@ -118,9 +118,9 @@ class Index {
                     syncNum = start+i
                 }
             }
-            console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}], start=[${start}], step=[${step}]`);
+            console.info(`ETH Thread[${tag}]>>> syncNum=[${syncNum}], start=[${start}], step=[${step}]`);
             if(!syncNum || syncNum>remoteNum){
-                console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}] invalid return`);
+                console.info(`ETH Thread[${tag}]>>> syncNum=[${syncNum}] invalid return`);
                 return
             }
             // const end = dbNum + limit;
@@ -138,11 +138,11 @@ class Index {
             // }
 
             let begin = Date.now()
-            const block: Block = await bsc.getBlockByNum(syncNum);
+            const block: Block = await ethRpc.getBlockByNum(syncNum);
             if(!block){
                 return
             }
-            console.log(`bsc getBlock cost:[${(Date.now()-begin)/1000}]`)
+            console.log(`ETH getBlock cost:[${(Date.now()-begin)/1000}]`)
 
             begin = Date.now();
             const transactions: Array<Transaction> = block.transactions;
@@ -151,7 +151,7 @@ class Index {
                 txInfos.push(txInfo);
                 txInfoMap.set(txInfo.txHash,txInfos.length-1)
                 removeTxHashArray.push(t.hash);
-                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ) {
+                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.ETH) ) {
 
                     this.addTxAddress(t, addressTxs);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
@@ -160,26 +160,26 @@ class Index {
                     }
                 }
             }
-            console.log(`bsc transaction cost:[${(Date.now()-begin)/1000}]`)
+            console.log(`ETH transaction cost:[${(Date.now()-begin)/1000}]`)
 
             const logBegin = Date.now();
-            const logs:Array<Log> = await bsc.getLogs(syncNum,syncNum)
+            const logs:Array<Log> = await ethRpc.getLogs(syncNum,syncNum)
             console.info(`log cost:[${Math.floor((Date.now()-logBegin)/1000)}]`)
             if (logs && logs.length > 0) {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
                     const txInfo = txInfos[index];
-                    const token = utils.isErc20Address(log.address,ChainType.BSC);
+                    const token = utils.isErc20Address(log.address,ChainType.ETH);
                     if (!token) {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
 
-                    if(utils.isErc721Address(log.address,ChainType.BSC)){
+                    if(utils.isErc721Address(log.address,ChainType.ETH)){
                         this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
                     }
 
-                    if (utils.isCrossAddress(log.address,ChainType.BSC)  || utils.isCrossNftAddress(log.address,ChainType.BSC)) {
+                    if (utils.isCrossAddress(log.address,ChainType.ETH)  || utils.isCrossNftAddress(log.address,ChainType.ETH)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
                             events.push(logRet)
@@ -190,9 +190,9 @@ class Index {
 
             console.log(`Address txs=[${addressTxs.length}], tx infos=[${txInfoMap.size}]  balance records=[${balanceRecords.length}]`)
             if (addressTxs.length == 0 || txInfoMap.size == 0 || balanceRecords.length == 0) {
-                const t = await bsc.getBlockByNum(syncNum);
+                const t = await ethRpc.getBlockByNum(syncNum);
                 if (t) {
-                    await db.bsc.insertBlock(syncNum, tag, session, client);
+                    await db.eth.insertBlock(syncNum, tag, session, client);
                 }
                 return
             }
@@ -201,35 +201,35 @@ class Index {
             const transactionResults = await session.withTransaction(async () => {
 
                 begin = Date.now();
-                await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
-                console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.eth.removePendingTxByHash(removeTxHashArray, session, client);
+                console.log(`db.eth.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertAddressTx(addressTxs, session, client)
-                console.log(`db.bsc.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.eth.insertAddressTx(addressTxs, session, client)
+                console.log(`db.eth.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertTxInfos(txInfos, session, client)
-                console.log(`db.bsc.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.eth.insertTxInfos(txInfos, session, client)
+                console.log(`db.eth.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertBalanceRecord(balanceRecords, session, client)
-                console.log(`db.bsc.insertBalanceRecord cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.eth.insertBalanceRecord(balanceRecords, session, client)
+                console.log(`db.eth.insertBalanceRecord cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
                 if (events && events.length > 0) {
-                    await db.bsc.insertEvents(events, session, client)
+                    await db.eth.insertEvents(events, session, client)
                 }
-                console.log(`db.bsc.insertEvents cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                console.log(`db.eth.insertEvents cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertBlock(syncNum,tag, session, client);
-                console.log(`db.bsc.insertBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await db.eth.insertBlock(syncNum,tag, session, client);
+                console.log(`db.eth.insertBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
 
-            }, constant.mongo.bsc.transactionOptions);
+            }, constant.mongo.eth.transactionOptions);
 
             if (transactionResults) {
-                console.log("BSC>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-beginF)/1000)}]s`);
+                console.log("ETH>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-beginF)/1000)}]s`);
             } else {
-                console.log("BSC>>> The transaction was intentionally aborted.");
+                console.log("ETH>>> The transaction was intentionally aborted.");
             }
         } catch (e) {
-            console.error("BSC>>> The transaction was aborted due to an unexpected error: ", e);
+            console.error("ETH>>> The transaction was aborted due to an unexpected error: ", e);
         } finally {
             await session.endSession();
             myPool.release(client);
@@ -362,7 +362,7 @@ class Index {
     }
 
     private async handelErc20Event(log: Log, balanceMap: Map<string, Balance>, key: string, addressTxs: Array<AddressTx>, balanceRecords: Array<BalanceRecord>, txInfo: TxInfo) {
-        const ierc20: Ierc20 = new Ierc20(log.address,BSC_HOST);
+        const ierc20: Ierc20 = new Ierc20(log.address,ETH_HOST);
         // await this.setBalanceMap(txInfo.fromAddress, balanceMap, key, ierc20);
 
         if (ierc20.encodeEventSignature("Transfer") === log.topics[0]) {
@@ -463,7 +463,7 @@ class Index {
         if (ierc20) {
             balance = await ierc20.balanceOf(address)
         } else {
-            balance = await bsc.getBalance(address)
+            balance = await ethRpc.getBalance(address)
             cy = defaultCurrency
         }
         balanceMap.set([address, cy].join(":"), {

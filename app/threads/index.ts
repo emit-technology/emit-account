@@ -1,4 +1,4 @@
-import SyncThreadEth from "./ethereum/";
+import SyncThreadEth from "./ethereum/indexV2";
 import SyncThreadBsc from "./bsc/";
 import SyncThreadSero from "./sero/"
 import TronEvent from "./tron/event";
@@ -17,7 +17,7 @@ class Threads {
     constructor() {
         this.timeSyncBlock = constant.SYNC_TIME;
         this.syncSero = new SyncThreadSero();
-        this.syncEth = new SyncThreadEth();
+        this.syncEth = new SyncThreadEth(0,"pending");
         this.tronEvent = new TronEvent();
         this.syncBsc = new SyncThreadBsc(0,"pending");
     }
@@ -31,7 +31,7 @@ class Threads {
         this.startEth();
         // this.startSyncPendingEth();
         // this.dealSyncPendingEth();
-        this.removeEthUnPendingTx();
+        // this.removeEthUnPendingTx();
 
         this.startGasTracker();
         // this.startTronEvent();
@@ -77,18 +77,27 @@ class Threads {
 
     startEth = () => {
         console.info("eth sync start...")
-        const begin = Date.now();
-        this.syncEth.syncTransactions(constant.THREAD_CONFIG.START_AT.ETH,constant.THREAD_CONFIG.LIMIT.ETH).then(()=>{
-            console.info(`eth sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
-            setTimeout(()=>{
-                this.startEth();
-            },this.timeSyncBlock/10)
-        }).catch(e=>{
-            console.error("eth sync err: ",e," restart 5s later...")
-            setTimeout(()=>{
-                this.startEth();
-            },this.timeSyncBlock)
-        });
+
+        const step = 5;
+
+        for(let i=0;i<step;i++){
+            const tag = `thread-${i}`
+            const syncThread = new SyncThreadEth(constant.THREAD_CONFIG.START_AT.ETH,tag)
+            syncThread.run();
+        }
+
+        // const begin = Date.now();
+        // this.syncEth.syncTransactions(constant.THREAD_CONFIG.START_AT.ETH,constant.THREAD_CONFIG.LIMIT.ETH).then(()=>{
+        //     console.info(`eth sync end, cost: ${Math.floor((Date.now()-begin)/1000)} seconds, sleep 5s`)
+        //     setTimeout(()=>{
+        //         this.startEth();
+        //     },this.timeSyncBlock/10)
+        // }).catch(e=>{
+        //     console.error("eth sync err: ",e," restart 5s later...")
+        //     setTimeout(()=>{
+        //         this.startEth();
+        //     },this.timeSyncBlock)
+        // });
     }
 
     startSyncPendingEth = () => {
@@ -247,7 +256,7 @@ class Threads {
             setTimeout(()=>{
                 this.removeSeroUnPendingTx();
             },this.timeSyncBlock * 5)
-        }).catch(e=>{
+        }).catch((e:any)=>{
             console.error("removeSeroUnPendingTx err: ",e," restart 5s later...")
             setTimeout(()=>{
                 this.removeSeroUnPendingTx();
