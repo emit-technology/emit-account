@@ -86,7 +86,7 @@ class Index {
         const tag = this.tag;
         const startNum = this.startNum;
 
-        const step = 10;
+        const step = 5;
         const threadTag = parseInt(tag.split("-")[1]);
         const client: any = await myPool.acquire();
         const session = client.startSession();
