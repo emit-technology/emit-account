@@ -210,7 +210,7 @@ class EthThreadBase {
             }
 
             console.log(`Address txs=[${addressTxs.length}], tx infos=[${txInfoMap.size}]  balance records=[${balanceRecords.length}]`)
-            if (addressTxs.length == 0 || txInfoMap.size == 0 || balanceRecords.length == 0) {
+            if (addressTxs.length == 0 || txInfoIns.length == 0 || balanceRecords.length == 0) {
                 const t = await this.rpc.getBlockByNum(syncNum);
                 if (t) {
                     await this.db.insertBlock(syncNum, tag, session, client);
