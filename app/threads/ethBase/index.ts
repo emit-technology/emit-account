@@ -142,6 +142,7 @@ class EthThreadBase {
             // const txInfos: Array<TxInfo> = [];
             const txInfoMap: Map<string,number> = new Map<string, number>();
             const txInfos:Array<TxInfo> = [];
+            const txInfoIns:Array<TxInfo> = [];
             const balanceRecords: Array<BalanceRecord> = [];
             // const transactionReceipts: Array<TransactionReceipt> = [];
             const balanceMap: Map<string, Balance> = new Map<string, Balance>()
@@ -166,7 +167,7 @@ class EthThreadBase {
                 txInfoMap.set(txInfo.txHash,txInfos.length-1)
                 removeTxHashArray.push(t.hash);
                 if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,this.chain) ) {
-
+                    txInfoIns.push(txInfo)
                     this.addTxAddress(t, addressTxs);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
                     if (balanceRecords.length == 0) {
@@ -227,7 +228,7 @@ class EthThreadBase {
                 await this.db.insertAddressTx(addressTxs, session, client)
                 console.log(`${ChainType[this.chain]}.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await this.db.insertTxInfos(txInfos, session, client)
+                await this.db.insertTxInfos(txInfoIns, session, client)
                 console.log(`${ChainType[this.chain]}.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
                 await this.db.insertBalanceRecord(balanceRecords, session, client)
