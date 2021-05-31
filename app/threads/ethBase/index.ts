@@ -175,6 +175,10 @@ class EthThreadBase {
                     }
                 }
             }
+            if(txInfoIns.length == 0 ){
+                console.log(`${ChainType[this.chain]} txInfoIns is empty`)
+                return
+            }
             console.log(`${ChainType[this.chain]} transaction cost:[${(Date.now()-begin)/1000}]`)
 
             const logBegin = Date.now();
