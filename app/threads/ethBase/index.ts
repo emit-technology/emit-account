@@ -25,6 +25,7 @@ import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
 import {EthRpc} from "../../rpc/eth";
+import * as db from "../../db";
 
 const Web3 = require('web3');
 
@@ -196,6 +197,12 @@ class EthThreadBase {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
                             events.push(logRet)
+                        }
+                    }
+
+                    if(token || utils.isContractAddress(log.address,this.chain)){
+                        if(txInfo.num>0){
+                            await this.db.removeUnPendingTxByHash(txInfo.fromAddress,txInfo.nonce)
                         }
                     }
                 }
