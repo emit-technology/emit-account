@@ -21,6 +21,7 @@ export interface BalanceRecord {
     txHash: string
     num: number
     timestamp: number | undefined
+    createdAt?:any
 }
 
 export interface Asset {
@@ -34,6 +35,7 @@ export interface AddressTx {
     txHash: string
     num: number
     currency: string
+    createdAt?:any
 }
 
 export interface TxInfo {
@@ -56,6 +58,7 @@ export interface TxInfo {
     extra?: any
     contractAddress?: string
     nonce?:number
+    createdAt?:any
 }
 
 export interface Transaction {

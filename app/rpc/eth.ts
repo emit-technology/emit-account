@@ -128,3 +128,6 @@ class EthRpc extends RPC {
 const ethRpc = new EthRpc();
 
 export default ethRpc
+export {
+    EthRpc
+}

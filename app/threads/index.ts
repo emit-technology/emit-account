@@ -1,5 +1,5 @@
-import SyncThreadEth from "./ethereum/indexV2";
-import SyncThreadBsc from "./bsc/";
+import SyncThreadEth from "./ethereum/indexV3";
+import SyncThreadBsc from "./bsc/indexV3";
 import SyncThreadSero from "./sero/"
 import TronEvent from "./tron/event";
 import gasTracker from "../api/gasTracker";

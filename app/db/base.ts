@@ -27,24 +27,29 @@ class Base {
         return await client.db(this.dbName).collection('balance');
     }
 
+    protected  useV2 = ()=>{
+        return this.dbName == constant.mongo.bsc.name || this.dbName == constant.mongo.eth.name
+    }
+
     protected balanceRecords = async (client: any) => {
-        // if (!client) {
-        //     client = await this.client();
-        // }
+        console.log(this.useV2())
+        if(this.useV2()){
+            return await client.db(this.dbName).collection('balanceRecordsV2');
+        }
         return await client.db(this.dbName).collection('balanceRecords');
     }
 
     protected txInfo = async (client: any) => {
-        // if (!client) {
-        //     client = await this.client();
-        // }
+        if(this.useV2()){
+            return await client.db(this.dbName).collection('txInfoV2');
+        }
         return await client.db(this.dbName).collection('txInfo');
     }
 
     protected addressTx = async (client: any) => {
-        // if (!client) {
-        //     client = await this.client();
-        // }
+        if(this.useV2()){
+            return await client.db(this.dbName).collection('addressTxV2');
+        }
         return await client.db(this.dbName).collection('addressTx');
     }
 

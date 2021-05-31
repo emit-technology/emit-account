@@ -274,6 +274,49 @@ for(var i=0;i<tables.length;i++){
 
 ```
 
+### update feature of add auto remove expired data
+```
+use eth;   // use bsc
+
+db.txInfoV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
+db.balanceRecordsV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
+db.addressTxV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
+
+[
+    {index:{currency:1},unique:false},
+    {index:{txHash:1},unique:false},
+    {index:{timestamp:-1},unique:false},
+    {index:{type:1},unique:false},
+    {index:{num:1},unique:false},
+    {index:{address:1},unique:false}
+].forEach((v)=>{
+   db.balanceRecordsV2.createIndex(v.index,{unique:v.unique});
+});
+
+
+[
+    {index:{txHash:1},unique:true},
+    {index:{fromAddress:1},unique:false},
+    {index:{timestamp:-1},unique:false},
+    {index:{contractAddress:1},unique:false},
+{index:{num:1},unique:false}
+].forEach((v)=>{
+    db.txInfoV2.createIndex(v.index,{unique:v.unique});
+ });
+
+[
+    {index:{address:1},unique:false},
+    {index:{txHash:1},unique:false},
+    {index:{currency:1},unique:false},
+    {index:{address:1,currency:1},unique:false},
+    {num:1,unique:false}
+].forEach((v)=>{
+     db.addressTxV2.createIndex(v.index,{unique:v.unique});
+ });
+
+
+```
+
 #### Start App
 
 ```shell script

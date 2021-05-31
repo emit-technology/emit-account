@@ -16,24 +16,21 @@
  along with E.M.I.T. . If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as db from "../../db";
-import bsc from "../../rpc/bsc";
+import {BscRpc} from "../../rpc/bsc";
 import {AddressTx, Balance, BalanceRecord, ChainType, EVENT_TYPE, EventStruct, TxInfo, TxType} from "../../types";
 import * as constant from "../../common/constant";
-import {BSC_HOST} from "../../common/constant";
 import * as utils from '../../common/utils'
 import {Block, Log, Transaction, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
+import {EthRpc} from "../../rpc/eth";
 
 const Web3 = require('web3');
 
 const myPool = require('../../db/mongodb');
 
-const defaultCurrency = "BNB";
-
-class Index {
+class EthThreadBase {
 
     web3: any;
 
@@ -41,31 +38,46 @@ class Index {
     startNum:number;
     tag:string;
 
-    constructor(startNum:number,tag:string) {
-        this.web3 = new Web3(constant.BSC_HOST);
+    defaultCy:string
+    rpc:EthRpc|BscRpc
+    rpcHost:string
+    chain:ChainType
+    db:any
+    transactionOption:any
+
+    constructor(startNum:number,tag:string,defaultCy:string,rpc:EthRpc|BscRpc,rpcHost:string,chain:ChainType,db:any,transactionOption:any) {
+        this.web3 = new Web3(rpcHost);
         this.txInfos = [];
         this.startNum = startNum;
-        this.tag=tag;
+        this.tag = tag;
+        
+        this.defaultCy = defaultCy;
+        this.rpcHost = rpcHost;
+        this.rpc = rpc;
+        this.chain = chain;
+        this.db = db;
+
+        this.transactionOption = transactionOption;
     }
 
     syncPendingTransactions = async () => {
-        const rests:any = await bsc.getFilterChangesPending();
+        const rests:any = await this.rpc.getFilterChangesPending();
         const c:any = this.txInfos.concat(rests);
         this.txInfos = c;
-        console.info(`bsc syncPendingTransactions,len[${this.txInfos.length}]`)
+        console.info(`${ChainType[this.chain]} syncPendingTransactions,len[${this.txInfos.length}]`)
         return Promise.resolve();
     }
 
     dealPending = async ()=>{
         if(this.txInfos && this.txInfos.length>0){
             const tx:any = this.txInfos.pop();
-            await db.bsc.insertTxInfo(tx.hash,tx)
+            await this.db.insertTxInfo(tx.hash,tx)
         }
         return Promise.resolve();
     }
 
     removeUnPendingTxTimeout = async () => {
-        await db.bsc.removeUnPendingTxTimeout();
+        await this.db.removeUnPendingTxTimeout();
     }
 
     run= ()=>{
@@ -93,10 +105,10 @@ class Index {
         // let limit = 1;
         try {
             const beginF = Date.now();
-            let dbNum: any = await db.bsc.latestBlock(tag);
-            const remoteNum = await bsc.blockNumber()
+            let dbNum: any = await this.db.latestBlock(tag);
+            const remoteNum = await this.rpc.blockNumber()
             const chainNum = remoteNum - constant.THREAD_CONFIG.CONFIRM_BLOCK_NUM;
-            console.info(`BSC Thread[${tag}]>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
+            console.info(`${ChainType[this.chain]} Thread[${tag}]>>> remote=[${remoteNum}], start=[${chainNum}], db=[${dbNum}]`);
             if (!dbNum) {
                 dbNum = startNum;
             } else {
@@ -118,9 +130,9 @@ class Index {
                     syncNum = start+i
                 }
             }
-            console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}], start=[${start}], step=[${step}]`);
+            console.info(`${ChainType[this.chain]} Thread[${tag}]>>> syncNum=[${syncNum}], start=[${start}], step=[${step}]`);
             if(!syncNum || syncNum>remoteNum){
-                console.info(`BSC Thread[${tag}]>>> syncNum=[${syncNum}] invalid return`);
+                console.info(`${ChainType[this.chain]} Thread[${tag}]>>> syncNum=[${syncNum}] invalid return`);
                 return
             }
             // const end = dbNum + limit;
@@ -138,11 +150,11 @@ class Index {
             // }
 
             let begin = Date.now()
-            const block: Block = await bsc.getBlockByNum(syncNum);
+            const block: Block = await this.rpc.getBlockByNum(syncNum);
             if(!block){
                 return
             }
-            console.log(`bsc getBlock cost:[${(Date.now()-begin)/1000}]`)
+            console.log(`${ChainType[this.chain]} getBlock cost:[${(Date.now()-begin)/1000}]`)
 
             begin = Date.now();
             const transactions: Array<Transaction> = block.transactions;
@@ -151,7 +163,7 @@ class Index {
                 txInfos.push(txInfo);
                 txInfoMap.set(txInfo.txHash,txInfos.length-1)
                 removeTxHashArray.push(t.hash);
-                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,ChainType.BSC) ) {
+                if(new BigNumber(t.value).toNumber()>0 || utils.isContractAddress(t.to,this.chain) ) {
 
                     this.addTxAddress(t, addressTxs);
                     this.setBalanceRecords(t, balanceRecords, txInfo);
@@ -160,26 +172,26 @@ class Index {
                     }
                 }
             }
-            console.log(`bsc transaction cost:[${(Date.now()-begin)/1000}]`)
+            console.log(`${ChainType[this.chain]} transaction cost:[${(Date.now()-begin)/1000}]`)
 
             const logBegin = Date.now();
-            const logs:Array<Log> = await bsc.getLogs(syncNum,syncNum)
+            const logs:Array<Log> = await this.rpc.getLogs(syncNum,syncNum)
             console.info(`log cost:[${Math.floor((Date.now()-logBegin)/1000)}]`)
             if (logs && logs.length > 0) {
                 for (let log of logs) {
                     const index:any = txInfoMap.get(log.transactionHash)
                     const txInfo = txInfos[index];
-                    const token = utils.isErc20Address(log.address,ChainType.BSC);
+                    const token = utils.isErc20Address(log.address,this.chain);
                     if (!token) {
                     } else {
                         await this.handelErc20Event(log, balanceMap, token, addressTxs, balanceRecords, txInfo);
                     }
 
-                    if(utils.isErc721Address(log.address,ChainType.BSC)){
+                    if(utils.isErc721Address(log.address,this.chain)){
                         this.handleERC721Event(log, addressTxs, txInfo, balanceRecords);
                     }
 
-                    if (utils.isCrossAddress(log.address,ChainType.BSC)  || utils.isCrossNftAddress(log.address,ChainType.BSC)) {
+                    if (utils.isCrossAddress(log.address,this.chain)  || utils.isCrossNftAddress(log.address,this.chain)) {
                         const logRet = event.decodeLog(txInfo.num, txInfo.txHash, log.address, log.topics, log.data)
                         if (logRet) {
                             events.push(logRet)
@@ -190,9 +202,9 @@ class Index {
 
             console.log(`Address txs=[${addressTxs.length}], tx infos=[${txInfoMap.size}]  balance records=[${balanceRecords.length}]`)
             if (addressTxs.length == 0 || txInfoMap.size == 0 || balanceRecords.length == 0) {
-                const t = await bsc.getBlockByNum(syncNum);
+                const t = await this.rpc.getBlockByNum(syncNum);
                 if (t) {
-                    await db.bsc.insertBlock(syncNum, tag, session, client);
+                    await this.db.insertBlock(syncNum, tag, session, client);
                 }
                 return
             }
@@ -201,35 +213,35 @@ class Index {
             const transactionResults = await session.withTransaction(async () => {
 
                 begin = Date.now();
-                await db.bsc.removePendingTxByHash(removeTxHashArray, session, client);
-                console.log(`db.bsc.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await this.db.removePendingTxByHash(removeTxHashArray, session, client);
+                console.log(`${ChainType[this.chain]}.removePendingTxByHash cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertAddressTx(addressTxs, session, client)
-                console.log(`db.bsc.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await this.db.insertAddressTx(addressTxs, session, client)
+                console.log(`${ChainType[this.chain]}.insertAddressTx cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertTxInfos(txInfos, session, client)
-                console.log(`db.bsc.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await this.db.insertTxInfos(txInfos, session, client)
+                console.log(`${ChainType[this.chain]}.insertTxInfos cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertBalanceRecord(balanceRecords, session, client)
-                console.log(`db.bsc.insertBalanceRecord cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await this.db.insertBalanceRecord(balanceRecords, session, client)
+                console.log(`${ChainType[this.chain]}.insertBalanceRecord cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
                 if (events && events.length > 0) {
-                    await db.bsc.insertEvents(events, session, client)
+                    await this.db.insertEvents(events, session, client)
                 }
-                console.log(`db.bsc.insertEvents cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                console.log(`${ChainType[this.chain]}.insertEvents cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
                 begin = Date.now();
-                await db.bsc.insertBlock(syncNum,tag, session, client);
-                console.log(`db.bsc.insertBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
+                await this.db.insertBlock(syncNum,tag, session, client);
+                console.log(`${ChainType[this.chain]}.insertBlock cost:[${Math.floor((Date.now()-begin)/1000)}]s`)
 
-            }, constant.mongo.bsc.transactionOptions);
+            }, this.transactionOption);
 
             if (transactionResults) {
-                console.log("BSC>>> The reservation was successfully created.",`cost:[${Math.floor((Date.now()-beginF)/1000)}]s`);
+                console.log(`${ChainType[this.chain]} >>> The reservation was successfully created. cost:[${Math.floor((Date.now()-beginF)/1000)}]s`);
             } else {
-                console.log("BSC>>> The transaction was intentionally aborted.");
+                console.log(`${ChainType[this.chain]} >>> The transaction was intentionally aborted.`);
             }
         } catch (e) {
-            console.error("BSC>>> The transaction was aborted due to an unexpected error: ", e);
+            console.error(`${ChainType[this.chain]} >>> The transaction was aborted due to an unexpected error: `, e);
         } finally {
             await session.endSession();
             myPool.release(client);
@@ -237,7 +249,7 @@ class Index {
     }
 
     private handleERC721Event(log: Log, addressTxs: Array<AddressTx>, txInfo:TxInfo, balanceRecords: Array<BalanceRecord>) {
-        const key = defaultCurrency;
+        const key = this.defaultCy;
         const txEvent: TransferEvent = event.decodeERC721_Transfer(log.topics, log.data);
         txEvent.from && addressTxs.push({
             address: txEvent.from.toLowerCase(),
@@ -287,7 +299,7 @@ class Index {
             gasUsed: t.gas,
             gasPrice: t.gasPrice,
             fee: new BigNumber(t.gas).multipliedBy(new BigNumber(t.gasPrice)).toString(10),     //gas * gasPrice
-            feeCy: defaultCurrency,
+            feeCy: this.defaultCy,
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
             outs: [],
@@ -306,14 +318,14 @@ class Index {
             address: t.from.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
-            currency: defaultCurrency,
+            currency: this.defaultCy,
             createdAt: new Date()
         })
         t.to && addressTxs.push({
             address: t.to.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
-            currency: defaultCurrency,
+            currency: this.defaultCy,
             createdAt: new Date()
         })
     }
@@ -322,7 +334,7 @@ class Index {
         if (t.from) {
             balanceRecords.push({
                 address: t.from.toLowerCase(),
-                currency: defaultCurrency,
+                currency: this.defaultCy,
                 amount: new BigNumber(t.value).multipliedBy(-1).toString(10),
                 type: TxType.OUT,
                 txHash: txInfo.txHash,
@@ -334,7 +346,7 @@ class Index {
         if (t.to) {
             balanceRecords.push({
                 address: t.to.toLowerCase(),
-                currency: defaultCurrency,
+                currency: this.defaultCy,
                 amount: t.value,
                 type: TxType.IN,
                 txHash: txInfo.txHash,
@@ -349,7 +361,7 @@ class Index {
         if (t.from) {
             balanceRecords.push({
                 address: t.from.toLowerCase(),
-                currency: defaultCurrency,
+                currency: this.defaultCy,
                 amount: new BigNumber(t.value).multipliedBy(-1).toString(10),
                 type: TxType.OUT,
                 txHash: txInfo.txHash,
@@ -361,7 +373,7 @@ class Index {
         if (t.to) {
             balanceRecords.push({
                 address: t.to.toLowerCase(),
-                currency: defaultCurrency,
+                currency: this.defaultCy,
                 amount: new BigNumber(t.value).toString(10),
                 type: TxType.IN,
                 txHash: txInfo.txHash,
@@ -373,7 +385,7 @@ class Index {
     }
 
     private async handelErc20Event(log: Log, balanceMap: Map<string, Balance>, key: string, addressTxs: Array<AddressTx>, balanceRecords: Array<BalanceRecord>, txInfo: TxInfo) {
-        const ierc20: Ierc20 = new Ierc20(log.address,BSC_HOST);
+        const ierc20: Ierc20 = new Ierc20(log.address,this.rpcHost);
         // await this.setBalanceMap(txInfo.fromAddress, balanceMap, key, ierc20);
 
         if (ierc20.encodeEventSignature("Transfer") === log.topics[0]) {
@@ -448,7 +460,7 @@ class Index {
                     if(record.address == logRet.event.src.toLowerCase()){
                         balanceRecords.splice(i,1,{
                             address: logRet.event.src.toLowerCase(),
-                            currency: defaultCurrency,
+                            currency: this.defaultCy,
                             amount: new BigNumber(logRet.event.wad).toString(10),
                             type: TxType.IN,
                             txHash: txInfo.txHash,
@@ -481,8 +493,8 @@ class Index {
         if (ierc20) {
             balance = await ierc20.balanceOf(address)
         } else {
-            balance = await bsc.getBalance(address)
-            cy = defaultCurrency
+            balance = await this.rpc.getBalance(address)
+            cy = this.defaultCy
         }
         balanceMap.set([address, cy].join(":"), {
             address: address.toLowerCase(),
@@ -495,4 +507,4 @@ class Index {
 }
 
 
-export default Index
+export default EthThreadBase

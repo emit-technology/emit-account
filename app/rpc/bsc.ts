@@ -133,3 +133,6 @@ class BscRpc extends RPC {
 const rpc = new BscRpc();
 
 export default rpc
+export {
+    BscRpc
+}
