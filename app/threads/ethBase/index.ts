@@ -44,8 +44,8 @@ class EthThreadBase {
     chain:ChainType
     db:any
     transactionOption:any
-
-    constructor(startNum:number,tag:string,defaultCy:string,rpc:EthRpc|BscRpc,rpcHost:string,chain:ChainType,db:any,transactionOption:any) {
+    step:number
+    constructor(startNum:number,tag:string,defaultCy:string,rpc:EthRpc|BscRpc,rpcHost:string,chain:ChainType,db:any,transactionOption:any,step:number) {
         this.web3 = new Web3(rpcHost);
         this.txInfos = [];
         this.startNum = startNum;
@@ -58,6 +58,7 @@ class EthThreadBase {
         this.db = db;
 
         this.transactionOption = transactionOption;
+        this.step = step;
     }
 
     syncPendingTransactions = async () => {
@@ -98,7 +99,7 @@ class EthThreadBase {
         const tag = this.tag;
         const startNum = this.startNum;
 
-        const step = 10;
+        const step = this.step;
         const threadTag = parseInt(tag.split("-")[1]);
         const client: any = await myPool.acquire();
         const session = client.startSession();

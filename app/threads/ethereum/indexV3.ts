@@ -24,7 +24,7 @@ import * as constant from "../../common/constant";
 
 class Index extends EthThreadBase{
     constructor(startNum:number,tag:string) {
-        super(startNum,tag,"ETH",ethRpc,ETH_HOST,ChainType.ETH,db.eth,constant.mongo.eth.transactionOptions)
+        super(startNum,tag,"ETH",ethRpc,ETH_HOST,ChainType.ETH,db.eth,constant.mongo.eth.transactionOptions,5)
     }
 }
 
