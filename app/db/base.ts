@@ -100,7 +100,8 @@ class Base {
                 transactionIndex: "0x0",
                 contract: null,
                 timestamp: timestamp,
-                nonce:t.nonce?new BigNumber(t.nonce).toNumber():0
+                nonce:t.nonce?new BigNumber(t.nonce).toNumber():0,
+                createdAt:new Date()
             };
             const records: Array<any> = [];
             [t.value].forEach(value => {
@@ -112,7 +113,8 @@ class Base {
                         type: TxType.OUT,
                         txHash: info.txHash,
                         num: 0,
-                        timestamp: timestamp
+                        timestamp: timestamp,
+                        createdAt:new Date()
                     })
                     records.push({
                         address: t.to,
@@ -121,14 +123,23 @@ class Base {
                         type: TxType.IN,
                         txHash: info.txHash,
                         num: 0,
-                        timestamp: timestamp
+                        timestamp: timestamp,
+                        createdAt:new Date()
                     })
                 // }
             })
+            let option = constant.mongo.eth.transactionOptions;
+            if(this.dbName == constant.mongo.eth.name){
+                option = constant.mongo.eth.transactionOptions;
+            }else if(this.dbName == constant.mongo.bsc.name){
+                option = constant.mongo.bsc.transactionOptions;
+            }else if(this.dbName == constant.mongo.sero.name){
+                option = constant.mongo.sero.transactionOptions;
+            }
             const transactionResults = await session.withTransaction(async () => {
                 await this.insertTxInfos([info], session, client)
                 await this.insertBalanceRecord(records, session, client)
-            }, constant.mongo.eth.transactionOptions)
+            }, option)
 
             if (transactionResults) {
                 // console.log("The pending tx was successfully created.");
