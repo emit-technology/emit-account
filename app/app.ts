@@ -195,15 +195,11 @@ app.post('/', function (req, res) {
             })
             break;
         default:
-            if(prefix && method){
-                api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
-                    sendResult(r, res, rest)
-                }).catch((e: any) => {
-                    sendError(r, res, typeof e == "string" ? e : e.message);
-                })
-            }else{
-                sendError(r, res, "method not exist");
-            }
+            api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
             break;
     }
 });
