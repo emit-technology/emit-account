@@ -230,6 +230,11 @@ class Index {
             }
         } catch (e) {
             console.error("BSC>>> The transaction was aborted due to an unexpected error: ", e);
+            const err = typeof e == "string"?e:e.message;
+            if(err.indexOf("E11000 duplicate key error collection: bsc.txInfoV2")){
+                const hash = err.split("\"")[1].split("\"")[0];
+                console.log(hash,"bsc err hash:")
+            }
         } finally {
             await session.endSession();
             myPool.release(client);

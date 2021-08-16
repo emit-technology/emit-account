@@ -25,6 +25,7 @@ import gasTracker from "./api/gasTracker";
 import TronApi from "./api/tron";
 import BscApi from "./api/bsc";
 import {ChainType} from "./types";
+import {checkCommit} from "./common/constant";
 const log4js = require("log4js");
 const logger = log4js.getLogger();
 logger.level = "debug";
@@ -144,11 +145,15 @@ app.post('/', function (req, res) {
             })
             break;
         case "commitTx":
-            api.commitTx(r.params[0],r.params[1]).then(rest => {
-                sendResult(r, res, rest)
-            }).catch((e: any) => {
-                sendError(r, res, typeof e == "string" ? e : e.message);
-            })
+            if(prefix != "sero" || checkCommit(r.params[1],req)){
+                api.commitTx(r.params[0],r.params[1]).then(rest => {
+                    sendResult(r, res, rest)
+                }).catch((e: any) => {
+                    sendError(r, res, typeof e == "string" ? e : e.message);
+                })
+            }else{
+                sendError(r, res, "error");
+            }
             break;
         case "genParams":
             api.genParams(r.params[0]).then(rest => {
@@ -190,11 +195,15 @@ app.post('/', function (req, res) {
             })
             break;
         default:
-            api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
-                sendResult(r, res, rest)
-            }).catch((e: any) => {
-                sendError(r, res, typeof e == "string" ? e : e.message);
-            })
+            if(prefix && method){
+                api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
+                    sendResult(r, res, rest)
+                }).catch((e: any) => {
+                    sendError(r, res, typeof e == "string" ? e : e.message);
+                })
+            }else{
+                sendError(r, res, "method not exist");
+            }
             break;
     }
 });
