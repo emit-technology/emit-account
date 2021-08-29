@@ -10,6 +10,7 @@ import {BSC_HOST} from "../common/constant";
 const myPool = require('../db/mongodb');
 
 class BscApi extends Api {
+    addressMap:Map<string,boolean>=new Map<string, boolean>();
 
     constructor() {
         super(bsc);
@@ -39,9 +40,16 @@ class BscApi extends Api {
             assets[b.currency] = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10)
         }
         //init for next query
-        this.initBalance(address).catch(e=>{
-            console.log(e,"initBalance")
-        })
+        if(!this.addressMap.has(address)){
+            this.addressMap.set(address,true);
+            //init for next query
+            this.initBalance(address).then(()=>{
+                this.addressMap.delete(address)
+            }).catch(e=>{
+                this.addressMap.delete(address)
+                console.log(e,"initBalance")
+            })
+        }
         return Promise.resolve(assets);
     }
 
