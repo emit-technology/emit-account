@@ -33,7 +33,7 @@ class BscApi extends Api {
     }
 
     getBalance = async (address: string,cy:string): Promise<any> => {
-        console.log("bsc...getbalance>>",address)
+
         const balances: Array<Balance> = await this.db.queryBalance(address,cy)
         const assets: any = {};
         for (let b of balances) {
@@ -41,12 +41,17 @@ class BscApi extends Api {
         }
         //init for next query
         if(!this.addressMap.has(address)){
+            console.log("bsc...getbalance>>",address)
             this.addressMap.set(address,true);
             //init for next query
             this.initBalance(address).then(()=>{
-                this.addressMap.delete(address)
+                setTimeout(()=>{
+                    this.addressMap.delete(address)
+                },10*1000)
             }).catch(e=>{
-                this.addressMap.delete(address)
+                setTimeout(()=>{
+                    this.addressMap.delete(address)
+                },10*1000)
                 console.log(e,"initBalance")
             })
         }

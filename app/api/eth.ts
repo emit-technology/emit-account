@@ -40,12 +40,17 @@ class EthApi extends Api {
             assets[b.currency] = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10)
         }
         if(!this.addressMap.has(address)){
+            console.log("bsc...getbalance>>",address)
             this.addressMap.set(address,true);
             //init for next query
             this.initBalance(address).then(()=>{
-                this.addressMap.delete(address)
+                setTimeout(()=>{
+                    this.addressMap.delete(address)
+                },10*1000)
             }).catch(e=>{
-                this.addressMap.delete(address)
+                setTimeout(()=>{
+                    this.addressMap.delete(address)
+                },10*1000)
                 console.log(e,"initBalance")
             })
         }
