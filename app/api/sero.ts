@@ -31,9 +31,6 @@ class SeroApi extends Api {
     }
 
     commitTx = async (signTx: any,t:any): Promise<any> => {
-        if(t.data && t.to &&  ["iHQNuR2MiAL7BMxer9rSXQcwCKugnTKS5Xty58kb9ietKjw181HUyVDoxEmmzu3AYUs1uR4MYWi9HJqHEnJmQ9q","5nnPpLDjrSeoxrMtZzdLL1Djbrsk6DJtdQ7yA6KccZN3s4LGXFjNG5KiiRMV9RkCswd3KmcfytwPvBuUjqo4bDkL"].indexOf(t.to)>-1){
-            return Promise.reject("The Altar and Chaos are being upgraded and will be upgraded before the end of the 186 period.")
-        }
         const resp = await seroRPC.post('sero_commitTx', [signTx])
         if(t && t.gasPrice && t.gas){
             this.multiGasPrice(t);
