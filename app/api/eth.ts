@@ -10,6 +10,9 @@ import {ETH_HOST} from "../common/constant";
 const myPool = require('../db/mongodb');
 
 class EthApi extends Api {
+    getChainConfig(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 
     addressMap:Map<string,boolean>=new Map<string, boolean>();
 

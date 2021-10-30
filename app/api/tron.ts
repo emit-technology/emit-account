@@ -173,6 +173,13 @@ class TronApi extends Api{
         return await this.getTxs(address,currency,pageSize,pageNo,fingerprint);
     }
 
+    getChainConfig(): Promise<any> {
+        const config:any = {
+            feeLimit:  150000000
+        }
+        return config;
+    }
+
 }
 
 export default TronApi

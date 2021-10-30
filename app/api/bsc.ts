@@ -10,6 +10,9 @@ import {BSC_HOST} from "../common/constant";
 const myPool = require('../db/mongodb');
 
 class BscApi extends Api {
+    getChainConfig(): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
     addressMap:Map<string,boolean>=new Map<string, boolean>();
 
     constructor() {
