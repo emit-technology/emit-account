@@ -19,6 +19,7 @@ class RPC {
         };
         return new Promise((resolve, reject) => {
             axios.post(this.host, data).then((resp: any) => {
+                console.log("rpc post resp",this.host,data,resp)
                 if (resp.data.error) {
                     reject(resp.data.error.message);
                 } else {

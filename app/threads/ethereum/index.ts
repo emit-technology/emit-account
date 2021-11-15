@@ -40,7 +40,10 @@ class Index {
     txInfos: Array<any>
 
     constructor() {
-        this.ethWeb3 = new Web3(constant.ETH_HOST);
+        const provider = new Web3.providers.HttpProvider(constant.ETH_HOST,{
+            timeout: constant.defaultHttpTimeout
+        })
+        this.ethWeb3 = new Web3(provider);
         this.txInfos = [];
     }
 

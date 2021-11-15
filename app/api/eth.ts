@@ -48,11 +48,11 @@ class EthApi extends Api {
             this.initBalance(address).then(()=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },10*1000)
+                },600*1000)
             }).catch(e=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },10*1000)
+                },600*1000)
             })
         }
 

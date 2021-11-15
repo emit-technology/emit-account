@@ -3,7 +3,6 @@ import * as constant from '../../common/constant';
 import {ApprovalEvent, TransferEvent} from "../../types/eth";
 
 const Web3 = require('web3');
-
 export class Ierc20 {
 
     protected abi: any = [{
@@ -74,7 +73,10 @@ export class Ierc20 {
     protected web3: any;
 
     constructor(address: string,host:string) {
-        this.web3 = new Web3(host);
+        const provider = new Web3.providers.HttpProvider(host,{
+            timeout: constant.defaultHttpTimeout
+        })
+        this.web3 = new Web3(provider);
         this.contract = new this.web3.eth.Contract(this.abi, address);
     }
 

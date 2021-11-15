@@ -42,7 +42,10 @@ class Index {
     tag:string;
 
     constructor(startNum:number,tag:string) {
-        this.web3 = new Web3(ETH_HOST);
+        const provider = new Web3.providers.HttpProvider(ETH_HOST,{
+            timeout: constant.defaultHttpTimeout
+        })
+        this.web3 = new Web3(provider);
         this.txInfos = [];
         this.startNum = startNum;
         this.tag=tag;

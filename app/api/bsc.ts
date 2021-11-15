@@ -32,6 +32,7 @@ class BscApi extends Api {
     }
 
     proxyPost = async (method: string, params: any): Promise<any> => {
+        console.log("BSC proxy post:",method,params)
         return await bscRpc.post(method, params)
     }
 
@@ -50,11 +51,11 @@ class BscApi extends Api {
             this.initBalance(address).then(()=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },10*1000)
+                },600*1000)
             }).catch(e=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },10*1000)
+                },600*1000)
                 console.log(e,"initBalance")
             })
         }

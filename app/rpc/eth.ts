@@ -8,7 +8,10 @@ import {EVENT_ABI_CONFIG} from "../event";
 import {Transaction,ChainType} from "../types";
 
 const Web3 = require('web3');
-const web3 = new Web3(constant.ETH_HOST);
+const provider = new Web3.providers.HttpProvider(constant.ETH_HOST,{
+    timeout: constant.defaultHttpTimeout
+})
+const web3 = new Web3(provider);
 
 class EthRpc extends RPC {
 

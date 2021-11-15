@@ -47,7 +47,10 @@ class EthThreadBase {
     transactionOption:any
     step:number
     constructor(startNum:number,tag:string,defaultCy:string,rpc:EthRpc|BscRpc,rpcHost:string,chain:ChainType,db:any,transactionOption:any,step:number) {
-        this.web3 = new Web3(rpcHost);
+        const provider = new Web3.providers.HttpProvider(rpcHost,{
+            timeout: constant.defaultHttpTimeout
+        })
+        this.web3 = new Web3(provider);
         this.txInfos = [];
         this.startNum = startNum;
         this.tag = tag;
@@ -86,7 +89,7 @@ class EthThreadBase {
         this.syncTransactions().then(()=>{
             setTimeout(()=>{
                 this.run()
-            },500)
+            },10*1000)
         }).catch(e=>{
             console.error(e)
             setTimeout(()=>{
