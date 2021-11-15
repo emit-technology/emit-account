@@ -74,7 +74,8 @@ export class Ierc20 {
 
     constructor(address: string,host:string) {
         const provider = new Web3.providers.HttpProvider(host,{
-            timeout: constant.defaultHttpTimeout
+            timeout: constant.defaultHttpTimeout,
+            keepAlive: false
         })
         this.web3 = new Web3(provider);
         this.contract = new this.web3.eth.Contract(this.abi, address);

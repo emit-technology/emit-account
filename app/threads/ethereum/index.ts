@@ -41,7 +41,8 @@ class Index {
 
     constructor() {
         const provider = new Web3.providers.HttpProvider(constant.ETH_HOST,{
-            timeout: constant.defaultHttpTimeout
+            timeout: constant.defaultHttpTimeout,
+            keepAlive: false
         })
         this.ethWeb3 = new Web3(provider);
         this.txInfos = [];

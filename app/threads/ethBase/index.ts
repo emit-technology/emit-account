@@ -48,7 +48,8 @@ class EthThreadBase {
     step:number
     constructor(startNum:number,tag:string,defaultCy:string,rpc:EthRpc|BscRpc,rpcHost:string,chain:ChainType,db:any,transactionOption:any,step:number) {
         const provider = new Web3.providers.HttpProvider(rpcHost,{
-            timeout: constant.defaultHttpTimeout
+            timeout: constant.defaultHttpTimeout,
+            keepAlive: false
         })
         this.web3 = new Web3(provider);
         this.txInfos = [];

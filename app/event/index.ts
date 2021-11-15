@@ -11,7 +11,8 @@ import {
 
 const Web3 = require('web3');
 const provider = new Web3.providers.HttpProvider(constant.ETH_HOST,{
-    timeout: constant.defaultHttpTimeout
+    timeout: constant.defaultHttpTimeout,
+    keepAlive: false
 })
 const web3 = new Web3(provider);
 

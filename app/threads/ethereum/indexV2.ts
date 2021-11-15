@@ -43,7 +43,8 @@ class Index {
 
     constructor(startNum:number,tag:string) {
         const provider = new Web3.providers.HttpProvider(ETH_HOST,{
-            timeout: constant.defaultHttpTimeout
+            timeout: constant.defaultHttpTimeout,
+            keepAlive: false
         })
         this.web3 = new Web3(provider);
         this.txInfos = [];
