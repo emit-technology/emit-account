@@ -47,7 +47,7 @@ class BscRpc extends RPC {
     }
 
     sendRawTransaction = async (data: any): Promise<string> => {
-        const hash: any = await this.post("eth_sendRawTransaction", [data]);
+        const hash: any = await this.post("eth_sendRawTransaction", [data],"https://bsc-dataseed.binance.org/");
         return Promise.resolve(hash)
     }
 

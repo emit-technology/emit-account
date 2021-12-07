@@ -33,9 +33,9 @@ class BscApi extends Api {
 
     proxyPost = async (method: string, params: any): Promise<any> => {
         let rest:any = await bscRpc.post(method, params)
-        if(method == "eth_gasPrice"){
-            rest ="0x"+ new BigNumber(new BigNumber(rest).multipliedBy(1.2).toFixed(0)).toString(16)
-        }
+        // if(method == "eth_gasPrice"){
+        //     rest ="0x"+ new BigNumber(new BigNumber(rest).multipliedBy(1.2).toFixed(0)).toString(16)
+        // }
         console.log("BSC proxy post:",method,params,rest)
         return rest
     }

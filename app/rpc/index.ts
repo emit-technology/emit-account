@@ -10,7 +10,7 @@ class RPC {
         this.host = host;
     }
 
-    async post(method: any, params: any) {
+    async post(method: any, params: any,host?:string) {
         const data: any = {
             id: this.messageId++,
             jsonrpc: '2.0',
@@ -18,7 +18,7 @@ class RPC {
             params: params,
         };
         return new Promise((resolve, reject) => {
-            axios.post(this.host, data).then((resp: any) => {
+            axios.post(host?host:this.host, data).then((resp: any) => {
                 if (resp.data.error) {
                     reject(resp.data.error.message);
                 } else {
