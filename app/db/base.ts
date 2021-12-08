@@ -396,13 +396,11 @@ class Base {
                     }
                 }
             ).toArray();
+            if(!txInfo){
+                txInfo = {txHash:txHash}
+            }
             if (txInfo && records) {
                 txInfo.records = records;
-            }else if(txInfo){
-                txInfo["records"]=[];
-            }else {
-                txInfo = {}
-                txInfo["records"]=[];
             }
             return txInfo;
         }catch (e){
