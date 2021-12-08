@@ -376,7 +376,7 @@ class Base {
         try{
             const db: any = await this.txInfo(client);
             const dbRecord: any = await this.balanceRecords(client);
-            const txInfo: any = await db.findOne({"txHash": txHash},
+            let txInfo: any = await db.findOne({"txHash": txHash},
                 {
                     projection: {
                         ins: 0,
@@ -398,7 +398,10 @@ class Base {
             ).toArray();
             if (txInfo && records) {
                 txInfo.records = records;
-            }else{
+            }else if(txInfo){
+                txInfo["records"]=[];
+            }else {
+                txInfo = {}
                 txInfo["records"]=[];
             }
             return txInfo;
