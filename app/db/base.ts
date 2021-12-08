@@ -398,6 +398,8 @@ class Base {
             ).toArray();
             if (txInfo && records) {
                 txInfo.records = records;
+            }else{
+                txInfo["records"]=[];
             }
             return txInfo;
         }catch (e){
