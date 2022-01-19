@@ -25,7 +25,7 @@ import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
 import {EthRpc} from "../../rpc/eth";
-import * as db from "../../db";
+import {SYNC_TIME} from "../../common/constant";
 
 const Web3 = require('web3');
 
@@ -90,7 +90,7 @@ class EthThreadBase {
         this.syncTransactions().then(()=>{
             setTimeout(()=>{
                 this.run()
-            },10*1000)
+            },SYNC_TIME*1000)
         }).catch(e=>{
             console.error(e)
             setTimeout(()=>{

@@ -27,17 +27,23 @@ class Threads {
         this.startGasTracker();
 
         if(constant.IS_MASTER_NODE){
-            this.startSero();
-            this.startSyncPendingSero();
-            this.removeSeroUnPendingTx();
+            {
+                //TODO FOR TEST
 
-            this.startEth();
+                // this.startSero();
+                // this.startSyncPendingSero();
+                // this.removeSeroUnPendingTx();
+                //
+                // this.startEth();
+                // this.removeEthUnPendingTx();
+                //
+                // this.startTronEventApi()
+            }
+
             // this.startSyncPendingEth();
             // this.dealSyncPendingEth();
-            this.removeEthUnPendingTx();
 
             // this.startTronEvent();
-            this.startTronEventApi()
 
             //bsc
             this.startBsc();

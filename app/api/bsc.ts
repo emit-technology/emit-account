@@ -53,13 +53,13 @@ class BscApi extends Api {
             this.addressMap.set(address,true);
             //init for next query
             this.initBalance(address).then(()=>{
-                setTimeout(()=>{
+                // setTimeout(()=>{
                     this.addressMap.delete(address)
-                },60*1000)
+                // },60*1000)
             }).catch(e=>{
-                setTimeout(()=>{
+                // setTimeout(()=>{
                     this.addressMap.delete(address)
-                },60*1000)
+                // },60*1000)
                 console.log(e,"initBalance")
             })
         }

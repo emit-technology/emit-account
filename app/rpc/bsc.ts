@@ -6,6 +6,7 @@ import * as utils from "../common/utils";
 import Ierc20 from "../api/tokens/ierc20";
 import {EVENT_ABI_CONFIG} from "../event";
 import {Transaction,ChainType} from "../types";
+import {BSC_HOST} from "../common/constant";
 
 const Web3 = require('web3');
 const provider = new Web3.providers.HttpProvider(constant.BSC_HOST,{
@@ -47,7 +48,7 @@ class BscRpc extends RPC {
     }
 
     sendRawTransaction = async (data: any): Promise<string> => {
-        const hash: any = await this.post("eth_sendRawTransaction", [data],"https://bsc-dataseed.binance.org/");
+        const hash: any = await this.post("eth_sendRawTransaction", [data],BSC_HOST);
         return Promise.resolve(hash)
     }
 

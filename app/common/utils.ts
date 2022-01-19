@@ -21,9 +21,22 @@ export function isContractAddress(address: string,chain:ChainType){
             return true
         }else if(isCrossNftAddress(address,chain)){
             return true
+        }else if(isEMITAddress(address, chain)){
+            return true
         }
     }
     return false
+}
+
+export function isEMITAddress(address:string, chain: ChainType){
+    const arr:Array<string>|undefined = constant.EMIT_ADDRESS[ChainType[chain]];
+    if(arr && arr.length>0){
+        const addr = arr.find(v=> v.toLowerCase() == address.toLowerCase());
+        if(addr){
+           return true
+        }
+    }
+    return false;
 }
 
 export function isErc20Address(address: string,chain:ChainType) {
