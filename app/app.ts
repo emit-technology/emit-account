@@ -152,7 +152,8 @@ app.post('/', function (req, res) {
                     sendError(r, res, typeof e == "string" ? e : e.message);
                 })
             }else{
-                sendError(r, res, "error");
+                sendError(r, res, "Sorry, this content is not available in your location.");
+
             }
             break;
         case "genParams":
