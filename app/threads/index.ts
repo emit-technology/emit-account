@@ -28,27 +28,17 @@ class Threads {
 
         if(constant.IS_MASTER_NODE){
             {
-                //TODO FOR TEST
+                this.startSero();
+                this.startSyncPendingSero();
+                this.removeSeroUnPendingTx();
 
-                // this.startSero();
-                // this.startSyncPendingSero();
-                // this.removeSeroUnPendingTx();
-                //
-                // this.startEth();
-                // this.removeEthUnPendingTx();
-                //
-                // this.startTronEventApi()
+                this.startEth();
+                this.removeEthUnPendingTx();
+
+                this.startTronEventApi()
             }
-
-            // this.startSyncPendingEth();
-            // this.dealSyncPendingEth();
-
-            // this.startTronEvent();
-
             //bsc
             this.startBsc();
-            // this.startSyncPendingBsc();
-            // this.dealSyncPendingBsc();
             // this.removeBscUnPendingTx();
         }
     }

@@ -90,7 +90,7 @@ class EthThreadBase {
         this.syncTransactions().then(()=>{
             setTimeout(()=>{
                 this.run()
-            },SYNC_TIME*1000)
+            },SYNC_TIME/10)
         }).catch(e=>{
             console.error(e)
             setTimeout(()=>{
