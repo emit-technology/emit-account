@@ -49,17 +49,16 @@ class BscApi extends Api {
         }
         //init for next query
         if(!this.addressMap.has(address)){
-            console.log("bsc...getbalance>>",address)
             this.addressMap.set(address,true);
             //init for next query
             this.initBalance(address).then(()=>{
-                // setTimeout(()=>{
+                setTimeout(()=>{
                     this.addressMap.delete(address)
-                // },60*1000)
+                },30*1000)
             }).catch(e=>{
-                // setTimeout(()=>{
+                setTimeout(()=>{
                     this.addressMap.delete(address)
-                // },60*1000)
+                },30*1000)
                 console.log(e,"initBalance")
             })
         }
