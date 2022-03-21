@@ -338,7 +338,6 @@ class Base {
                 rest.push(adx)
             }
         }
-        console.log("insert address many:",rest,addressTxs)
         const db: any = await this.addressTx(client);
         return await db.insertMany(rest, {session})
     }
