@@ -160,8 +160,19 @@ class Base {
 
     //balance
     insertBalanceRecord = async (records: Array<BalanceRecord>, session: any, client: any) => {
+        const rest:Array<BalanceRecord> = [];
+        for(let adx of records){
+            if(rest.findIndex(
+                v=>v.address == adx.address
+                    && v.currency==adx.currency
+                    && v.txHash == adx.txHash
+            ) == -1){
+                rest.push(adx)
+            }
+        }
+
         const db: any = await this.balanceRecords(client);
-        return await db.insertMany(records, {session})
+        return await db.insertMany(rest, {session})
     }
 
     insertEvents = async (events: Array<EventStruct>, session: any, client: any) => {
