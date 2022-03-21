@@ -328,8 +328,19 @@ class Base {
 
     // tx
     insertAddressTx = async (addressTxs: Array<AddressTx>, session: any, client: any) => {
+        const rest:Array<AddressTx> = [];
+        for(let adx of addressTxs){
+            if(rest.findIndex(
+                v=>v.address == adx.address
+                && v.currency==adx.currency
+                && v.txHash == adx.txHash
+            ) == -1){
+                rest.push(adx)
+            }
+        }
+        console.log("insert address many:",rest,addressTxs)
         const db: any = await this.addressTx(client);
-        return await db.insertMany(addressTxs, {session})
+        return await db.insertMany(rest, {session})
     }
 
     queryTxByAddress = async (address: string, currency: string, pageSize: number, pageNo: number) => {
