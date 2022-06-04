@@ -8,7 +8,7 @@ const factory = {
         return MongodbClient.connect(constant.mongo.host, {useUnifiedTopology: true, useNewUrlParser: true});
     },
 
-    destroy: function (client) {
+    destroy: function (client:any) {
         client.close();
     }
 }

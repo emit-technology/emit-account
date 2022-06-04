@@ -1,6 +1,20 @@
-import {AddressTx, Balance, BalanceRecord, EventStruct, Transaction, TxInfo, TxsView, TxType} from "../types";
+import {
+    AddressTx,
+    Balance,
+    BalanceRecord,
+    ChainType,
+    EventStruct,
+    Token,
+    Transaction,
+    TxInfo,
+    TxsView,
+    TxType
+} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
+import {tokenCache} from "../cache/tokens";
+import {TOKEN_ADDRESS, TOKEN_ADDRESS_BSC} from "../common/constant";
+import {ZERO_ADDRESS} from "../common/utils";
 
 const myPool = require('../db/mongodb');
 
@@ -32,7 +46,6 @@ class Base {
     }
 
     protected balanceRecords = async (client: any) => {
-        console.log(this.useV2())
         if(this.useV2()){
             return await client.db(this.dbName).collection('balanceRecordsV2');
         }
@@ -58,6 +71,13 @@ class Base {
         //     client = await this.client();
         // }
         return await client.db(this.dbName).collection('blockNum');
+    }
+
+    protected tokens = async (client: any) => {
+        // if (!client) {
+        //     client = await this.client();
+        // }
+        return await client.db(this.dbName).collection('tokens');
     }
 
     protected versions = async (client: any) => {
@@ -241,7 +261,7 @@ class Base {
         return false
     }
 
-    queryBalanceRecords = async (address: string, currency: string, hash: string, pageSize: number, pageNo: number) => {
+    queryBalanceRecords = async (address: string, currency: string, hash: string, pageSize: number, pageNo: number,tokenAddress?:string) => {
         const client = await this.client();
         try{
             const db: any = await this.balanceRecords(client);
@@ -255,6 +275,22 @@ class Base {
             if (hash) {
                 query.txHash = {"$regex": hash}
             }
+            if(tokenAddress){
+                if(tokenAddress == ZERO_ADDRESS){
+                    query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
+                }else {
+                    query["tokenAddress"] = tokenAddress
+                }
+            }else{
+                let tokenAddress = ZERO_ADDRESS;
+                if(this.dbName == constant.mongo.bsc.name){
+                    tokenAddress = TOKEN_ADDRESS_BSC[currency];
+                }else if (this.dbName == constant.mongo.eth.name){
+                    tokenAddress = TOKEN_ADDRESS[currency];
+                }
+                query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
+                // query["tokenAddress"] = {"$or":[{tokenAddress:tokenAddress},{"$exists":false}]};
+            }
 
             const cursor = await db.find(query, {
                 limit: pageSize,
@@ -263,6 +299,7 @@ class Base {
             });
             const count = await cursor.count();
             const rests = await cursor.toArray();
+            console.log(query,count);
             return {total: count, data: rests, pageSize: pageSize, pageNo: pageNo};
         }catch (e){
             console.error(e)
@@ -289,7 +326,8 @@ class Base {
             totalIn: record.type == TxType.IN ? record.amount : "0",
             totalOut: record.type == TxType.OUT ? record.amount : "0",
             totalFrozen: "0",
-            currency: record.currency
+            currency: record.currency,
+            tokenAddress: record.tokenAddress
         }
         return await db.insertOne(balance, {session})
     }
@@ -304,14 +342,27 @@ class Base {
         return await db.insertOne(balance, {session})
     }
 
-    queryBalance = async (address: string, cy: string): Promise<Array<Balance>> => {
+    queryBalance = async (address: string, cy: string,tokenAddress?:string): Promise<Array<Balance>> => {
         const client = await this.client();
         try{
             const db: any = await this.balance(client);
             const query: any = {address: address}
             if (cy) {
                 query.currency = cy;
+                if(tokenAddress){
+                    query["tokenAddress"] = {"$eq":tokenAddress};
+                }else{
+                    let tokenAddress = ZERO_ADDRESS;
+                    if(this.dbName == constant.mongo.bsc.name){
+                        tokenAddress = TOKEN_ADDRESS_BSC[cy];
+                    }else if (this.dbName == constant.mongo.eth.name){
+                        tokenAddress = TOKEN_ADDRESS[cy];
+                    }
+                    query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
+                    // query["tokenAddress"] = {"$or":[{tokenAddress:tokenAddress},{"$exists":false}]};
+                }
             }
+
             const options = {
                 // "limit": 1,
                 // "skip": 0,
@@ -345,6 +396,7 @@ class Base {
                 v=>v.address == adx.address
                 && v.currency==adx.currency
                 && v.txHash == adx.txHash
+                && v.tokenAddress == adx.tokenAddress
             ) == -1){
                 rest.push(adx)
             }
@@ -353,7 +405,7 @@ class Base {
         return await db.insertMany(rest, {session})
     }
 
-    queryTxByAddress = async (address: string, currency: string, pageSize: number, pageNo: number) => {
+    queryTxByAddress = async (address: string, currency: string, pageSize: number, pageNo: number,tokenAddress?:string) => {
         const client = await this.client();
         try{
             const db1: any = await this.addressTx(client);
@@ -365,6 +417,19 @@ class Base {
             if (currency) {
                 query.currency = currency;
             }
+            if(tokenAddress){
+                query["tokenAddress"] = {"$eq":tokenAddress};
+            }else{
+                let tokenAddress = ZERO_ADDRESS;
+                if(this.dbName == constant.mongo.bsc.name){
+                    tokenAddress = TOKEN_ADDRESS_BSC[currency];
+                }else if (this.dbName == constant.mongo.eth.name){
+                    tokenAddress = TOKEN_ADDRESS[currency];
+                }
+                query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
+                // query["tokenAddress"] = {"$or":[{tokenAddress:tokenAddress},{"$exists":false}]};
+            }
+            console.log(query)
             const cursor = await db1.find(query, {
                 limit: pageSize,
                 skip: (pageNo - 1) * pageSize,
@@ -517,6 +582,66 @@ class Base {
             console.error(e)
         }finally {
             this.release(client);
+        }
+        return
+    }
+
+    // tx
+    insertTokens = async (token: Token):Promise<boolean> => {
+        const client = await this.client();
+        try{
+            const db: any = await this.tokens(client);
+            await db.insertMany([token]);
+            await tokenCache.init();
+            return true
+        }catch (e){
+            console.error(e)
+        }finally {
+            this.release(client);
+        }
+        return false;
+    }
+
+    getToken = async (address: string): Promise<Token> => {
+        const client = await this.client();
+        let err ;
+        try{
+            if (!address){
+                throw new Error("address is required!")
+            }
+            const db: any = await this.tokens(client);
+            const query: any = {address: address};
+            const results = await db.find(query).toArray();
+            if(results && results.length>0){
+                return results[0]
+            }else{
+               return null
+            }
+        }catch (e){
+            err = typeof e == 'string'?e:e.message;
+        }finally {
+            this.release(client);
+        }
+        if(err){
+            return Promise.reject(err);
+        }
+        return
+    }
+
+    getTokens = async (): Promise<Array<Token>> => {
+        const client = await this.client();
+        let err ;
+        try{
+            const db: any = await this.tokens(client);
+            const results = await db.find({}).toArray();
+            return results
+        }catch (e){
+            err = typeof e == 'string'?e:e.message;
+        }finally {
+            this.release(client);
+        }
+        if(err){
+            return Promise.reject(err);
         }
         return
     }

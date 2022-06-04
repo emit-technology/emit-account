@@ -19,6 +19,13 @@ export class Ierc20 {
         "outputs": [{"name": "totalSupply", "type": "uint256"}],
         "payable": false,
         "type": "function"
+    },{
+        "constant": true,
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [{"name": "symbol", "type": "string"}],
+        "payable": false,
+        "type": "function"
     }, {
         "constant": false,
         "inputs": [{"name": "_from", "type": "address"}, {"name": "_to", "type": "address"}, {
@@ -72,11 +79,13 @@ export class Ierc20 {
     protected contract: any;
     protected web3: any;
 
+    public address;
     constructor(address: string,host:string) {
         const provider = new Web3.providers.HttpProvider(host,{
             timeout: constant.defaultHttpTimeout,
             keepAlive: false
         })
+        this.address = address;
         this.web3 = new Web3(provider);
         this.contract = new this.web3.eth.Contract(this.abi, address);
     }
@@ -85,6 +94,16 @@ export class Ierc20 {
         return new Promise((resolve,reject)=>{
             this.contract.methods.totalSupply().call({}).then(function (rest:any){
                 resolve(new BigNumber(rest));
+            }).catch((e:any)=>{
+                reject(e)
+            })
+        })
+    }
+
+    symbol = async (): Promise<string> => {
+        return new Promise((resolve,reject)=>{
+            this.contract.methods.symbol().call({}).then(function (rest:any){
+                resolve(rest);
             }).catch((e:any)=>{
                 reject(e)
             })

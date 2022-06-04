@@ -26,6 +26,7 @@ import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
 import {ETH_HOST} from "../../common/constant";
+import {ZERO_ADDRESS} from "../../common/utils";
 
 const Web3 = require('web3');
 
@@ -211,13 +212,16 @@ class Index {
             address: txEvent.from.toLowerCase(),
             txHash: txInfo.txHash,
             num: txInfo.num,
-            currency: key
+            currency: key,
+            tokenAddress: ZERO_ADDRESS
         })
         txEvent.to && addressTxs.push({
             address: txEvent.to.toLowerCase(),
             txHash: txInfo.txHash,
             num: txInfo.num,
-            currency: key
+            currency: key,
+
+            tokenAddress: ZERO_ADDRESS
         })
         if (txEvent.from) {
             balanceRecords.push({
@@ -227,7 +231,9 @@ class Index {
                 type: TxType.OUT,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (txEvent.to) {
@@ -238,7 +244,9 @@ class Index {
                 type: TxType.IN,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -269,13 +277,17 @@ class Index {
             address: t.from.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
-            currency: defaultCurrency
+            currency: defaultCurrency,
+
+            tokenAddress: ZERO_ADDRESS
         })
         t.to && addressTxs.push({
             address: t.to.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
-            currency: defaultCurrency
+            currency: defaultCurrency,
+
+            tokenAddress: ZERO_ADDRESS
         })
     }
 
@@ -288,7 +300,9 @@ class Index {
                 type: TxType.OUT,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -299,7 +313,9 @@ class Index {
                 type: TxType.IN,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -313,7 +329,9 @@ class Index {
                 type: TxType.OUT,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -324,7 +342,9 @@ class Index {
                 type: TxType.IN,
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                timestamp: txInfo.timestamp
+                timestamp: txInfo.timestamp,
+
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -339,13 +359,16 @@ class Index {
                 address: e.from.toLowerCase(),
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                currency: key
+                currency: key,
+
+                tokenAddress: log.address
             })
             e.to && addressTxs.push({
                 address: e.to.toLowerCase(),
                 txHash: txInfo.txHash,
                 num: txInfo.num,
-                currency: key
+                currency: key,
+                tokenAddress: log.address
             })
             //
             // await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
@@ -359,7 +382,8 @@ class Index {
                     type: TxType.OUT,
                     txHash: txInfo.txHash,
                     num: txInfo.num,
-                    timestamp: txInfo.timestamp
+                    timestamp: txInfo.timestamp,
+                    tokenAddress: log.address
                 })
             }
             if (e.to) {
@@ -370,7 +394,8 @@ class Index {
                     type: TxType.IN,
                     txHash: txInfo.txHash,
                     num: txInfo.num,
-                    timestamp: txInfo.timestamp
+                    timestamp: txInfo.timestamp,
+                    tokenAddress: log.address
                 })
             }
         } else if (ierc20.encodeEventSignature("Approval") === log.topics[0]) {
@@ -391,7 +416,8 @@ class Index {
                     type: TxType.IN,
                     txHash: txInfo.txHash,
                     num: txInfo.num,
-                    timestamp: txInfo.timestamp
+                    timestamp: txInfo.timestamp,
+                    tokenAddress: log.address
                 })
             }else if(logRet.eventName == EVENT_TYPE.WETH_WITHDRAW){
                 // balanceRecords.splice()
@@ -405,7 +431,8 @@ class Index {
                             type: TxType.IN,
                             txHash: txInfo.txHash,
                             num: txInfo.num,
-                            timestamp: txInfo.timestamp
+                            timestamp: txInfo.timestamp,
+                            tokenAddress: ZERO_ADDRESS
                         })
                         break
                     }
@@ -417,30 +444,11 @@ class Index {
                     type: TxType.OUT,
                     txHash: txInfo.txHash,
                     num: txInfo.num,
-                    timestamp: txInfo.timestamp
+                    timestamp: txInfo.timestamp,
+                    tokenAddress: log.address
                 })
             }
         }
-    }
-
-    private async setBalanceMap(address: string, balanceMap: Map<string, Balance>, cy: string, ierc20?: Ierc20) {
-        if (!address) {
-            return
-        }
-        let balance;
-        if (ierc20) {
-            balance = await ierc20.balanceOf(address)
-        } else {
-            balance = await ethRpc.getBalance(address)
-            cy = defaultCurrency
-        }
-        balanceMap.set([address, cy].join(":"), {
-            address: address.toLowerCase(),
-            currency: cy,
-            totalIn: balance.toString(10),
-            totalOut: "0",
-            totalFrozen: "0"
-        })
     }
 }
 

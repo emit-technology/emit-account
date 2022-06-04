@@ -74,8 +74,7 @@ class TronApi extends Api{
 
     getTxInfo = async (txHash: string): Promise<TxInfo> => {
         const t:any = await tronWeb.trx.getTransactionInfo(txHash)
-
-        return Promise.resolve(t);
+        return t
     }
 
     getTxs = async (address: string,currency: string, pageSize: number, pageNo: number,fingerprint?:string): Promise<any> => {
@@ -178,6 +177,10 @@ class TronApi extends Api{
             feeLimit:  150000000
         }
         return config;
+    }
+
+    getBalanceWithAddress(address: string): Promise<any> {
+        return Promise.resolve(undefined);
     }
 
 }

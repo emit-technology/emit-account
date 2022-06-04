@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "./build/app.js",
+  "homepage": "./",
   "scripts": {
     "tsc": "tsc",
     "start": "ts-node-dev --respawn ./app/app.ts",

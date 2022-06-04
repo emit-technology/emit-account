@@ -26,6 +26,7 @@ import TronApi from "./api/tron";
 import BscApi from "./api/bsc";
 import {ChainType} from "./types";
 import {checkCommit} from "./common/constant";
+import {tokenCache} from "./cache/tokens";
 const log4js = require("log4js");
 const logger = log4js.getLogger();
 logger.level = "debug";
@@ -123,15 +124,25 @@ app.post('/', function (req, res) {
             })
 
             break;
+        case "getBalanceWithAddress":
+            api.getBalanceWithAddress(r.params[0]).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
+
+            break;
         case "getTransactions":
-            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3],r.params[4],r.params[5]).then(rest => {
+            const tkAddress = r.params.length>6?r.params[6]:""
+            api.getBalanceRecords(r.params[0], r.params[1], r.params[2], r.params[3],r.params[4],r.params[5],tkAddress.toLowerCase()).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
                 sendError(r, res, typeof e == "string" ? e : e.message);
             })
             break;
         case "getTxs":
-            api.getTxs(r.params[0], r.params[1], r.params[2], r.params[3]).then(rest => {
+            const tAddress = r.params.length>4?r.params[4]:""
+            api.getTxs(r.params[0], r.params[1], r.params[2], r.params[3],tAddress.toLowerCase()).then(rest => {
                 sendResult(r, res, rest)
             }).catch((e: any) => {
                 sendError(r, res, typeof e == "string" ? e : e.message);
@@ -202,6 +213,20 @@ app.post('/', function (req, res) {
                 sendError(r, res, typeof e == "string" ? e : e.message);
             })
             break;
+        case "addToken":
+            api.addToken(r.params[0]).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
+            break;
+        case "getToken":
+            api.getToken(r.params[0]).then(rest => {
+                sendResult(r, res, rest)
+            }).catch((e: any) => {
+                sendError(r, res, typeof e == "string" ? e : e.message);
+            })
+            break;
         default:
             api.proxyPost([prefix,method].join("_"),r.params).then(rest => {
                 sendResult(r, res, rest)
@@ -214,6 +239,9 @@ app.post('/', function (req, res) {
 
 app.listen(7655, function () {
     console.log('App listening on port 7655!',"started!");
+
+    //init app/
+    tokenCache.init().catch(e=>{console.error(e)});
 })
 
 interface JsonParams {

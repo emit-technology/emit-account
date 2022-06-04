@@ -3,9 +3,9 @@ import BigNumber from "bignumber.js";
 // @ts-ignore
 import BN from "bn.js";
 import {OutInfo, TxPrams} from "../types/sero";
-import {genTxParam} from "jsuperzk/src/tx/tx";
+import {genTxParam} from "jsuperzk/dist/tx/tx";
 import {PreTxParam, utxo} from "jsuperzk/src/tx/prepare";
-import {Token, Witness, ZPkg} from "jsuperzk/src/types/types";
+import {Token, Witness, ZPkg} from "jsuperzk/dist/types/types";
 import utils from "jsuperzk/src/utils/utils";
 import seroRPC from "../rpc/sero";
 import * as db from '../db'
@@ -168,6 +168,10 @@ class SeroApi extends Api {
     }
 
     getChainConfig(): Promise<any> {
+        return Promise.resolve(undefined);
+    }
+
+    getBalanceWithAddress(address: string): Promise<any> {
         return Promise.resolve(undefined);
     }
 }

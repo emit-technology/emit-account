@@ -1,7 +1,8 @@
-import utils, {addrToString, hexToCy, isNewVersion} from 'jsuperzk/src/utils/utils'
+import utils, {addrToString, hexToCy, isNewVersion} from 'jsuperzk/dist/utils/utils'
 import BigNumber from "bignumber.js";
 import * as constant from "./constant";
-import {ChainType} from "../types";
+import {ChainType, Token} from "../types";
+import {tokenCache} from "../cache/tokens";
 
 export function isV1(pkr: string) {
     return !isNewVersion(utils.toBuffer(pkr));
@@ -42,12 +43,20 @@ export function isEMITAddress(address:string, chain: ChainType){
 export function isErc20Address(address: string,chain:ChainType) {
     const obj = chain == ChainType.BSC?constant.TOKEN_ADDRESS_BSC:constant.TOKEN_ADDRESS;
 
-    const cKeys: any = Object.keys(obj);
-    for (let key of cKeys) {
-        // @ts-ignore
-        const addr: string = obj[key];
-        if (address.toLowerCase() === addr.toLowerCase()) {
-            return key;
+    const symbols = Object.keys(obj);
+    if(symbols && symbols.length>0){
+        for (let symbol of symbols) {
+            // @ts-ignore
+            const addr: string = obj[symbol];
+            if (address.toLowerCase() === addr.toLowerCase()) {
+                return symbol;
+            }
+        }
+    }
+    const cacheToken:Array<Token> = tokenCache.all(chain);
+    for(let token of cacheToken){
+        if(token.address.toLowerCase() == address.toLowerCase()){
+            return token.symbol;
         }
     }
     return "";
@@ -106,6 +115,7 @@ function toHex(value: string | BigNumber | number) {
     return `0x${new BigNumber(value).toString(16)}`
 }
 
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 export {
     hexToCy, addrToString, toHex
 }

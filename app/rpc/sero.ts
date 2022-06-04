@@ -20,7 +20,7 @@ class SeroRPC extends RPC {
 
     getTransactionReceipt = async (txHash: string): Promise<TransactionReceipt> => {
         const rest: any = await this.post("sero_getTransactionReceipt", [txHash]);
-        return Promise.resolve(rest)
+        return rest
     }
 
     getBlockTimestamp = async (num: number): Promise<number> => {
@@ -326,7 +326,8 @@ class SeroRPC extends RPC {
         return txArray
     }
 
-    protected filterChanges = async ():Promise<Array<string>> =>{
+    //Array<string>
+    protected filterChanges = async ():Promise<any> =>{
         return new Promise((resolve,reject)=>{
             this.post("sero_getFilterChanges", [this.pendingFilterId]).then((rest:any)=>{
                 resolve(rest)

@@ -26,6 +26,7 @@ import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
 import {EthRpc} from "../../rpc/eth";
 import {SYNC_TIME} from "../../common/constant";
+import {ZERO_ADDRESS} from "../../common/utils";
 
 const Web3 = require('web3');
 
@@ -274,14 +275,16 @@ class EthThreadBase {
             txHash: txInfo.txHash,
             num: txInfo.num,
             currency: key,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         txEvent.to && addressTxs.push({
             address: txEvent.to.toLowerCase(),
             txHash: txInfo.txHash,
             num: txInfo.num,
             currency: key,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         if (txEvent.from) {
             balanceRecords.push({
@@ -292,7 +295,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (txEvent.to) {
@@ -304,7 +308,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -337,14 +342,16 @@ class EthThreadBase {
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
             currency: this.defaultCy,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         t.to && addressTxs.push({
             address: t.to.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
             currency: this.defaultCy,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
     }
 
@@ -358,7 +365,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -370,7 +378,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -385,7 +394,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -397,7 +407,8 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -413,19 +424,22 @@ class EthThreadBase {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 currency: key,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: log.address
             })
             e.to && addressTxs.push({
                 address: e.to.toLowerCase(),
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 currency: key,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: log.address
             })
 
             // await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
             // await this.setBalanceMap(e.to.toLowerCase(), balanceMap, key, ierc20);
 
+            console.log("========>",this.chain,JSON.stringify(e))
             if (e.from) {
                 balanceRecords.push({
                     address: e.from.toLowerCase(),
@@ -435,7 +449,8 @@ class EthThreadBase {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    tokenAddress: log.address
                 })
             }
             if (e.to) {
@@ -447,7 +462,8 @@ class EthThreadBase {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    tokenAddress: log.address
                 })
             }
         } else if (ierc20.encodeEventSignature("Approval") === log.topics[0]) {
@@ -469,7 +485,8 @@ class EthThreadBase {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    tokenAddress: log.address
                 })
             }else if(logRet.eventName == EVENT_TYPE.WETH_WITHDRAW){
                 // balanceRecords.splice()
@@ -484,7 +501,8 @@ class EthThreadBase {
                             txHash: txInfo.txHash,
                             num: txInfo.num,
                             timestamp: txInfo.timestamp,
-                            createdAt: new Date()
+                            createdAt: new Date(),
+                            tokenAddress: ZERO_ADDRESS
                         })
                         break
                     }
@@ -497,31 +515,33 @@ class EthThreadBase {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    tokenAddress: log.address
                 })
             }
         }
     }
-
-    private async setBalanceMap(address: string, balanceMap: Map<string, Balance>, cy: string, ierc20?: Ierc20) {
-        if (!address) {
-            return
-        }
-        let balance;
-        if (ierc20) {
-            balance = await ierc20.balanceOf(address)
-        } else {
-            balance = await this.rpc.getBalance(address)
-            cy = this.defaultCy
-        }
-        balanceMap.set([address, cy].join(":"), {
-            address: address.toLowerCase(),
-            currency: cy,
-            totalIn: balance.toString(10),
-            totalOut: "0",
-            totalFrozen: "0"
-        })
-    }
+    //
+    // private async setBalanceMap(address: string, balanceMap: Map<string, Balance>, cy: string, ierc20?: Ierc20) {
+    //     if (!address) {
+    //         return
+    //     }
+    //     let balance;
+    //     if (ierc20) {
+    //         balance = await ierc20.balanceOf(address)
+    //     } else {
+    //         balance = await this.rpc.getBalance(address)
+    //         cy = this.defaultCy
+    //     }
+    //     balanceMap.set([address, cy].join(":"), {
+    //         address: address.toLowerCase(),
+    //         currency: cy,
+    //         totalIn: balance.toString(10),
+    //         totalOut: "0",
+    //         totalFrozen: "0",
+    //         tokenAddress: log.address
+    //     })
+    // }
 }
 
 

@@ -1,11 +1,13 @@
 import {Api} from "./index";
 import * as db from "../db";
 import ethRpc from "../rpc/eth";
-import {Balance} from "../types";
+import {Balance, ChainType, Token} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
-import Ierc20 from "./tokens/ierc20";
 import {ETH_HOST} from "../common/constant";
+import Ierc20 from "./tokens/ierc20";
+import {tokenCache} from "../cache/tokens";
+import {ZERO_ADDRESS} from "../common/utils";
 
 const myPool = require('../db/mongodb');
 
@@ -36,12 +38,31 @@ class EthApi extends Api {
         return await ethRpc.post(method, params)
     }
 
+    getBalanceWithAddress = async (address: string): Promise<any> => {
+        const balances: Array<Balance> = await this.db.queryBalance(address,"","")
+        const assets: Array<any> = [];
+        for (let b of balances) {
+            assets.push({
+                value: new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10),
+                symbol: b.currency,
+                tokenAddress: b.tokenAddress
+            })
+        }
+        this.handleBalance(address);
+        return Promise.resolve(assets);
+    }
+
     getBalance = async (address: string,cy:string): Promise<any> => {
         const balances: Array<Balance> = await this.db.queryBalance(address,cy)
         const assets: any = {};
         for (let b of balances) {
             assets[b.currency] = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10)
         }
+        this.handleBalance(address);
+        return Promise.resolve(assets);
+    }
+
+    private handleBalance = (address:string)=>{
         if(!this.addressMap.has(address)){
             this.addressMap.set(address,true);
             //init for next query
@@ -55,15 +76,14 @@ class EthApi extends Api {
                 },60*1000)
             })
         }
-
-        return Promise.resolve(assets);
     }
 
     initBalance = async (address:string) => {
-        const balanceArr:Array<any> = [];
-        const tokens:any = Object.keys(constant.TOKEN_ADDRESS);
-        for(let cy of tokens){
-            const addressContract:any = constant.TOKEN_ADDRESS[cy];
+        const balanceArr:Array<Balance> = [];
+        const tokens = constant.TOKEN_ADDRESS;
+        const tokenKeys:Array<string> = Object.keys(tokens);
+        for(let cy of tokenKeys){
+            const addressContract:any = tokens[cy];
             const ierc20: Ierc20 = new Ierc20(addressContract,ETH_HOST);
             // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
@@ -73,17 +93,37 @@ class EthApi extends Api {
                 currency: cy,
                 totalIn: balance.toString(10),
                 totalOut: "0",
-                totalFrozen: "0"
+                totalFrozen: "0",
+                tokenAddress: addressContract
             })
         }
+
+        const tokens_cache:Array<Token> = tokenCache.all(ChainType.ETH);
+        for(let t of tokens_cache){
+            const ierc20: Ierc20 = new Ierc20(t.address,ETH_HOST);
+            // console.log(address,cy,"initBalance ERC20")
+            const balance = await ierc20.balanceOf(address);
+
+            balanceArr.push({
+                address: address.toLowerCase(),
+                currency: t.symbol,
+                totalIn: balance.toString(10),
+                totalOut: "0",
+                totalFrozen: "0",
+                tokenAddress:t.address
+            })
+        }
+
         const balance = await ethRpc.getBalance(address)
         balanceArr.push( {
             address: address.toLowerCase(),
             currency: "ETH",
             totalIn: balance.toString(10),
             totalOut: "0",
-            totalFrozen: "0"
+            totalFrozen: "0",
+            tokenAddress: ZERO_ADDRESS
         })
+
         const client: any = await myPool.acquire();
         const session = client.startSession();
         try {

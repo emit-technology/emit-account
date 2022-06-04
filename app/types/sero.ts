@@ -1,4 +1,4 @@
-import {utxo} from "jsuperzk/src/tx/prepare";
+import {utxo} from "jsuperzk/dist/tx/prepare";
 import {Asset} from "./index";
 
 export interface OutInfo {

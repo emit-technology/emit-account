@@ -314,8 +314,26 @@ db.addressTxV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
      db.addressTxV2.createIndex(v.index,{unique:v.unique});
  });
 
+// update 20220601
+//use eth / bsc
+[
+    {index:{address:1},unique:true},
+    {index:{symbol:1},unique:false},
+    {index:{name:1},unique:false}
+].forEach((v)=>{
+     db.tokens.createIndex(v.index,{unique:v.unique});
+ });
+
+db.balance.createIndex({tokenAddress: 1}, {unique: false,background: true})
+db.balanceRecords.createIndex({tokenAddress: 1}, {unique: false,background: true})
+db.addressTx.createIndex({tokenAddress: 1}, {unique: false,background: true})
+
+db.balanceRecordsV2.createIndex({tokenAddress: 1}, {unique: false,background: true})
+db.addressTxV2.createIndex({tokenAddress: 1}, {unique: false,background: true})
 
 ```
+
+
 
 #### Start App
 

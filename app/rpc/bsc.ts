@@ -1,12 +1,13 @@
 import RPC from "./index";
 import * as constant from "../common/constant";
+import {BSC_COMMIT_TX_HOST} from "../common/constant";
 import BigNumber from "bignumber.js";
 import {Block, Log, TransactionReceipt} from "../types/eth";
 import * as utils from "../common/utils";
 import Ierc20 from "../api/tokens/ierc20";
 import {EVENT_ABI_CONFIG} from "../event";
-import {Transaction,ChainType} from "../types";
-import {BSC_COMMIT_TX_HOST, BSC_HOST} from "../common/constant";
+import {ChainType, Transaction} from "../types";
+import {tokenCache} from "../cache/tokens";
 
 const Web3 = require('web3');
 const provider = new Web3.providers.HttpProvider(constant.BSC_HOST,{
@@ -44,20 +45,24 @@ class BscRpc extends RPC {
 
     getTransactionReceipt = async (txHash: string): Promise<TransactionReceipt> => {
         const rest: any = await this.post("eth_getTransactionReceipt", [txHash]);
-        return Promise.resolve(rest)
+        return rest
     }
 
     sendRawTransaction = async (data: any): Promise<string> => {
         const hash: any = await this.post("eth_sendRawTransaction", [data],BSC_COMMIT_TX_HOST);
-        return Promise.resolve(hash)
+        return hash
     }
 
     getLogs = async (from: number, to: number): Promise<Array<Log>> => {
-        const keys = Object.keys(constant.TOKEN_ADDRESS_BSC);
+        const tokens = constant.TOKEN_ADDRESS_BSC;
+        const keys = Object.keys(tokens);
         const addresses: Array<any> = [];
         const topics: Array<any> = [];
         for (let key of keys) {
-            addresses.push(constant.TOKEN_ADDRESS_BSC[key]);
+            addresses.push(tokens[key]);
+        }
+        for (let t of tokenCache.all(ChainType.BSC)){
+            addresses.push(t.address);
         }
         const keys2 = Object.keys(constant.ERC721_ADDRESS_BSC);
         for (let k of keys2) {
@@ -82,7 +87,7 @@ class BscRpc extends RPC {
             topics: [topics]
         }]
         const data: any = await this.post("eth_getLogs", params);
-        return Promise.resolve(data)
+        return data
     }
 
     getFilterChangesPending = async (): Promise<Array<Transaction>> => {
@@ -123,7 +128,8 @@ class BscRpc extends RPC {
     }
 
 
-    protected filterChanges = async (): Promise<Array<string>> => {
+    //Array<string>
+    protected filterChanges = async (): Promise<any> => {
         return new Promise((resolve, reject) => {
             this.post("eth_getFilterChanges", [this.pendingFilterId]).then((rest: any) => {
                 resolve(rest)

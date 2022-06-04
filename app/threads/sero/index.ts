@@ -135,7 +135,7 @@ class Index {
                 outsMap.set(o.root, o)
 
                 if (!addressAndTxMap.has(key)) {
-                    addressAndTxMap.set(key, {address: o.address, txHash: o.txHash, num: o.num,currency: o.asset.currency})
+                    addressAndTxMap.set(key, {address: o.address, txHash: o.txHash, num: o.num,currency: o.asset.currency,tokenAddress: ""})
                 }
             }
 
@@ -283,7 +283,8 @@ class Index {
                         address: out.address,
                         txHash: txInfo.txHash,
                         num: txInfo.num,
-                        currency: out.asset.currency
+                        currency: out.asset.currency,
+                        tokenAddress:""
                     })
                 }
             }
@@ -332,7 +333,9 @@ class Index {
                     type: type,
                     txHash: txHash,
                     num: parseInt(num),
-                    timestamp: timestampMap.get(parseInt(num))
+                    timestamp: timestampMap.get(parseInt(num)),
+
+                    tokenAddress:""
                 })
                 iNext = iEntries.next();
             }

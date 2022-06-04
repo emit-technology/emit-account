@@ -5,6 +5,8 @@ export interface Balance {
     totalIn: string
     totalOut: string
     totalFrozen: string
+
+    tokenAddress: string
 }
 
 export enum TxType {
@@ -22,6 +24,8 @@ export interface BalanceRecord {
     num: number
     timestamp: number | undefined
     createdAt?:any
+
+    tokenAddress: string
 }
 
 export interface Asset {
@@ -36,6 +40,8 @@ export interface AddressTx {
     num: number
     currency: string
     createdAt?:any
+
+    tokenAddress: string
 }
 
 export interface TxInfo {
@@ -132,4 +138,15 @@ export interface Version {
     date: string
     info: string
     tag: string
+}
+
+export interface Token {
+    name: string;
+    symbol: string;
+    decimal: number;
+    totalSupply?: string;
+    address: string;
+    image?: string;
+    protocol: string; //ERC20 , ERC721
+    chain: ChainType;
 }

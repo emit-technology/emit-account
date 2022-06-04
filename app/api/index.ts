@@ -1,5 +1,8 @@
 import {TxPrams} from "../types/sero";
-import {TxInfo, TxsView, EventStruct} from "../types/index";
+import {Balance, ChainType, EventStruct, Token, TxInfo, TxsView} from "../types";
+import Ierc20 from "./tokens/ierc20";
+import {BSC_HOST, ETH_HOST} from "../common/constant";
+import BigNumber from "bignumber.js";
 
 export abstract class Api {
 
@@ -17,6 +20,8 @@ export abstract class Api {
 
     abstract getBalance(address: string,cy:string): Promise<any>;
 
+    abstract getBalanceWithAddress(address: string): Promise<any>;
+
     abstract getTicket(address: string): Promise<any>;
 
     abstract getChainConfig(): Promise<any>;
@@ -26,8 +31,8 @@ export abstract class Api {
         return Promise.resolve(txInfo);
     }
 
-    getTxs = async (address: string,currency: string, pageSize: number, pageNo: number): Promise<TxsView> => {
-        const retn: TxsView = await this.db.queryTxByAddress(address,currency, pageSize, pageNo)
+    getTxs = async (address: string,currency: string, pageSize: number, pageNo: number,tokenAddress?:string): Promise<TxsView> => {
+        const retn: TxsView = await this.db.queryTxByAddress(address,currency, pageSize, pageNo,tokenAddress)
         return Promise.resolve(retn);
     }
 
@@ -36,9 +41,9 @@ export abstract class Api {
         return Promise.resolve(rest);
     }
 
-    getBalanceRecords = async (address: string,currency: string, hash:string,pageSize: number, pageNo: number,fingerprint?:string): Promise<TxsView> => {
-        const retn: any = await this.db.queryBalanceRecords(address,currency,hash, pageSize, pageNo)
-        return Promise.resolve(retn);
+    getBalanceRecords = async (address: string,currency: string, hash:string,pageSize: number, pageNo: number,finger?:string,tokenAddress?:string): Promise<TxsView> => {
+        const ret: any = await this.db.queryBalanceRecords(address,currency,hash, pageSize, pageNo,tokenAddress)
+        return ret
     }
 
     getEvents = async (txHash: string,depositNonce: string,originChainID:string,resourceID:string): Promise<Array<EventStruct>> => {
@@ -49,6 +54,30 @@ export abstract class Api {
 
     getAppVersion = async (tag:string,versionNum:number):Promise<any>=>{
         return await this.db.getAppVersion(tag,versionNum)
+    }
+
+    addToken = async (token:Token):Promise<boolean>=>{
+        if(token["contractAddress"]){
+            token.address = token["contractAddress"];
+        }
+        const _token = await this.db.getToken(token.address);
+        if(!_token){
+            const ierc20: Ierc20 = new Ierc20(token.address,token.chain == ChainType.BSC?BSC_HOST:ETH_HOST);
+            const symbol = await ierc20.symbol()
+            if(symbol){
+                return await this.db.insertTokens(token)
+            }
+        }else{
+            return true
+        }
+    }
+
+    getToken = async (address:string):Promise<any>=>{
+        return await this.db.getToken(address)
+    }
+
+    tokens = async ():Promise<any>=>{
+        return await this.db.getTokens()
     }
 
     protected insertTxInfo = async (hash: string, t: any) => {

@@ -26,6 +26,7 @@ import {Block, Log, Transaction, TransferEvent} from "../../types/eth";
 import BigNumber from "bignumber.js";
 import Ierc20 from "../../api/tokens/ierc20";
 import event from "../../event";
+import {ZERO_ADDRESS} from "../../common/utils";
 
 const Web3 = require('web3');
 
@@ -253,14 +254,16 @@ class Index {
             txHash: txInfo.txHash,
             num: txInfo.num,
             currency: key,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         txEvent.to && addressTxs.push({
             address: txEvent.to.toLowerCase(),
             txHash: txInfo.txHash,
             num: txInfo.num,
             currency: key,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         if (txEvent.from) {
             balanceRecords.push({
@@ -271,7 +274,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (txEvent.to) {
@@ -283,7 +287,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -316,14 +321,16 @@ class Index {
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
             currency: defaultCurrency,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
         t.to && addressTxs.push({
             address: t.to.toLowerCase(),
             txHash: t.hash,
             num: utils.toNum(t.blockNumber),
             currency: defaultCurrency,
-            createdAt: new Date()
+            createdAt: new Date(),
+            tokenAddress: ZERO_ADDRESS
         })
     }
 
@@ -337,7 +344,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -349,7 +357,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -364,7 +373,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
         if (t.to) {
@@ -376,7 +386,8 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 timestamp: txInfo.timestamp,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: ZERO_ADDRESS
             })
         }
     }
@@ -392,14 +403,16 @@ class Index {
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 currency: key,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: log.address
             })
             e.to && addressTxs.push({
                 address: e.to.toLowerCase(),
                 txHash: txInfo.txHash,
                 num: txInfo.num,
                 currency: key,
-                createdAt: new Date()
+                createdAt: new Date(),
+                tokenAddress: log.address
             })
 
             // await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
@@ -414,7 +427,8 @@ class Index {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    tokenAddress:log.address
                 })
             }
             if (e.to) {
@@ -426,7 +440,9 @@ class Index {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+
+                    tokenAddress:log.address
                 })
             }
         } else if (ierc20.encodeEventSignature("Approval") === log.topics[0]) {
@@ -448,7 +464,9 @@ class Index {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+
+                    tokenAddress:log.address
                 })
             }else if(logRet.eventName == EVENT_TYPE.WETH_WITHDRAW){
                 // balanceRecords.splice()
@@ -463,7 +481,9 @@ class Index {
                             txHash: txInfo.txHash,
                             num: txInfo.num,
                             timestamp: txInfo.timestamp,
-                            createdAt: new Date()
+                            createdAt: new Date(),
+
+                            tokenAddress: ZERO_ADDRESS
                         })
                         break
                     }
@@ -476,7 +496,9 @@ class Index {
                     txHash: txInfo.txHash,
                     num: txInfo.num,
                     timestamp: txInfo.timestamp,
-                    createdAt: new Date()
+                    createdAt: new Date(),
+
+                    tokenAddress:log.address
                 })
             }
         }
@@ -487,8 +509,10 @@ class Index {
             return
         }
         let balance;
+        let tokenAddress = ZERO_ADDRESS;
         if (ierc20) {
             balance = await ierc20.balanceOf(address)
+            tokenAddress = ierc20.address;
         } else {
             balance = await bsc.getBalance(address)
             cy = defaultCurrency
@@ -498,7 +522,8 @@ class Index {
             currency: cy,
             totalIn: balance.toString(10),
             totalOut: "0",
-            totalFrozen: "0"
+            totalFrozen: "0",
+            tokenAddress: tokenAddress
         })
     }
 }
