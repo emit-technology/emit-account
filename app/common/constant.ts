@@ -18,7 +18,7 @@ export const mongo = {
 	host: "mongodb://localhost:27017,localhost:27018,localhost:27019?replicaSet=rs",
 
 	sero: {
-		name: "sero",
+		name: "sero_test",
 		transactionOptions: {
 			readPreference: 'primary',
 			readConcern: {level: 'local'},
@@ -27,7 +27,7 @@ export const mongo = {
 	},
 
 	eth: {
-		name: "eth",
+		name: "eth_test",
 		transactionOptions: {
 			readPreference: 'primary',
 			readConcern: {level: 'local'},
@@ -36,7 +36,7 @@ export const mongo = {
 	},
 
 	tron: {
-		name: "tron",
+		name: "tron_test",
 		transactionOptions: {
 			readPreference: 'primary',
 			readConcern: {level: 'local'},
@@ -45,7 +45,7 @@ export const mongo = {
 	},
 
 	bsc: {
-		name: "bsc",
+		name: "bsc_test",
 		transactionOptions: {
 			readPreference: 'primary',
 			readConcern: {level: 'local'},

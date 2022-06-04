@@ -3,10 +3,11 @@ import * as constant from "../common/constant";
 
 class Bsc extends Base {
 
-    protected dbName: string = "bsc";
+    // protected dbName: string;
 
     constructor() {
         super(constant.mongo.bsc.name)
+        // this.dbName = constant.mongo.bsc.name;
     }
 
     removeUnPendingTxByHash = async (address: string, nonce: number|undefined) => {
