@@ -439,7 +439,6 @@ class EthThreadBase {
             // await this.setBalanceMap(e.from.toLowerCase(), balanceMap, key, ierc20);
             // await this.setBalanceMap(e.to.toLowerCase(), balanceMap, key, ierc20);
 
-            console.log("========>",this.chain,JSON.stringify(e))
             if (e.from) {
                 balanceRecords.push({
                     address: e.from.toLowerCase(),

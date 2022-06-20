@@ -314,6 +314,10 @@ db.addressTxV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
      db.addressTxV2.createIndex(v.index,{unique:v.unique});
  });
 
+```
+
+```
+
 // update 20220601
 //use eth / bsc
 [
@@ -324,15 +328,15 @@ db.addressTxV2.createIndex({createdAt:1},{expireAfterSeconds:60*60*24*30});
      db.tokens.createIndex(v.index,{unique:v.unique});
  });
 
-db.balance.createIndex({tokenAddress: 1}, {unique: false,background: true})
-db.balanceRecords.createIndex({tokenAddress: 1}, {unique: false,background: true})
-db.addressTx.createIndex({tokenAddress: 1}, {unique: false,background: true})
 
+//db.balanceRecords.createIndex({tokenAddress: 1}, {unique: false,background: true})
+//db.addressTx.createIndex({tokenAddress: 1}, {unique: false,background: true})
+
+db.balance.createIndex({tokenAddress: 1}, {unique: false,background: true})
 db.balanceRecordsV2.createIndex({tokenAddress: 1}, {unique: false,background: true})
 db.addressTxV2.createIndex({tokenAddress: 1}, {unique: false,background: true})
 
 ```
-
 
 
 #### Start App

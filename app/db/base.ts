@@ -299,7 +299,7 @@ class Base {
             });
             const count = await cursor.count();
             const rests = await cursor.toArray();
-            console.log(query,count);
+
             return {total: count, data: rests, pageSize: pageSize, pageNo: pageNo};
         }catch (e){
             console.error(e)
