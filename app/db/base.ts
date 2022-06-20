@@ -276,6 +276,7 @@ class Base {
                 query.txHash = {"$regex": hash}
             }
             if(tokenAddress){
+                tokenAddress = tokenAddress.toLowerCase();
                 if(tokenAddress == ZERO_ADDRESS){
                     query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
                 }else {
@@ -287,6 +288,9 @@ class Base {
                     tokenAddress = TOKEN_ADDRESS_BSC[currency];
                 }else if (this.dbName == constant.mongo.eth.name){
                     tokenAddress = TOKEN_ADDRESS[currency];
+                }
+                if(tokenAddress){
+                    tokenAddress = tokenAddress.toLowerCase();
                 }
                 query["$or"] = [{tokenAddress:{"$eq":tokenAddress}},{tokenAddress:{"$eq":""}},{tokenAddress:{"$exists":false}}]
                 // query["tokenAddress"] = {"$or":[{tokenAddress:tokenAddress},{"$exists":false}]};
