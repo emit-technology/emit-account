@@ -84,6 +84,9 @@ class EthApi extends Api {
         const tokenKeys:Array<string> = Object.keys(tokens);
         for(let cy of tokenKeys){
             const addressContract:any = tokens[cy];
+            if (addressContract == ZERO_ADDRESS){
+                continue
+            }
             const ierc20: Ierc20 = new Ierc20(addressContract,ETH_HOST);
             // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
