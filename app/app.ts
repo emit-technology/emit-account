@@ -27,6 +27,7 @@ import BscApi from "./api/bsc";
 import {ChainType} from "./types";
 import {checkCommit} from "./common/constant";
 import {tokenCache} from "./cache/tokens";
+import {token} from "../../3d-test/sgb-api/src/components/Auth";
 const log4js = require("log4js");
 const logger = log4js.getLogger();
 logger.level = "debug";
@@ -78,6 +79,28 @@ app.all("*", function (req, res, next) {
     } else {
         next();
     }
+})
+
+app.get('/api/stats/:chain/:action/:tokenAddress',function (req,res){
+    const action = req.params.action;
+    const chain = req.params.chain;
+    const tokenAddress = req.params.tokenAddress;
+    let api: Api;
+    if(chain == "bsc"){
+       api = bscApi;
+    }else if(chain == "eth"){
+       api = ethApi;
+    }else{
+        res.status(200).send("Invalid address!");
+        return
+    }
+    api.tokenAction(action,tokenAddress).then(rest=>{
+        res.status(200).send(rest);
+    }).catch(e=>{
+        const err = typeof e == 'string'?e:e.message;
+        res.status(200).send(err);
+    })
+    return;
 })
 
 app.post('/', function (req, res) {

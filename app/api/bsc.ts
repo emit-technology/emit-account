@@ -4,7 +4,7 @@ import bscRpc from "../rpc/bsc";
 import {Balance, ChainType, Token} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
-import {BSC_HOST} from "../common/constant";
+import {BSC_HOST, ETH_HOST} from "../common/constant";
 import Ierc20 from "./tokens/ierc20";
 import {tokenCache} from "../cache/tokens";
 import {ZERO_ADDRESS} from "../common/utils";
@@ -169,6 +169,18 @@ class BscApi extends Api {
 
     getTicket(address: string): Promise<any> {
         return Promise.resolve(undefined);
+    }
+
+    tokenAction = async (action: string, tokenAddress: string): Promise<any> => {
+        const erc20: Ierc20 = new Ierc20(tokenAddress, BSC_HOST)
+        if (action == "totalSupply") {
+            const rest = await erc20.totalSupply();
+            return rest.dividedBy(1e18).toFixed(0,1);
+        } else if (action == "symbol") {
+            const rest = await erc20.symbol();
+            return rest;
+        }
+        return Promise.reject("Invalid action")
     }
 }
 

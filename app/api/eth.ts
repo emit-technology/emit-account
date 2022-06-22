@@ -16,7 +16,7 @@ class EthApi extends Api {
         throw new Error("Method not implemented.");
     }
 
-    addressMap:Map<string,boolean>=new Map<string, boolean>();
+    addressMap: Map<string, boolean> = new Map<string, boolean>();
 
     constructor() {
         super(db.eth);
@@ -39,7 +39,7 @@ class EthApi extends Api {
     }
 
     getBalanceWithAddress = async (address: string): Promise<any> => {
-        const balances: Array<Balance> = await this.db.queryBalance(address,"","")
+        const balances: Array<Balance> = await this.db.queryBalance(address, "", "")
         const assets: Array<any> = [];
         for (let b of balances) {
             assets.push({
@@ -52,8 +52,8 @@ class EthApi extends Api {
         return Promise.resolve(assets);
     }
 
-    getBalance = async (address: string,cy:string): Promise<any> => {
-        const balances: Array<Balance> = await this.db.queryBalance(address,cy)
+    getBalance = async (address: string, cy: string): Promise<any> => {
+        const balances: Array<Balance> = await this.db.queryBalance(address, cy)
         const assets: any = {};
         for (let b of balances) {
             assets[b.currency] = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10)
@@ -62,32 +62,32 @@ class EthApi extends Api {
         return Promise.resolve(assets);
     }
 
-    private handleBalance = (address:string)=>{
-        if(!this.addressMap.has(address)){
-            this.addressMap.set(address,true);
+    private handleBalance = (address: string) => {
+        if (!this.addressMap.has(address)) {
+            this.addressMap.set(address, true);
             //init for next query
-            this.initBalance(address).then(()=>{
-                setTimeout(()=>{
+            this.initBalance(address).then(() => {
+                setTimeout(() => {
                     this.addressMap.delete(address)
-                },60*1000)
-            }).catch(e=>{
-                setTimeout(()=>{
+                }, 60 * 1000)
+            }).catch(e => {
+                setTimeout(() => {
                     this.addressMap.delete(address)
-                },60*1000)
+                }, 60 * 1000)
             })
         }
     }
 
-    initBalance = async (address:string) => {
-        const balanceArr:Array<Balance> = [];
+    initBalance = async (address: string) => {
+        const balanceArr: Array<Balance> = [];
         const tokens = constant.TOKEN_ADDRESS;
-        const tokenKeys:Array<string> = Object.keys(tokens);
-        for(let cy of tokenKeys){
-            const addressContract:any = tokens[cy];
-            if (addressContract == ZERO_ADDRESS){
+        const tokenKeys: Array<string> = Object.keys(tokens);
+        for (let cy of tokenKeys) {
+            const addressContract: any = tokens[cy];
+            if (addressContract == ZERO_ADDRESS) {
                 continue
             }
-            const ierc20: Ierc20 = new Ierc20(addressContract,ETH_HOST);
+            const ierc20: Ierc20 = new Ierc20(addressContract, ETH_HOST);
             // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
 
@@ -101,9 +101,9 @@ class EthApi extends Api {
             })
         }
 
-        const tokens_cache:Array<Token> = tokenCache.all(ChainType.ETH);
-        for(let t of tokens_cache){
-            const ierc20: Ierc20 = new Ierc20(t.address,ETH_HOST);
+        const tokens_cache: Array<Token> = tokenCache.all(ChainType.ETH);
+        for (let t of tokens_cache) {
+            const ierc20: Ierc20 = new Ierc20(t.address, ETH_HOST);
             // console.log(address,cy,"initBalance ERC20")
             const balance = await ierc20.balanceOf(address);
 
@@ -113,12 +113,12 @@ class EthApi extends Api {
                 totalIn: balance.toString(10),
                 totalOut: "0",
                 totalFrozen: "0",
-                tokenAddress:t.address
+                tokenAddress: t.address
             })
         }
 
         const balance = await ethRpc.getBalance(address)
-        balanceArr.push( {
+        balanceArr.push({
             address: address.toLowerCase(),
             currency: "ETH",
             totalIn: balance.toString(10),
@@ -132,8 +132,8 @@ class EthApi extends Api {
         try {
             // console.log("eth balanceArr===> ",balanceArr)
             const transactionResults = await session.withTransaction(async () => {
-                for(let balance of balanceArr){
-                    await db.eth.updateBalance(balance,session,client)
+                for (let balance of balanceArr) {
+                    await db.eth.updateBalance(balance, session, client)
                 }
             }, constant.mongo.eth.transactionOptions)
 
@@ -152,6 +152,18 @@ class EthApi extends Api {
 
     getTicket(address: string): Promise<any> {
         return Promise.resolve(undefined);
+    }
+
+    tokenAction = async (action: string, tokenAddress: string): Promise<any> => {
+        const erc20: Ierc20 = new Ierc20(tokenAddress, ETH_HOST)
+        if (action == "totalSupply") {
+            const rest = await erc20.totalSupply();
+            return rest.dividedBy(1e18).toFixed(0,1);
+        } else if (action == "symbol") {
+            const rest = await erc20.symbol();
+            return rest;
+        }
+        return Promise.reject("Invalid action")
     }
 }
 

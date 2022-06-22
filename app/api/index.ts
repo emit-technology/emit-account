@@ -2,7 +2,6 @@ import {TxPrams} from "../types/sero";
 import {Balance, ChainType, EventStruct, Token, TxInfo, TxsView} from "../types";
 import Ierc20 from "./tokens/ierc20";
 import {BSC_HOST, ETH_HOST} from "../common/constant";
-import BigNumber from "bignumber.js";
 
 export abstract class Api {
 
@@ -25,6 +24,8 @@ export abstract class Api {
     abstract getTicket(address: string): Promise<any>;
 
     abstract getChainConfig(): Promise<any>;
+
+    abstract tokenAction(action:string,tokenAddress:string): Promise<any>;
 
     getTxInfo = async (txHash: string): Promise<TxInfo> => {
         const txInfo: TxInfo = await this.db.queryTxByHash(txHash);
@@ -83,4 +84,6 @@ export abstract class Api {
     protected insertTxInfo = async (hash: string, t: any) => {
         this.db.insertTxInfo(hash,t);
     }
+
+
 }

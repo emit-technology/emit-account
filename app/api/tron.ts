@@ -183,6 +183,10 @@ class TronApi extends Api{
         return Promise.resolve(undefined);
     }
 
+    tokenAction(action: string, tokenAddress: string): Promise<any> {
+        return Promise.resolve(undefined);
+    }
+
 }
 
 export default TronApi

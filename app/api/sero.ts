@@ -174,6 +174,10 @@ class SeroApi extends Api {
     getBalanceWithAddress(address: string): Promise<any> {
         return Promise.resolve(undefined);
     }
+
+    tokenAction(action: string, tokenAddress: string): Promise<any> {
+        return Promise.resolve(undefined);
+    }
 }
 
 
