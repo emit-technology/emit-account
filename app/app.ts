@@ -27,7 +27,6 @@ import BscApi from "./api/bsc";
 import {ChainType} from "./types";
 import {checkCommit} from "./common/constant";
 import {tokenCache} from "./cache/tokens";
-import {token} from "../../3d-test/sgb-api/src/components/Auth";
 const log4js = require("log4js");
 const logger = log4js.getLogger();
 logger.level = "debug";
