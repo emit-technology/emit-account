@@ -42,8 +42,12 @@ class EthApi extends Api {
         const balances: Array<Balance> = await this.db.queryBalance(address, "", "")
         const assets: Array<any> = [];
         for (let b of balances) {
+            const value = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen);
+            if(value.toNumber() <= 0){
+                continue
+            }
             assets.push({
-                value: new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10),
+                value: value.toString(10),
                 symbol: b.currency,
                 tokenAddress: b.tokenAddress
             })
