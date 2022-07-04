@@ -141,9 +141,9 @@ class EthApi extends Api {
             // console.log("eth balanceArr===> ",balanceArr)
             const transactionResults = await session.withTransaction(async () => {
                 for (let balance of balanceArr) {
-                    if(new BigNumber(balance.totalIn).toNumber()>0){
+                    // if(new BigNumber(balance.totalIn).toNumber() != 0){
                         await db.eth.updateBalance(balance, session, client)
-                    }
+                    // }
                 }
             }, constant.mongo.eth.transactionOptions)
 
