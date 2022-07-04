@@ -85,10 +85,4 @@ export abstract class Api {
         this.db.insertTxInfo(hash,t);
     }
 
-    hasNewTx =async (address:string):Promise<boolean>=>{
-        const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
-        const now = Math.floor(Date.now()/1000);
-        return blcRcrd && now - blcRcrd.timestamp < 60;
-    }
-
 }

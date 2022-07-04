@@ -1,7 +1,7 @@
 import {Api} from "./index";
 import * as db from "../db";
 import ethRpc from "../rpc/eth";
-import {Balance, ChainType, Token} from "../types";
+import {Balance, BalanceRecord, ChainType, Token} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
 import {ETH_HOST} from "../common/constant";
@@ -175,6 +175,14 @@ class EthApi extends Api {
         }
         return Promise.reject("Invalid action")
     }
+
+
+    hasNewTx =async (address:string):Promise<boolean>=>{
+        const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
+        const now = Math.floor(Date.now()/1000);
+        return blcRcrd && now - blcRcrd.timestamp < 60;
+    }
+
 }
 
 export default EthApi;

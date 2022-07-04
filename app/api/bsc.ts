@@ -191,6 +191,14 @@ class BscApi extends Api {
         }
         return Promise.reject("Invalid action")
     }
+
+
+    hasNewTx =async (address:string):Promise<boolean>=>{
+        const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
+        const now = Math.floor(Date.now()/1000);
+        return blcRcrd && now - blcRcrd.timestamp < 60;
+    }
+
 }
 
 export default BscApi;
