@@ -10,7 +10,7 @@ import {tokenCache} from "../cache/tokens";
 import {ZERO_ADDRESS} from "../common/utils";
 
 const myPool = require('../db/mongodb');
-
+const scanRatioSec = 5;
 class EthApi extends Api {
     getChainConfig(): Promise<any> {
         throw new Error("Method not implemented.");
@@ -73,16 +73,20 @@ class EthApi extends Api {
             this.initBalance(address).then(() => {
                 setTimeout(() => {
                     this.addressMap.delete(address)
-                }, 60 * 1000)
+                }, scanRatioSec * 1000)
             }).catch(e => {
                 setTimeout(() => {
                     this.addressMap.delete(address)
-                }, 60 * 1000)
+                }, scanRatioSec * 1000)
             })
         }
     }
 
     initBalance = async (address: string) => {
+        const hasNew = await this.hasNewTx(address);
+        if(!hasNew){
+            return;
+        }
         const balanceArr: Array<Balance> = [];
         const tokens = constant.TOKEN_ADDRESS;
         const tokenKeys: Array<string> = Object.keys(tokens);

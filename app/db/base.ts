@@ -650,5 +650,31 @@ class Base {
         return
     }
 
+
+    getLatestTxRecord = async (address: string): Promise<any> => {
+        const client = await this.client();
+        const db: any = await this.balanceRecords(client);
+        let err ;
+        try{
+            const cursor = await db.find({address: address}, {
+                limit: 1,
+                sort: {timestamp: -1}
+            });
+            const count = await cursor.count();
+            if(count > 0){
+                const rests = await cursor.toArray();
+                return rests[0]
+            }
+        }catch (e){
+            err = typeof e == 'string'?e:e.message;
+        }finally {
+            this.release(client);
+        }
+        if(err){
+            return Promise.reject(err);
+        }
+        return null;
+    }
+
 }
 export default Base

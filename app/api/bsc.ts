@@ -1,7 +1,7 @@
 import {Api} from "./index";
 import {bsc} from "../db";
 import bscRpc from "../rpc/bsc";
-import {Balance, ChainType, Token} from "../types";
+import {Balance, BalanceRecord, ChainType, Token} from "../types";
 import BigNumber from "bignumber.js";
 import * as constant from "../common/constant";
 import {BSC_HOST, ETH_HOST} from "../common/constant";
@@ -10,7 +10,7 @@ import {tokenCache} from "../cache/tokens";
 import {ZERO_ADDRESS} from "../common/utils";
 
 const myPool = require('../db/mongodb');
-
+const scanRatioSec = 5;
 class BscApi extends Api {
     getChainConfig(): Promise<any> {
         throw new Error("Method not implemented.");
@@ -67,11 +67,11 @@ class BscApi extends Api {
             this.initBalance(address).then(()=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },60*1000)
+                },scanRatioSec*1000)
             }).catch(e=>{
                 setTimeout(()=>{
                     this.addressMap.delete(address)
-                },60*1000)
+                },scanRatioSec*1000)
             })
         }
     }
@@ -100,10 +100,13 @@ class BscApi extends Api {
     }
 
     initBalance = async (address:string) => {
+        const hasNew = await this.hasNewTx(address);
+        if(!hasNew){
+            return;
+        }
+
         const balanceArr:Array<Balance> = [];
-
         const tokens = constant.TOKEN_ADDRESS_BSC;
-
         const tokenKeys:Array<string> = Object.keys(tokens);
         for(let cy of tokenKeys){
             const addressContract:any = tokens[cy];

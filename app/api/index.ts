@@ -1,5 +1,5 @@
 import {TxPrams} from "../types/sero";
-import {Balance, ChainType, EventStruct, Token, TxInfo, TxsView} from "../types";
+import {Balance, BalanceRecord, ChainType, EventStruct, Token, TxInfo, TxsView} from "../types";
 import Ierc20 from "./tokens/ierc20";
 import {BSC_HOST, ETH_HOST} from "../common/constant";
 
@@ -85,5 +85,10 @@ export abstract class Api {
         this.db.insertTxInfo(hash,t);
     }
 
+    hasNewTx =async (address:string):Promise<boolean>=>{
+        const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
+        const now = Math.floor(Date.now()/1000);
+        return blcRcrd && now - blcRcrd.timestamp < 60;
+    }
 
 }
