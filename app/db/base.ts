@@ -343,7 +343,10 @@ class Base {
         if (balanceDB) {
             return await db.updateOne(query, {"$set": balance}, {session})
         }
-        return await db.insertOne(balance, {session})
+        if(new BigNumber(balance.totalIn).toNumber() != 0){
+            return await db.insertOne(balance, {session})
+        }
+        return true
     }
 
     queryBalance = async (address: string, cy: string,tokenAddress?:string): Promise<Array<Balance>> => {
