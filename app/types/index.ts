@@ -7,6 +7,8 @@ export interface Balance {
     totalFrozen: string
 
     tokenAddress: string
+
+    timestamp?: number
 }
 
 export enum TxType {

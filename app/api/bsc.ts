@@ -81,21 +81,7 @@ class BscApi extends Api {
         for (let b of balances) {
             assets[b.currency] = new BigNumber(b.totalIn).minus(b.totalOut).minus(b.totalFrozen).toString(10)
         }
-        //init for next query
-        if(!this.addressMap.has(address)){
-            this.addressMap.set(address,true);
-            //init for next query
-            this.initBalance(address).then(()=>{
-                setTimeout(()=>{
-                    this.addressMap.delete(address)
-                },30*1000)
-            }).catch(e=>{
-                setTimeout(()=>{
-                    this.addressMap.delete(address)
-                },30*1000)
-                console.log(e,"initBalance")
-            })
-        }
+        this.handleBalance(address);
         return Promise.resolve(assets);
     }
 
@@ -124,6 +110,8 @@ class BscApi extends Api {
                 totalOut: "0",
                 totalFrozen: "0",
                 tokenAddress: addressContract,
+
+                timestamp: Math.floor(Date.now() /1000)
             })
         }
 
@@ -139,7 +127,9 @@ class BscApi extends Api {
                 totalIn: balance.toString(10),
                 totalOut: "0",
                 totalFrozen: "0",
-                tokenAddress:t.address
+                tokenAddress:t.address,
+
+                timestamp: Math.floor(Date.now() /1000)
             })
         }
 
@@ -150,7 +140,9 @@ class BscApi extends Api {
             totalIn: balance.toString(10),
             totalOut: "0",
             totalFrozen: "0",
-            tokenAddress: ZERO_ADDRESS
+            tokenAddress: ZERO_ADDRESS,
+
+            timestamp: Math.floor(Date.now() /1000)
         })
         const client: any = await myPool.acquire();
         const session = client.startSession();
@@ -195,8 +187,11 @@ class BscApi extends Api {
 
     hasNewTx =async (address:string):Promise<boolean>=>{
         const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
-        const now = Math.floor(Date.now()/1000);
-        return blcRcrd && now - blcRcrd.timestamp < 60;
+        const blc:Balance = await this.db.getLatestBalance(address.toLowerCase());
+        if(!blc || !blc.timestamp || blc.timestamp == 0){
+            return true;
+        }
+        return blcRcrd && blc && blc.timestamp  < blcRcrd.timestamp;
     }
 
 }

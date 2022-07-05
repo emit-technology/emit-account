@@ -676,5 +676,28 @@ class Base {
         return null;
     }
 
+    getLatestBalance = async (address: string): Promise<any> => {
+        const client = await this.client();
+        const db: any = await this.balance(client);
+        let err ;
+        try{
+            const cy = this.dbName == constant.mongo.bsc.name ?"BNB":this.dbName == constant.mongo.eth.name?"ETH":""
+            const cursor = await db.find({address: address,currency:cy});
+            const count = await cursor.count();
+            if(count > 0){
+                const rests = await cursor.toArray();
+                return rests[0]
+            }
+        }catch (e){
+            err = typeof e == 'string'?e:e.message;
+        }finally {
+            this.release(client);
+        }
+        if(err){
+            return Promise.reject(err);
+        }
+        return null;
+    }
+
 }
 export default Base

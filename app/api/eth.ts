@@ -179,8 +179,11 @@ class EthApi extends Api {
 
     hasNewTx =async (address:string):Promise<boolean>=>{
         const blcRcrd:BalanceRecord = await this.db.getLatestTxRecord(address.toLowerCase());
-        const now = Math.floor(Date.now()/1000);
-        return blcRcrd && now - blcRcrd.timestamp < 60;
+        const blc:Balance = await this.db.getLatestBalance(address.toLowerCase());
+        if(!blc || !blc.timestamp || blc.timestamp == 0){
+            return true;
+        }
+        return blcRcrd && blc && blc.timestamp  < blcRcrd.timestamp;
     }
 
 }
