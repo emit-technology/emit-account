@@ -105,7 +105,9 @@ class EthApi extends Api {
                 totalIn: balance.toString(10),
                 totalOut: "0",
                 totalFrozen: "0",
-                tokenAddress: addressContract
+                tokenAddress: addressContract,
+
+                timestamp: Math.floor(Date.now() /1000)
             })
         }
 
@@ -121,7 +123,9 @@ class EthApi extends Api {
                 totalIn: balance.toString(10),
                 totalOut: "0",
                 totalFrozen: "0",
-                tokenAddress: t.address
+                tokenAddress: t.address,
+
+                timestamp: Math.floor(Date.now() /1000)
             })
         }
 
@@ -132,7 +136,9 @@ class EthApi extends Api {
             totalIn: balance.toString(10),
             totalOut: "0",
             totalFrozen: "0",
-            tokenAddress: ZERO_ADDRESS
+            tokenAddress: ZERO_ADDRESS,
+
+            timestamp: Math.floor(Date.now() /1000)
         })
 
         const client: any = await myPool.acquire();
