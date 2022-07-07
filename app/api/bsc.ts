@@ -10,7 +10,7 @@ import {tokenCache} from "../cache/tokens";
 import {ZERO_ADDRESS} from "../common/utils";
 
 const myPool = require('../db/mongodb');
-const scanRatioSec = 5;
+const scanRatioSec = 1;
 class BscApi extends Api {
     getChainConfig(): Promise<any> {
         throw new Error("Method not implemented.");
