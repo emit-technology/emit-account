@@ -189,7 +189,7 @@ class EthApi extends Api {
         if(!blc || !blc.timestamp || blc.timestamp == 0){
             return true;
         }
-        return blcRcrd && blc && blc.timestamp  < blcRcrd.timestamp;
+        return blcRcrd && blc && blc.timestamp  < blcRcrd.timestamp + 180;
     }
 
 }
