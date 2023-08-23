@@ -214,7 +214,7 @@ class Index {
             }
 
             if (outs.length == 0 || addressTxs.length == 0 || txInfos.length == 0 || groupBalanceRecords.length == 0) {
-                throw new Error(`Invalid Data ,outs = [${outs.length}] , address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]`)
+                throw new Error(`Invalid Data ,outs = [${outs.length}] , address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]，txHashOuts=【${JSON.stringify(outs)}】`)
             }
 
             console.log(`SERO Address txs=[${addressTxs.length}], tx infos=[${txInfos.length}]  balance records=[${balanceRecords.length}]`)

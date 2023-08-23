@@ -35,6 +35,14 @@ class EthApi extends Api {
     }
 
     proxyPost = async (method: string, params: any): Promise<any> => {
+        if(method.indexOf("eth_estimateGas")>-1){
+            const block = await ethRpc.post("eth_getBlockByNumber",["latest",true]);
+            if(!!block["baseFeePerGas"]){
+                const next_gas_price = Math.ceil(block["baseFeePerGas"] * 1.251)
+                params["maxFeePerGas"] = next_gas_price;
+                console.log("next_gas_price, ", next_gas_price, block)
+            }
+        }
         return await ethRpc.post(method, params)
     }
 

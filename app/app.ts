@@ -27,6 +27,7 @@ import BscApi from "./api/bsc";
 import {ChainType} from "./types";
 import {checkCommit} from "./common/constant";
 import {tokenCache} from "./cache/tokens";
+import ethRpc from "./rpc/eth";
 const log4js = require("log4js");
 const logger = log4js.getLogger();
 logger.level = "debug";
